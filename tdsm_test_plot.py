@@ -108,8 +108,8 @@ plt.xlim([tmin, tmax])
 ax1b.set_yscale('log')
 
 # ----- plot and save figure ----
-fig.savefig(file+'.pdf', format='pdf',bbox_inches='tight')
-fig.savefig(file+'.png', format='png',resolution=100.0, oversample=2.0, size=None, width=None, height=None, psconvert=True, bbox_inches='tight')
+fig.savefig('plots/'+file+'.pdf', format='pdf',bbox_inches='tight')
+fig.savefig('plots/'+file+'.png', format='png',resolution=100.0, oversample=2.0, size=None, width=None, height=None, psconvert=True, bbox_inches='tight')
 
 plt.show()
 
@@ -144,5 +144,5 @@ plt.xlim([tmin, tmax])
 plt.show()
 
 # ----- plot and save figure ----
-fig.savefig(file2+'.pdf', format='pdf',bbox_inches='tight')
-fig.savefig(file2+'.png', format='png',resolution=250.0, oversample=2.0, size=None, width=None, height=None, psconvert=True, bbox_inches='tight')
+fig.savefig('plots/'+file2+'.pdf', format='pdf',bbox_inches='tight')
+fig.savefig('plots/'+file2+'.png', format='png',resolution=250.0, oversample=2.0, size=None, width=None, height=None, psconvert=True, bbox_inches='tight')
