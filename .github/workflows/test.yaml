@@ -1,0 +1,59 @@
+name: test
+
+on: [push]
+
+jobs:
+    checks:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-python@v2
+            - run: |
+                  pip install pipenv
+                  pipenv install --dev
+            - name: Code checks
+              uses: pre-commit/action@v2.0.0
+              env:
+                  SKIP: test
+              with:
+                  extra_args: --all-files
+
+    tests:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                python: ["3.6", "3.7", "3.8", "3.9"]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Setup dart
+              uses: dart-lang/setup-dart@v1
+            - name: Setup PHP with PECL extension
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: "8.0"
+            - name: Setup node
+              uses: actions/setup-node@v2
+              with:
+                  node-version: "14"
+            - name: Setup golang
+              uses: actions/setup-go@v2
+              with:
+                  go-version: "^1.13.1"
+            - name: Setup python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python }}
+            - run: pip install tox wheel
+            - name: Install some plugins
+              run: |
+                  dart pub global activate protoc_plugin # dart
+                  pip install mypy-protobuf # mypy
+                  npm install -g ts-protoc-gen # typescript
+                  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest # golang
+                  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest # golang grpc
+                  # sudo pecl install grpc # php grpc
+                  npm install -g grpc-tools # javascript grpc
+            - name: Test
+              run: tox
+            - uses: codecov/codecov-action@v1

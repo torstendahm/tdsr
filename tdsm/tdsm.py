@@ -1,3 +1,9 @@
+"""
+TDSM
+====================================
+Add some documentation about TDSM here
+"""
+
 import numpy as np
 from typing import Optional
 from tdsm.utils import shifted, gridrange
@@ -7,7 +13,17 @@ from copy import deepcopy
 
 
 class LCM(object):
+    """LCM class documentation."""
+
     def __init__(self, config: Optional[Config] = None):
+        """
+        Add description here
+
+        Parameters
+        ---------
+        config
+            Optional config to use
+        """
         self.config = config or Config()
         assert self.config.loading is not None
 
