@@ -1,0 +1,40 @@
+##### physical model parameters
+# susceptibility
+chi0 = 10.0 
+# depth of stress shadow
+depthS = -0.2
+# loading function to be used
+use_loading = "step"
+
+##### starting state
+# initial stress shadow , usually set to zero
+Sshadow = 0.0
+
+##### discretisation parameter
+# sample interval in seconds (default 12 minutes)
+deltat = 720
+# start time in seconds (default 0 seconds)
+tstart = 0
+# end time in seconds (default 24 hours)
+tend = 86_400
+
+# sampling of coulomb stress axis
+deltaS = 0.01
+# range to sample
+sigma_max = 10.0
+# precision
+precision = 12
+
+##### stress loading models
+[loading]
+  # step function overlaying steady stressing rate
+  [loading.step]
+    # fist phase must be larger at least 2
+    n1 = 50          
+    # second phase at least n1+1, better n1+2 as central differences taken
+    n2 = 51          
+    # coulomb stress values
+    sc0 = 0.0        
+    sc1 = 0.5
+    sc2 = 1.0
+    sc3 = 2.0

@@ -3,15 +3,12 @@
 """Console script for tdsm."""
 import os
 import sys
-import typing
-
+from pathlib import Path
+from typing import Optional
+from tdsm.utils import PathLike
+from tdsm.config import Config
+from tdsm import TDSM, LCM, Traditional
 import click
-
-import proto_compile.proto_compile as compiler
-import proto_compile.versions as versions
-from proto_compile.options import BaseCompilerOptions
-from proto_compile.utils import PathLike
-from proto_compile.versions import Target
 
 
 def assert_valid_dir(
@@ -37,133 +34,153 @@ base_proto_parent_dir_help = (
     "Must be a valid directory that contains the proto files in <proto_source_dir>",
 )
 
+DEFAULT_CONFIG = Config()
 
-@click.group()
-@click.argument("proto-source-dir", callback=assert_valid_dir, type=click.Path())
-@click.argument("output-dir", type=click.Path())
+
+@click.group(invoke_without_command=True)
+@click.argument("input", callback=assert_valid_dir, type=click.Path())
+@click.argument("output", default=None, type=click.Path())
 @click.option(
-    "--minimal-include-dir",
-    default=False,
-    type=bool,
-    help=str(
-        "determine the shortest proto source include path that contains all protos in the given source dir"
-    ),
+    "-c",
+    "--config",
+    default=None,
+    type=click.Path(),
+    help=str("configuration file path"),
 )
 @click.option(
-    "--clear-output-dirs",
-    "-clear",
-    is_flag=True,
-    default=False,
-    help=str("whether to clear the output directories before compilation"),
+    "--chi0",
+    default=None,
+    type=float,
+    help="chi0 (default %s)" % (DEFAULT_CONFIG.chi0),
 )
 @click.option(
-    "--verbosity",
-    default=0,
-    help=str("level of verbosity when printing to stdout (the higher the more output)"),
+    "--depthS",
+    default=None,
+    type=float,
+    help="depthS",
 )
 @click.option(
-    "--protoc-version",
-    default=versions.DEFAULT_PROTOC_VERSION,
-    help="protoc version to use (default is %s)" % versions.DEFAULT_PROTOC_VERSION,
+    "--Sshadow",
+    default=None,
+    type=float,
+    help="Sshadow",
+)
+@click.option(
+    "--deltat",
+    default=None,
+    type=float,
+    help="deltat",
+)
+@click.option(
+    "--tstart",
+    default=None,
+    type=float,
+    help="tstart",
+)
+@click.option(
+    "--tend",
+    default=None,
+    type=float,
+    help="tend",
+)
+@click.option(
+    "--deltaS",
+    default=None,
+    type=float,
+    help="deltaS",
+)
+@click.option(
+    "--sigma_max",
+    default=None,
+    type=int,
+    help="sigma_max",
+)
+@click.option(
+    "--precision",
+    default=None,
+    type=int,
+    help="precision",
+)
+@click.option(
+    "--precision",
+    default=None,
+    type=float,
+    help="precision",
+)
+@click.option(
+    "--loading",
+    default=None,
+    type=str,
+    help="loading",
 )
 @click.pass_context
-def proto_compile(
+def tdsm(
     ctx: click.Context,
-    proto_source_dir: str,
-    output_dir: str,
-    minimal_include_dir: bool,
-    clear_output_dirs: bool,
-    verbosity: int,
-    protoc_version: str,
+    input: PathLike,
+    output: Optional[PathLike],
+    config: Optional[PathLike],
+    chi0: Optional[float],
+    depths: Optional[float],
+    sshadow: Optional[float],
+    deltat: Optional[float],
+    tstart: Optional[float],
+    tend: Optional[float],
+    deltas: Optional[float],
+    sigma_max: Optional[int],
+    precision: Optional[int],
+    loading: Optional[str],
 ) -> None:
-    ctx.ensure_object(dict)
-    ctx.obj["COMPILER_OPTIONS"] = BaseCompilerOptions(
-        proto_source_dir=proto_source_dir,
-        output_dir=output_dir,
-        minimal_include_dir=minimal_include_dir,
-        clear_output_dirs=clear_output_dirs,
-        verbosity=verbosity,
-        protoc_version=protoc_version,
-    )
+    """ TDSM method """
+    # check if output dir is available
+    print(output)
 
-
-@proto_compile.command()
-@click.option(
-    "--js_out_options",
-    default="import_style=commonjs,binary",
-    help=str("options for the javascript proto compiler"),
-)
-@click.option(
-    "--grpc_web_out_options",
-    default="import_style=typescript,mode=grpcwebtext",
-    help=str("options for the grpc web proto compiler"),
-)
-@click.option(
-    "--grpc_web_plugin_version",
-    default=versions.DEFAULT_PLUGIN_VERSIONS[Target.GRPC_WEB],
-    help="grpc web plugin version to use (default is %s)"
-    % versions.DEFAULT_PLUGIN_VERSIONS[Target.GRPC_WEB],
-)
-@click.pass_context
-def grpc_web(
-    ctx: click.Context,
-    js_out_options: str,
-    grpc_web_out_options: str,
-    grpc_web_plugin_version: str,
-) -> int:
-    """ compile using the grpc-web preset """
-    try:
-        compiler.compile_grpc_web(
-            options=ctx.obj["COMPILER_OPTIONS"],
-            js_out_options=js_out_options,
-            grpc_web_out_options=grpc_web_out_options,
-            grpc_web_plugin_version=grpc_web_plugin_version,
+    if ctx.invoked_subcommand is None:
+        if config is not None:
+            conf = Config.open(config)
+        else:
+            conf = Config()
+        conf.merge(
+            dict(
+                hi0=chi0,
+                depthS=depths,
+                Sshadow=sshadow,
+                deltat=deltat,
+                tstart=tstart,
+                tend=tend,
+                deltaS=deltas,
+                sigma_max=sigma_max,
+                precision=precision,
+            )
         )
-    except Exception as e:  # pragma: no cover
-        raise click.ClickException(str(e))
+        print(conf)
+        tdsm = TDSM(config=conf)
+        result = tdsm()
+        print(result)
+    else:
+        ctx.ensure_object(dict)
+        ctx.obj["CONFIG"] = BaseParams(
+            input_dir=input_dir,
+            output_dir=output_dir,
+        )
+
+
+@tdsm.command()
+@click.pass_context
+def lcm(
+    ctx: click.Context,
+) -> int:
+    """ LCM method """
     return 0
 
 
-@proto_compile.command()
-@click.option(
-    "--py_out_options", default=None, help=str("options for the python proto compiler"),
-)
-@click.option(
-    "--py_output_dir",
-    default=None,
-    help=str("separate output dir for the python generated files"),
-)
-@click.option(
-    "--py_grpc_out_options",
-    default=None,
-    help=str("options for the python grpc proto compiler"),
-)
-@click.option(
-    "--py_grpc_output_dir",
-    default=None,
-    help=str("separate output dir for the python grpc generated files"),
-)
+@tdsm.command()
 @click.pass_context
-def python_grpc(
+def traditional(
     ctx: click.Context,
-    py_out_options: typing.Optional[str],
-    py_output_dir: typing.Optional[PathLike],
-    py_grpc_out_options: typing.Optional[str],
-    py_grpc_output_dir: typing.Optional[PathLike],
 ) -> int:
-    """ compile using the python grpc preset """
-    try:
-        compiler.compile_python_grpc(
-            options=ctx.obj["COMPILER_OPTIONS"],
-            py_out_options=py_out_options,
-            py_output_dir=py_output_dir,
-            py_grpc_out_options=py_grpc_out_options,
-            py_grpc_output_dir=py_grpc_output_dir,
-        )
-    except Exception as e:  # pragma: no cover
-        raise click.ClickException(str(e))
+    """ traditional method """
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(proto_compile(obj=dict()))  # pragma: no cover
+    sys.exit(tdsm(obj=dict()))  # pragma: no cover

@@ -14,6 +14,7 @@ pytest = "*"
 pytest-cov = "*"
 pytest-xdist = "*"
 pytest-sugar = "*"
+pytest-subtests = "*"
 pyfakefs = "*"
 mypy = "*"
 # Coverage
@@ -24,8 +25,12 @@ twine = "*"
 invoke = "*"
 m2r = "*"
 bump2version = "*"
-pytest-subtests = "*"
 types-setuptools = "*"
+# Exploration
+jupyterlab = "*"
+matplotlib = "*"
+# Documentation
+sphinx = "*"
 
 [packages]
 numpy = "*"
