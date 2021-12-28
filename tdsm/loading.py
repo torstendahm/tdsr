@@ -1,23 +1,35 @@
-import numpy as np
-from tdsm.utils import Number, PathLike
 from abc import ABC, abstractmethod
+
+import numpy as np
+import numpy.typing as npt
+
+from typing import Type, Dict
+from tdsm.utils import Number, PathLike
 
 
 class Loading(ABC):
-    def __init__(self):
+    __name__: str = ""
+
+    def __init__(self) -> None:
         pass
 
+    @property
+    def name(self) -> str:
+        return self.__name__
+
     @abstractmethod
-    def values(self, length: int):
+    def values(self, length: int) -> npt.NDArray[np.float64]:
         pass
 
     @property
     @abstractmethod
-    def stress_rate(self):
+    def stress_rate(self) -> float:
         pass
 
 
 class StepLoading(Loading):
+    __name__: str = "Step"
+
     def __init__(
         self,
         n1: int = 50,
@@ -30,17 +42,17 @@ class StepLoading(Loading):
     ):
         self.n1 = n1
         self.n2 = n2
-        self.deltat = deltat
-        self.sc0 = sc0
-        self.sc1 = sc1
-        self.sc2 = sc2
-        self.sc3 = sc3
+        self.deltat = float(deltat)
+        self.sc0 = float(sc0)
+        self.sc1 = float(sc1)
+        self.sc2 = float(sc2)
+        self.sc3 = float(sc3)
 
     @property
-    def stress_rate(self):
+    def stress_rate(self) -> float:
         return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
 
-    def values(self, length: int):
+    def values(self, length: int) -> npt.NDArray[np.float64]:
         return np.hstack(
             [
                 np.linspace(self.sc0, self.sc1, num=self.n1),
@@ -49,18 +61,7 @@ class StepLoading(Loading):
             ]
         )
 
-    # @classmethod
-    # def default(cls):
-    #     cls(
-    #         n1=50,
-    #         n2=51,
-    #         sc0=0.0,
-    #         sc1=0.5,
-    #         sc2=1.0,
-    #         sc3=2.0,
-    #     )
 
-
-LOADING = dict(
+LOADING: Dict[str, Type[Loading]] = dict(
     step=StepLoading,
 )

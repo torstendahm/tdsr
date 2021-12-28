@@ -6,7 +6,7 @@ __author__ = """torstendahm"""
 __email__ = "torsten.dahm@gfz-potsdam.de"
 __version__ = "0.0.1"
 
-from tdsm.tdsm import TDSM, LCM, Traditional
+from tdsm.tdsm import LCM, TDSM, Traditional
 
 __all__ = [
     "TDSM",

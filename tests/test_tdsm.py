@@ -9,6 +9,7 @@ import typing
 
 import pytest
 from click.testing import CliRunner
+from tdsm import cli
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -24,5 +25,5 @@ def test_tdsm_cli() -> None:
     # assert "Show this message and exit." in help_result.output
 
 
-def test_tdsm_cli() -> None:
+def test_tdsm() -> None:
     pass

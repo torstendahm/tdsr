@@ -1,38 +1,41 @@
-import toml
 from pprint import pprint
-from typing import Optional, Dict
+from typing import Dict, Optional, Any
+
+import toml
+
 from tdsm.constants import HOURS
+from tdsm.loading import LOADING, Loading, StepLoading
 from tdsm.utils import Number, PathLike
-from tdsm.loading import Loading, StepLoading, LOADING
 
 
 class Config(object):
     def __init__(
         self,
-        chi0=10.0,
-        depthS=-0.2,
-        Sshadow=0.0,
-        deltat=0.2 * HOURS,
-        tstart=0 * HOURS,
-        tend=30 * HOURS,
-        deltaS=0.01,
-        sigma_max=10.0,
-        precision=12,
+        chi0: Number = 10.0,
+        depthS: Number = -0.2,
+        Sshadow: Number = 0.0,
+        deltat: Number = 0.2 * HOURS,
+        tstart: Number = 0 * HOURS,
+        tend: Number = 30 * HOURS,
+        deltaS: Number = 0.01,
+        sigma_max: int = 10,
+        precision: int = 12,
         loading: Optional[Loading] = None,
     ) -> None:
-        self.chi0 = chi0
-        self.depthS = depthS
-        self.Sshadow = Sshadow
-        self.deltat = deltat
-        self.tstart = tstart
-        self.tend = tend
-        self.deltaS = deltaS
+        self.chi0 = float(chi0)
+        self.depthS = float(depthS)
+        self.Sshadow = float(Sshadow)
+        self.deltat = float(deltat)
+        self.tstart = float(tstart)
+        self.tend = float(tend)
+        self.deltaS = float(deltaS)
         self.sigma_max = sigma_max
         self.precision = precision
+        self.loading = loading
         if loading is None:
             self.loading = StepLoading(deltat=deltat)
 
-    def merge(self, config: Dict[str, str]) -> None:
+    def merge(self, config: Dict[str, Any]) -> None:
         config = {k: v for k, v in config.items() if v is not None}
         if "chi0" in config:
             self.chi0 = config["chi0"]
@@ -54,9 +57,9 @@ class Config(object):
             self.precision = config["precision"]
 
     @classmethod
-    def open(cls, config_file: PathLike):
+    def open(cls, config_file: PathLike) -> Config:
         config = cls()
-        parsed_config = toml.load(config_file)
+        parsed_config = dict(toml.load(config_file))
 
         loading: Optional[Loading] = None
         try:
