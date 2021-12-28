@@ -1,7 +1,7 @@
 import os
+import pickle as pkl
 from typing import TYPE_CHECKING, Callable, Tuple, Union
 
-import pickle as pkl
 import numpy as np
 import numpy.typing as npt
 

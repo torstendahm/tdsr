@@ -10,8 +10,7 @@ import typing
 import pytest
 from click.testing import CliRunner
 
-from tdsm import cli
-from tdsm import TDSM, LCM, Traditional
+from tdsm import LCM, TDSM, Traditional, cli
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 

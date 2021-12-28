@@ -59,14 +59,13 @@ class Config(object):
     def open(cls, config_file: PathLike) -> "Config":
         config = cls()
         parsed_config = dict(toml.load(config_file))
+        config.merge(parsed_config)
         try:
             loading_typ = parsed_config["use_loading"]
             loading_params = parsed_config["loading"][loading_typ]
             loading_cls = LOADING[loading_typ]
-            config.loading = loading_cls(**loading_params)
+            config.loading = loading_cls(_config=config, **loading_params)
         except KeyError:
             # todo: warn about missing loading
             pass
-
-        config.merge(parsed_config)
         return config
