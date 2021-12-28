@@ -18,12 +18,20 @@ def plot(
 ) -> None:
     from matplotlib import pyplot as plt
 
-    plt.plot(cf)
+    plt.plot(t, cf)
+    plt.xlabel("$t$")
+    plt.ylabel("$\sigma_c$")
     plt.show()
     plt.close()
-    plt.plot(ratez)
+
+    plt.plot(t, ratez)
+    plt.xlabel("$t$")
+    plt.ylabel("$r$")
     plt.show()
     plt.close()
-    plt.plot(neqz)
+
+    plt.plot(t[0:-2], neqz[0:-1])
+    plt.xlabel("$t$")
+    plt.ylabel("$n$")
     plt.show()
     plt.close()

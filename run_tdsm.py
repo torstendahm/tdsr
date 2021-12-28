@@ -21,22 +21,4 @@ config, t, cf, ratez, neqz = tdsm(loading=loading, chi0=10.0, depthS=-0.2)
 # config, t, cf, ratez, neqz = tdsm(chi0=10.0, depthS=-0.2, tend=86_400)
 # config, t, cf, ratez, neqz = tdsm(chi0=10.0, depthS=-0.2, tend=200_000)
 
-
-print("begin plotting")
-plt.plot(t, cf)
-plt.xlabel("$t$")
-plt.ylabel("$\sigma_c$")
-plt.show()
-plt.close()
-
-plt.plot(t, ratez)
-plt.xlabel("$t$")
-plt.ylabel("$r$")
-plt.show()
-plt.close()
-
-plt.plot(t[0:-2], neqz[0:-1])
-plt.xlabel("$t$")
-plt.ylabel("$n$")
-plt.show()
-plt.close()
+plot(config, t, cf, ratez, neqz)
