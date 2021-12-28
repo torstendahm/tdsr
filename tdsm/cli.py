@@ -7,7 +7,7 @@ from typing import Optional
 
 import click
 
-from tdsm import save, LCM, TDSM, Traditional
+from tdsm import LCM, TDSM, Traditional, save
 from tdsm.config import Config
 from tdsm.utils import PathLike
 
