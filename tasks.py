@@ -13,13 +13,13 @@ from pathlib import Path
 Path().expanduser()
 
 ROOT_DIR = Path(__file__).parent
-SETUP_FILE = ROOT_DIR.joinpath("setup.py")
-TEST_DIR = ROOT_DIR.joinpath("tests")
-SOURCE_DIR = ROOT_DIR.joinpath("tdsm")
-TOX_DIR = ROOT_DIR.joinpath(".tox")
-COVERAGE_FILE = ROOT_DIR.joinpath(".coverage")
-COVERAGE_DIR = ROOT_DIR.joinpath("htmlcov")
-COVERAGE_REPORT = COVERAGE_DIR.joinpath("index.html")
+SETUP_FILE = ROOT_DIR / "setup.py"
+TEST_DIR = ROOT_DIR / "tests"
+SOURCE_DIR = ROOT_DIR / "tdsm"
+TOX_DIR = ROOT_DIR / ".tox"
+COVERAGE_FILE = ROOT_DIR / ".coverage"
+COVERAGE_DIR = ROOT_DIR / "htmlcov"
+COVERAGE_REPORT = COVERAGE_DIR / "index.html"
 PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR]]
 
 

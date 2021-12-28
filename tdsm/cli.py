@@ -227,7 +227,7 @@ def lcm(
 def traditional(
     ctx: click.Context,
 ) -> int:
-    """traditional method"""
+    """Traditional method"""
     params = ctx.obj["PARAMS"]
     config = params["config"]
     output_file = get_output_file(params["output_path"], name="lcm")
