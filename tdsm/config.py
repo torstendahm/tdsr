@@ -32,7 +32,7 @@ class Config(object):
         self.precision = precision
         self.loading = loading
         if loading is None:
-            self.loading = StepLoading(deltat=deltat)
+            self.loading = StepLoading(_config=self)
 
     def merge(self, config: Dict[str, Any]) -> None:
         config = {k: v for k, v in config.items() if v is not None}

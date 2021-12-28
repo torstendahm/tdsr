@@ -11,6 +11,7 @@ import numpy as np
 import numpy.typing as npt
 
 from tdsm.config import Config
+from tdsm.loading import Loading
 from tdsm.utils import gridrange, shifted
 
 Result = Tuple[
@@ -47,6 +48,7 @@ class LCM(object):
         deltaS: Optional[float] = None,
         sigma_max: Optional[int] = None,
         precision: Optional[int] = None,
+        loading: Optional[Loading] = None,
     ) -> Result:
         config = deepcopy(self.config)
         config.merge(
@@ -62,6 +64,8 @@ class LCM(object):
                 precision=precision,
             )
         )
+        if loading is not None:
+            config.loading = loading
         self._prepare(config)
         return self._compute(config)
 

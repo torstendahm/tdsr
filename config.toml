@@ -4,8 +4,8 @@ chi0 = 10.0
 # depth of stress shadow
 depthS = -0.2
 # loading function to be used
-#use_loading = "step"
-use_loading = "4points"
+use_loading = "step"
+# use_loading = "4points"
 
 ##### starting state
 # initial stress shadow , usually set to zero
@@ -42,8 +42,9 @@ precision = 12
   # step function overlaying steady stressing rate
   [loading.step]
     # strend (background stress rate (=DeltaS/deltat)
-    strend = 0.2
-    # time of step (tstart < tstep < tend
-    tstep = 2_000  
+    strend = 0.00001
+    # time of step in seconds (tstart < tstep < tend)
+    # default: tend / 2
+    # tstep = 40_000  
     # coulomb stress step 
-    sstep = 0.5
+    sstep = 0.1

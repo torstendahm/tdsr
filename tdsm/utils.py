@@ -8,6 +8,7 @@ import numpy.typing as npt
 if TYPE_CHECKING:
     from tdsm.tdsm import Result
 
+DEBUG = os.environ.get("DEBUG") is not None
 Number = Union[int, float]
 PathLike = Union[str, os.PathLike]
 
