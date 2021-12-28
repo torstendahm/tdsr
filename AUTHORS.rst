@@ -10,4 +10,4 @@ Maintainers
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Roman Dahm <contact@romnn.com>
