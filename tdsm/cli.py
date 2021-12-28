@@ -7,7 +7,7 @@ from typing import Optional
 
 import click
 
-from tdsm import LCM, TDSM, Traditional
+from tdsm import save, LCM, TDSM, Traditional
 from tdsm.config import Config
 from tdsm.utils import PathLike
 
@@ -15,14 +15,11 @@ from tdsm.utils import PathLike
 def optional_valid_dir_or_file(
     ctx: click.core.Context, param: click.core.Parameter, value: str
 ) -> str:
-    return value
-    # if value == "":
-    #     return value
-    # if os.path.exists(value) and os.path.isdir(value) and not os.path.isfile(value):
-    # return value
-    # raise click.BadParameter(
-    #     "%s is not a file or directory." % (value), ctx=ctx, param=param
-    # )
+    if value is None or value == "":
+        return value
+    if Path(value).exists() and Path(value).is_file():
+        return value
+    raise click.BadParameter("%s is not a file" % (value), ctx=ctx, param=param)
 
 
 DEFAULT_CONFIG = Config()
@@ -45,11 +42,12 @@ def check_output_file(
             if not ask or (
                 ask
                 and not click.confirm(
-                    "%s already exists. Do you want to overwrite it?" % _file,
+                    "%s already exists. Use -f to force overwriting. Do you want to overwrite it?"
+                    % _file,
                     default=False,
                 )
             ):
-                raise FileExistsError("%s already exists" % _file)
+                raise click.Abort("%s already exists" % _file)
     # create parent directories
     _file.parent.mkdir(parents=True, exist_ok=True)
     return _file
@@ -67,7 +65,6 @@ def check_output_file(
 @click.option(
     "-o",
     "--output",
-    callback=optional_valid_dir_or_file,
     default=None,
     help="output file",
     type=click.Path(),
@@ -80,9 +77,8 @@ def check_output_file(
     help="configuration file path",
 )
 @click.option(
-    "-f",
     "--force",
-    default=False,
+    is_flag=True,
     type=bool,
     help="force overwrite output results",
 )
@@ -166,13 +162,15 @@ def tdsm(
     loading: Optional[str],
 ) -> None:
     """TDSM method"""
-    output_path: Optional[PathLike] = None
-    input_path: Optional[PathLike] = None
+    output_file: Optional[PathLike] = None
+    input_file: Optional[PathLike] = None
     if output:
+        # try:
         output_path = Path(output).resolve()
         output_file = get_output_file(output_path, name="tdsm")
         output_file = check_output_file(output_file, force=force)
-        print(output_file)
+        # except FileExistsError:
+        #     raise Click
 
     if config is not None:
         conf = Config.open(config)
@@ -195,13 +193,15 @@ def tdsm(
     if ctx.invoked_subcommand is None:
         tdsm = TDSM(config=conf)
         result = tdsm()
-        print(result)
+        if output_file:
+            save(result, output_file)
+            print("saved to ", output_file)
     else:
         ctx.ensure_object(dict)
         ctx.obj["PARAMS"] = dict(
             config=conf,
-            input_path=input_path,
-            output_path=output_path,
+            input_file=input_file,
+            output_file=output_file,
             force=force,
         )
 

@@ -1,11 +1,26 @@
 import os
-from typing import Callable, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Tuple, Union
 
+import pickle as pkl
 import numpy as np
 import numpy.typing as npt
 
+if TYPE_CHECKING:
+    from tdsm.tdsm import Result
+
 Number = Union[int, float]
 PathLike = Union[str, os.PathLike]
+
+
+def save(result: "Result", filename: PathLike) -> None:
+    with open(filename, "wb") as f:
+        pkl.dump(result, f)
+
+
+def load(filename: PathLike) -> "Result":
+    with open(filename, "rb") as f:
+        result: Result = pkl.load(f)
+        return result
 
 
 def shifted(x: npt.NDArray[np.float64], nshift: int) -> npt.NDArray[np.float64]:
