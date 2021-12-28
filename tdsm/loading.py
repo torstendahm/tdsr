@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import Dict, Type
 
 import numpy as np
 import numpy.typing as npt
 
-from typing import Type, Dict
-from tdsm.utils import Number, PathLike
+from tdsm.utils import Number
 
 
 class Loading(ABC):

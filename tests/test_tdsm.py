@@ -9,6 +9,7 @@ import typing
 
 import pytest
 from click.testing import CliRunner
+
 from tdsm import cli
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))

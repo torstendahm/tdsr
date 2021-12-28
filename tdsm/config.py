@@ -1,5 +1,4 @@
-from pprint import pprint
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 import toml
 
@@ -57,11 +56,9 @@ class Config(object):
             self.precision = config["precision"]
 
     @classmethod
-    def open(cls, config_file: PathLike) -> Config:
+    def open(cls, config_file: PathLike) -> "Config":
         config = cls()
         parsed_config = dict(toml.load(config_file))
-
-        loading: Optional[Loading] = None
         try:
             loading_typ = parsed_config["use_loading"]
             loading_params = parsed_config["loading"][loading_typ]

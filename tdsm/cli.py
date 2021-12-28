@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Console script for tdsm."""
-import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -217,6 +216,9 @@ def lcm(
     config = params["config"]
     output_file = get_output_file(params["output_path"], name="lcm")
     output_file = check_output_file(output_file, force=params["force"])
+    lcm = LCM(config=config)
+    result = lcm()
+    print(result)
     return 0
 
 
@@ -230,6 +232,9 @@ def traditional(
     config = params["config"]
     output_file = get_output_file(params["output_path"], name="lcm")
     output_file = check_output_file(output_file, force=params["force"])
+    traditional = Traditional(config=config)
+    result = traditional()
+    print(result)
     return 0
 
 

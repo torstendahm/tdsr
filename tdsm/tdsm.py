@@ -11,7 +11,6 @@ import numpy as np
 import numpy.typing as npt
 
 from tdsm.config import Config
-from tdsm.constants import HOURS
 from tdsm.utils import gridrange, shifted
 
 Result = Tuple[
