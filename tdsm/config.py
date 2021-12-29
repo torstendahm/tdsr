@@ -17,6 +17,7 @@ class Config(object):
         tstart: Number = 0 * HOURS,
         tend: Number = 30 * HOURS,
         deltaS: Number = 0.01,
+        equilibrium: bool = False,
         sigma_max: int = 10,
         precision: int = 12,
         loading: Optional[Loading] = None,
@@ -24,6 +25,7 @@ class Config(object):
         self.chi0 = float(chi0)
         self.depthS = float(depthS)
         self.Sshadow = float(Sshadow)
+        self.Equilibrium = bool(equilibrium)
         self.deltat = float(deltat)
         self.tstart = float(tstart)
         self.tend = float(tend)
@@ -42,6 +44,8 @@ class Config(object):
             self.depthS = config["depthS"]
         if "Sshadow" in config:
             self.depthS = config["Sshadow"]
+        if "equilibrium" in config:
+            self.equilibrium = config["equilibrium"]
         if "deltat" in config:
             self.deltat = config["deltat"]
         if "tstart" in config:

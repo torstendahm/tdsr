@@ -42,6 +42,7 @@ class LCM(object):
         chi0: Optional[float] = None,
         depthS: Optional[float] = None,
         Sshadow: Optional[float] = None,
+        equilibrium: Optional[bool] = None,
         deltat: Optional[float] = None,
         tstart: Optional[float] = None,
         tend: Optional[float] = None,
@@ -56,6 +57,7 @@ class LCM(object):
                 chi0=chi0,
                 depthS=depthS,
                 Sshadow=Sshadow,
+                equilibrium=equilibrium,
                 deltat=deltat,
                 tstart=tstart,
                 tend=tend,
@@ -84,7 +86,12 @@ class LCM(object):
         self.cf = loading.values(length=self.nt)
 
     def _compute(self, config: Config) -> Result:
-        chiz = np.heaviside(-self.sigma, 0)
+        if config.equilibrium:
+            #chiz = np.heaviside(-self.sigma, 0)
+            raise ValueError("the option to calculate or read the equilibrium function chiz is not yet implemented")
+        else: 
+            chiz = np.heaviside(-self.sigma, 0)
+
         nshift = np.around(config.Sshadow / config.deltaS, 0).astype(int)
         chiz = shifted(chiz, nshift)
 

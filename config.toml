@@ -10,6 +10,7 @@ use_loading = "step"
 ##### starting state
 # initial stress shadow , usually set to zero
 Sshadow = 0.0
+equilibrium = false
 
 ##### discretisation parameter
 # sample interval in seconds (default 12 minutes)
