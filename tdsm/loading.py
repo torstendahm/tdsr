@@ -90,7 +90,7 @@ class StepLoading(Loading):
         sc0 = 0.0
         sc1 = (self.tstep - self.config.tstart) * self.strend
         sc2 = sc1 + self.sstep
-        sc3 = (self.config.tend - self.tstep) * self.strend + sc2
+        sc3 = sc2 + (self.config.tend - self.tstep - self.config.deltat) * self.strend
         n1 = np.floor(self.tstep / self.config.deltat).astype(int)
         n2 = n1 + 1
         nt = length
@@ -118,8 +118,45 @@ class StepLoading(Loading):
             ]
         )
 
+class BackgroundLoading(Loading):
+    __name__: str = "Background"
+
+    def __init__(
+        self,
+        _config: "Config",
+        strend: Number = 0.00001,
+    ):
+        self.config = _config
+        self.strend = strend
+
+    @property
+    def stress_rate(self) -> float:
+        return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+
+    def values(self, length: int) -> npt.NDArray[np.float64]:
+        sc0 = 0.0
+        sc3 = (self.config.tend - self.config.tstart) * self.strend
+        nt = length
+        from pprint import pprint
+
+        if DEBUG:
+            pprint(
+                dict(
+                    sc0=sc0,
+                    sc3=sc3,
+                    nt=nt,
+                )
+            )
+        return np.hstack(
+            [
+                np.linspace(sc0, sc3, num=nt),
+            ]
+        )
+
+
 
 LOADING: Dict[str, Type[Loading]] = {
     "step": StepLoading,
     "4points": FourPointLoading,
+    "background": BackgroundLoading,
 }

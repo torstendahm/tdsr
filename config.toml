@@ -6,6 +6,7 @@ depthS = -0.2
 # loading function to be used
 use_loading = "step"
 # use_loading = "4points"
+# use_loading = "background"
 
 ##### starting state
 # initial stress shadow , usually set to zero
@@ -49,3 +50,7 @@ precision = 12
     # tstep = 40_000  
     # coulomb stress step 
     sstep = 0.1
+  # background loading 
+  [loading.background]
+    # strend (background stress rate (=DeltaS/deltat)
+    strend = 0.00001

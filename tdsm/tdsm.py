@@ -40,6 +40,7 @@ class LCM(object):
     def __call__(
         self,
         chi0: Optional[float] = None,
+        chiz: Optional[float] = None,
         depthS: Optional[float] = None,
         Sshadow: Optional[float] = None,
         equilibrium: Optional[bool] = None,
@@ -68,7 +69,15 @@ class LCM(object):
         )
         if loading is not None:
             config.loading = loading
-        self._prepare(config)
+        #if config.equilibrium:
+        if chiz is not None:
+            self._prepare(config)
+            chiz_background = chiz
+            print('chiz_background=',chiz_background)
+            self.chiz = chiz_background
+        else:
+            print('chiz is none')
+            self._prepare(config)
         return self._compute(config)
 
     def _prepare(self, config: Config) -> None:
@@ -88,12 +97,13 @@ class LCM(object):
     def _compute(self, config: Config) -> Result:
         if config.equilibrium:
             #chiz = np.heaviside(-self.sigma, 0)
-            raise ValueError("the option to calculate or read the equilibrium function chiz is not yet implemented")
+            #raise ValueError("the option to calculate or read the equilibrium function chiz is not yet implemented")
+            print("chiz bereits uebergeben, daher nicht ueberschrieben mit Heaviside")
         else: 
-            chiz = np.heaviside(-self.sigma, 0)
+            self.chiz = np.heaviside(-self.sigma, 0)
 
         nshift = np.around(config.Sshadow / config.deltaS, 0).astype(int)
-        chiz = shifted(chiz, nshift)
+        self.chiz = shifted(self.chiz, nshift)
 
         ratez = np.zeros(self.nt)
         ratez[0] = 0.0
@@ -103,17 +113,17 @@ class LCM(object):
             nshift = np.around(deltacf / config.deltaS, 0).astype(int)
             resid = deltacf - nshift * config.deltaS
             # shift chiz (memory effect)
-            chiz = shifted(chiz, nshift)
-            ratez[i] = np.trapz(chiz * self.pz) * config.deltaS  # type: ignore
+            self.chiz = shifted(self.chiz, nshift)
+            ratez[i] = np.trapz(self.chiz * self.pz) * config.deltaS  # type: ignore
             # cut off chiz
-            chiz = chiz * (1.0 - self.pz)
+            self.chiz = self.chiz * (1.0 - self.pz)
 
         ratez = ratez * config.chi0 / config.deltat
         neqz = np.zeros(self.nt - 1)
         # neqz[0] = 0.0
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, self.cf, ratez, neqz
+        return config, self.t, self.chiz, self.cf, ratez, neqz
 
 
 class TDSM(LCM):
@@ -143,4 +153,4 @@ class Traditional(LCM):
         # neqz[0] = 0.0
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, self.cf, ratez, neqz
+        return config, self.t, self.chiz, self.cf, ratez, neqz
