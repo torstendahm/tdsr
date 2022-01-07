@@ -10,16 +10,16 @@ from tdsm.utils import Number, PathLike
 class Config(object):
     def __init__(
         self,
-        chi0: Number = 10.0,
-        depthS: Number = -0.2,
+        chi0: Number = 10000.0,
+        depthS: Number = -0.5,
         Sshadow: Number = 0.0,
         deltat: Number = 0.2 * HOURS,
         tstart: Number = 0 * HOURS,
         tend: Number = 30 * HOURS,
-        deltaS: Number = 0.01,
+        deltaS: Number = 0.0125,
         equilibrium: bool = False,
-        sigma_max: int = 10,
-        precision: int = 12,
+        sigma_max: int = 25,
+        precision: int = 18,
         loading: Optional[Loading] = None,
     ) -> None:
         self.chi0 = float(chi0)

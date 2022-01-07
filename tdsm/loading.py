@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Type
 
 import numpy as np
 import numpy.typing as npt
+#from typing import Type as npt
 
 if TYPE_CHECKING:
     from tdsm.config import Config
@@ -73,9 +74,9 @@ class StepLoading(Loading):
     def __init__(
         self,
         _config: "Config",
-        strend: Number = 0.00001,
+        strend: Number = 7.0E-5,
         tstep: Optional[Number] = None,
-        sstep: Number = 0.1,
+        sstep: Number = 1.0,
     ):
         self.config = _config
         self.strend = strend
@@ -90,7 +91,9 @@ class StepLoading(Loading):
         sc0 = 0.0
         sc1 = (self.tstep - self.config.tstart) * self.strend
         sc2 = sc1 + self.sstep
-        sc3 = (self.config.tend - self.tstep) * self.strend + sc2
+        sc2plus = sc2 + self.config.deltat * self.strend
+        sc3 = sc2plus + (self.config.tend - self.tstep - self.config.deltat) * self.strend
+        #sc3 = sc2 + (self.config.tend - self.tstep - self.config.deltat) * self.strend
         n1 = np.floor(self.tstep / self.config.deltat).astype(int)
         n2 = n1 + 1
         nt = length
@@ -114,12 +117,50 @@ class StepLoading(Loading):
             [
                 np.linspace(sc0, sc1, num=n1),
                 np.linspace(sc1, sc2, num=n2 - n1 + 1)[1:],
-                np.linspace(sc2, sc3, num=nt - n2 + 1)[1:],
+                #np.linspace(sc2, sc3, num=nt - n2 + 1)[1:],
+                np.linspace(sc2plus, sc3, num=nt - n2 + 1)[1:],
             ]
         )
+
+class BackgroundLoading(Loading):
+    __name__: str = "Background"
+
+    def __init__(
+        self,
+        _config: "Config",
+        strend: Number = 7.0E-5,
+    ):
+        self.config = _config
+        self.strend = strend
+
+    @property
+    def stress_rate(self) -> float:
+        return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+
+    def values(self, length: int) -> npt.NDArray[np.float64]:
+        sc0 = 0.0
+        sc3 = (self.config.tend - self.config.tstart) * self.strend
+        nt = length
+        from pprint import pprint
+
+        if DEBUG:
+            pprint(
+                dict(
+                    sc0=sc0,
+                    sc3=sc3,
+                    nt=nt,
+                )
+            )
+        return np.hstack(
+            [
+                np.linspace(sc0, sc3, num=nt),
+            ]
+        )
+
 
 
 LOADING: Dict[str, Type[Loading]] = {
     "step": StepLoading,
     "4points": FourPointLoading,
+    "background": BackgroundLoading,
 }

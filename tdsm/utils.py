@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Callable, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
+#from typing import Type as npt
 
 if TYPE_CHECKING:
     from tdsm.tdsm import Result

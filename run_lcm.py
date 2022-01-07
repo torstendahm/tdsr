@@ -8,7 +8,7 @@ current_dir = Path(__file__).parent
 config_file = current_dir / "config.toml"
 
 print("Aufsetzen eines tdsm runs")
-tdsm = TDSM(config=Config.open(config_file))
+lcm = LCM(config=Config.open(config_file))
 
 # ----Rechne t, cf, ratez, neqz aus mit Werten aus config, wobei Parameter aus config ueberschrieben werden koennen
 # config, t, chiz, cf, ratez, neqz = tdsm()
@@ -36,22 +36,11 @@ sigma_max = 3000.*deltaS
 
 print("Rechnung Background")
 # ---- chiz mit BackgroundLoading ausrechnen (vom Ende der Iteration) 
-loading = BackgroundLoading(_config=tdsm.config, strend=strend)
-#config, t, chiz_background, cf, ratez, neqz = tdsm(loading=loading, chi0=10.0, depthS=-0.2)
-config, t, chiz_background, cf, ratez, neqz = tdsm(loading=loading, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max)
+loading = BackgroundLoading(_config=lcm.config, strend=strend)
+config, t, chiz_background, cf, ratez, neqz = lcm(loading=loading, chi0=chi0)
 plot(config, t, cf, ratez, neqz)
 
 print("Rechnung mit step function wie bisher")
-#loading = StepLoading(_config=tdsm.config, tstep=10_000)
-loading = StepLoading(_config=tdsm.config, sstep=sstep, strend=strend)
-#config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, chi0=10.0, depthS=-0.2)
-config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max)
+loading = StepLoading(_config=lcm.config, sstep=sstep, strend=strend)
+config, t, chiz, cf, ratez, neqz = lcm(loading=loading, chi0=chi0)
 plot(config, t, cf, ratez, neqz)
-
-print("Rechnung mit step function und Background chiz")
-# ---- chiz mit BackgroundLoading ausrechnen (vom Ende der Iteration) 
-loading = StepLoading(_config=tdsm.config, sstep=sstep, strend=strend, tstep=10_000)
-#config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=10.0, depthS=-0.2)
-config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max)
-plot(config, t, cf, ratez, neqz)
-

@@ -1,11 +1,14 @@
 ##### physical model parameters
 # susceptibility
-chi0 = 10.0 
+#chi0 = 10.0 
+chi0 = 1.0E4
 # depth of stress shadow
-depthS = -0.2
+#depthS = -0.2
+depthS = -0.5E0
 # loading function to be used
 use_loading = "step"
 # use_loading = "4points"
+# use_loading = "background"
 
 ##### starting state
 # initial stress shadow , usually set to zero
@@ -21,11 +24,16 @@ tstart = 0
 tend = 86_400
 
 # sampling of coulomb stress axis
-deltaS = 0.01
+#deltaS = 0.01
+#deltaS = -depthS/40.
+deltaS = 0.0125
 # range to sample
-sigma_max = 10.0
+#sigma_max = 10.0
+#sigma_max = 2000.*deltaS
+sigma_max = 25.0
 # precision
-precision = 12
+#precision = 12
+precision = 18
 
 ##### stress loading models
 [loading]
@@ -37,15 +45,21 @@ precision = 12
     n2 = 51          
     # coulomb stress values
     sc0 = 0.0        
-    sc1 = 0.5
-    sc2 = 1.0
-    sc3 = 2.0
+    sc1 = 0.5E0
+    sc2 = 1.0E0
+    sc3 = 2.0E0
   # step function overlaying steady stressing rate
   [loading.step]
     # strend (background stress rate (=DeltaS/deltat)
-    strend = 0.00001
+    #strend = 0.00001
+    strend = 7.0E-5
     # time of step in seconds (tstart < tstep < tend)
     # default: tend / 2
     # tstep = 40_000  
     # coulomb stress step 
-    sstep = 0.1
+    sstep = 1.0E0
+  # background loading 
+  [loading.background]
+    # strend (background stress rate (=DeltaS/deltat)
+    #strend = 0.00001
+    strend = 7.0E-5
