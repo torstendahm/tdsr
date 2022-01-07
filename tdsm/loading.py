@@ -91,9 +91,13 @@ class StepLoading(Loading):
         sc0 = 0.0
         sc1 = (self.tstep - self.config.tstart) * self.strend
         sc2 = sc1 + self.sstep
+<<<<<<< HEAD
         sc2plus = sc2 + self.config.deltat * self.strend
         sc3 = sc2plus + (self.config.tend - self.tstep - self.config.deltat) * self.strend
         #sc3 = sc2 + (self.config.tend - self.tstep - self.config.deltat) * self.strend
+=======
+        sc3 = sc2 + (self.config.tend - self.tstep - self.config.deltat) * self.strend
+>>>>>>> refs/remotes/origin/master
         n1 = np.floor(self.tstep / self.config.deltat).astype(int)
         n2 = n1 + 1
         nt = length
@@ -128,7 +132,11 @@ class BackgroundLoading(Loading):
     def __init__(
         self,
         _config: "Config",
+<<<<<<< HEAD
         strend: Number = 7.0E-5,
+=======
+        strend: Number = 0.00001,
+>>>>>>> refs/remotes/origin/master
     ):
         self.config = _config
         self.strend = strend

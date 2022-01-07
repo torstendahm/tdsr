@@ -20,6 +20,7 @@ tdsm = TDSM(config=Config.open(config_file))
 # loading = FourPointLoading(_config=tdsm.config)
 
 
+<<<<<<< HEAD
 strend = 7.E-5
 sstep  = 1.E0
 #sstep  = 1.E-1
@@ -53,5 +54,23 @@ print("Rechnung mit step function und Background chiz")
 loading = StepLoading(_config=tdsm.config, sstep=sstep, strend=strend, tstep=10_000)
 #config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=10.0, depthS=-0.2)
 config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max)
+=======
+print("Rechnung Background")
+# ---- chiz mit BackgroundLoading ausrechnen (vom Ende der Iteration) 
+loading = BackgroundLoading(_config=tdsm.config)
+config, t, chiz_background, cf, ratez, neqz = tdsm(loading=loading, chi0=10.0, depthS=-0.2)
+plot(config, t, cf, ratez, neqz)
+
+print("Rechnung mit step function wie bisher")
+#loading = StepLoading(_config=tdsm.config, tstep=10_000)
+loading = StepLoading(_config=tdsm.config)
+config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, chi0=10.0, depthS=-0.2)
+plot(config, t, cf, ratez, neqz)
+
+print("Rechnung mit step function und Background chiz")
+# ---- chiz mit BackgroundLoading ausrechnen (vom Ende der Iteration) 
+loading = StepLoading(_config=tdsm.config, tstep=20_000)
+config, t, chiz, cf, ratez, neqz = tdsm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=10.0, depthS=-0.2)
+>>>>>>> refs/remotes/origin/master
 plot(config, t, cf, ratez, neqz)
 

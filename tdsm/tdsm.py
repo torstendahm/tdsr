@@ -154,6 +154,7 @@ class Traditional(LCM):
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
         return config, self.t, self.chiz, self.cf, ratez, neqz
+<<<<<<< HEAD
 
 class RSM(LCM):
     def _compute(self, config: Config) -> Result:
@@ -179,3 +180,5 @@ class RSM(LCM):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
         return config, self.t, self.chiz, self.cf, ratez, neqz
 
+=======
+>>>>>>> refs/remotes/origin/master

@@ -57,9 +57,17 @@ precision = 18
     # default: tend / 2
     # tstep = 40_000  
     # coulomb stress step 
+<<<<<<< HEAD
     sstep = 1.0E0
   # background loading 
   [loading.background]
     # strend (background stress rate (=DeltaS/deltat)
     #strend = 0.00001
     strend = 7.0E-5
+=======
+    sstep = 0.1
+  # background loading 
+  [loading.background]
+    # strend (background stress rate (=DeltaS/deltat)
+    strend = 0.00001
+>>>>>>> refs/remotes/origin/master
