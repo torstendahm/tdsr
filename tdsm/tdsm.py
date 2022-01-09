@@ -73,10 +73,10 @@ class LCM(object):
         if chiz is not None:
             self._prepare(config)
             chiz_background = chiz
-            print('chiz_background=',chiz_background)
+            #print('chiz_background=',chiz_background)
             self.chiz = chiz_background
         else:
-            print('chiz is none')
+            #print('chiz is none')
             self._prepare(config)
         return self._compute(config)
 
@@ -144,9 +144,11 @@ class Traditional(LCM):
         for i in range(1, self.nt - 1):
             if self.cf[i] >= self.cf[i - 1] and self.cf[i] >= S0:
                 S0 = self.cf[i]
-                ratez[i] = config.chi0 * (self.cf[i] - self.cf[i - 1]) / config.deltat
+                #ratez[i] = config.chi0 * (self.cf[i] - self.cf[i - 1]) / config.deltat
+                ratez[i] = (self.cf[i] - self.cf[i - 1])
             else:
-                ratez[i] = 0.0 / config.deltat
+                #ratez[i] = 0.0 / config.deltat
+                ratez[i] = 0.0
             self.chiz[i] = S0
         ratez = ratez * config.chi0 / config.deltat
         neqz = np.zeros(self.nt - 1)
@@ -154,7 +156,6 @@ class Traditional(LCM):
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
         return config, self.t, self.chiz, self.cf, ratez, neqz
-<<<<<<< HEAD
 
 class RSM(LCM):
     def _compute(self, config: Config) -> Result:
@@ -180,5 +181,3 @@ class RSM(LCM):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
         return config, self.t, self.chiz, self.cf, ratez, neqz
 
-=======
->>>>>>> refs/remotes/origin/master

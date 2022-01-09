@@ -1,7 +1,7 @@
 from pathlib import Path
 from tdsm import Config, TDSM, LCM, Traditional, RSM
 from tdsm.plotting import plot
-from tdsm.loading import StepLoading, FourPointLoading, BackgroundLoading
+from tdsm.loading import StepLoading, FourPointLoading, BackgroundLoading, CyclicLoading
 import matplotlib.pyplot as plt
 
 current_dir = Path(__file__).parent
@@ -25,6 +25,12 @@ sstep  = 1.E0
 #sstep  = 0.0
 #sstep  = 1.E+3
 #sstep  = 2.E0
+tstep = 80_000
+tstep = 10_000
+#tstep = 42_000
+
+ampsin = 2.0
+Tsin = 43_200
 
 chi0   = 1.E4
 
@@ -40,12 +46,18 @@ sigma_max = 3000.*deltaS
 
 print("Rechnung Background")
 # ---- chiz mit BackgroundLoading ausrechnen (vom Ende der Iteration) 
-loading = BackgroundLoading(_config=rsm.config, strend=strend)
-print('loading=',loading.strend)
-config, t, chiz_background, cf, ratez, neqz = rsm(loading=loading, chi0=chi0, depthS=depthS)
-plot(config, t, cf, ratez, neqz)
+#loading = BackgroundLoading(_config=rsm.config, strend=strend)
+#print('loading=',loading.strend)
+#config, t, chiz_background, cf, ratez, neqz = rsm(loading=loading, chi0=chi0, depthS=depthS)
+#plot(config, t, cf, ratez, neqz)
+
+#loading = CyclicLoading(_config=rsm.config, strend=strend, ampsin=ampsin, Tsin=Tsin)
+#print('loading=',loading.strend)
+#config, t, chiz, cf, ratez, neqz = rsm(loading=loading, chi0=chi0, depthS=depthS)
+#plot(config, t, cf, ratez, neqz)
 
 print("Rechnung mit step function wie bisher")
-loading = StepLoading(_config=rsm.config, sstep=sstep, strend=strend)
+loading = StepLoading(_config=rsm.config, sstep=sstep, tstep=tstep, strend=strend)
+#loading = StepLoading(_config=rsm.config, sstep=sstep, strend=strend)
 config, t, chiz, cf, ratez, neqz = rsm(loading=loading, chi0=chi0, depthS=depthS)
 plot(config, t, cf, ratez, neqz)

@@ -77,30 +77,47 @@ class StepLoading(Loading):
         strend: Number = 7.0E-5,
         tstep: Optional[Number] = None,
         sstep: Number = 1.0,
+        tstart: Number = 0.,
+        tend: Number = 86400.,
+        deltat: Number = 720. 
     ):
         self.config = _config
         self.strend = strend
         self.tstep = tstep or self.config.tend / 2
         self.sstep = sstep
+        self.tstart = tstart
+        self.tend   = tend
+        self.deltat = deltat
 
     @property
     def stress_rate(self) -> float:
         return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
 
     def values(self, length: int) -> npt.NDArray[np.float64]:
-        sc0 = 0.0
-        sc1 = (self.tstep - self.config.tstart) * self.strend
-        sc2 = sc1 + self.sstep
-<<<<<<< HEAD
-        sc2plus = sc2 + self.config.deltat * self.strend
-        sc3 = sc2plus + (self.config.tend - self.tstep - self.config.deltat) * self.strend
-        #sc3 = sc2 + (self.config.tend - self.tstep - self.config.deltat) * self.strend
-=======
-        sc3 = sc2 + (self.config.tend - self.tstep - self.config.deltat) * self.strend
->>>>>>> refs/remotes/origin/master
-        n1 = np.floor(self.tstep / self.config.deltat).astype(int)
-        n2 = n1 + 1
+        #n1 = np.floor( (self.tstep - self.config.tstart) / self.config.deltat).astype(int) +1
+        n1 = np.floor( (self.tstep - self.tstart) / self.deltat).astype(int) +1
         nt = length
+        sinterval = self.deltat * self.strend
+        ninter1 = n1
+        ninter2 = nt-n1-1
+        sc0 = 0.0
+        sc1 = float(ninter1) * sinterval
+        sc2 = sc1 + self.sstep
+        sc3 = sc2 + float(ninter2) * sinterval
+        seg1 = np.linspace(sc0,sc1, num=n1+1)[0:-1]
+        seg3 = np.linspace(sc2,sc3, num=nt-n1)
+        #print('n1=',n1,' nt=',nt,' ninter1=',ninter1,' ninter2=',ninter2)
+        #print(' test segment 1')
+        #print(seg1[-3:])
+        #print('slope=',seg1[-1]-seg1[-2])
+        #print(' ')
+        #print(' test segment 3')
+        #print(seg3[0:3])
+        #print('slope=',seg3[1]-seg3[0])
+        #print(' ')
+        #print('len1=',len(seg1),' len3=',len(seg3))
+        #exit()
+
         from pprint import pprint
 
         if DEBUG:
@@ -111,18 +128,66 @@ class StepLoading(Loading):
                     sc2=sc2,
                     sc3=sc3,
                     n1=n1,
-                    n2=n2,
                     nt=nt,
                 )
             )
-        if not (n1 >= 0 and n2 <= nt):
+        if not (n1 >= 0 and n1+1 <= nt):
             raise ValueError("tstep must be greater than zero and smaller than tend")
         return np.hstack(
             [
-                np.linspace(sc0, sc1, num=n1),
-                np.linspace(sc1, sc2, num=n2 - n1 + 1)[1:],
-                #np.linspace(sc2, sc3, num=nt - n2 + 1)[1:],
-                np.linspace(sc2plus, sc3, num=nt - n2 + 1)[1:],
+                seg1 , seg3 
+                # np.linspace(sc0, sc1, num=n1),
+                #np.linspace(sc2, sc3, num=nt - n1 + 1)[1:],
+            ]
+        )
+
+class CyclicLoading(Loading):
+    __name__: str = "Cycle"
+
+    def __init__(
+        self,
+        _config: "Config",
+        strend: Number = 7.0E-5,
+        ampsin: Number = 0.2E0,
+        Tsin: Number = 43200,
+        tstart: Number = 0.,
+        tend: Number = 86400.,
+        deltat: Number = 720. 
+    ):
+        self.config = _config
+        self.strend = strend
+        self.ampsin = ampsin
+        self.Tsin = Tsin
+        self.tstart = tstart
+        self.tend   = tend
+        self.deltat = deltat
+
+    @property
+    def stress_rate(self) -> float:
+        return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+
+    def values(self, length: int) -> npt.NDArray[np.float64]:
+        sc0 = 0.0
+        sc3 = (self.tend - self.tstart) * self.strend
+        nt = length
+        from pprint import pprint
+
+        seg1 = np.linspace(sc0, sc3, num=nt)
+        temp = np.linspace(self.tstart, self.tend, num=nt)
+        seg2 = self.ampsin*(1.-np.cos(2.*np.pi*temp/self.Tsin))
+        seg = seg1 + seg2
+
+        if DEBUG:
+            pprint(
+                dict(
+                    sc0=sc0,
+                    sc3=sc3,
+                    nt=nt,
+                )
+            )
+        return np.hstack(
+            [
+                seg, 
             ]
         )
 
@@ -132,14 +197,16 @@ class BackgroundLoading(Loading):
     def __init__(
         self,
         _config: "Config",
-<<<<<<< HEAD
         strend: Number = 7.0E-5,
-=======
-        strend: Number = 0.00001,
->>>>>>> refs/remotes/origin/master
+        tstart: Number = 0.,
+        tend: Number = 86400.,
+        deltat: Number = 720. 
     ):
         self.config = _config
         self.strend = strend
+        self.tstart = tstart
+        self.tend   = tend
+        self.deltat = deltat
 
     @property
     def stress_rate(self) -> float:
@@ -147,7 +214,9 @@ class BackgroundLoading(Loading):
 
     def values(self, length: int) -> npt.NDArray[np.float64]:
         sc0 = 0.0
-        sc3 = (self.config.tend - self.config.tstart) * self.strend
+        sc3 = (self.tend - self.tstart) * self.strend
+        print('in background: tstart, tend, dottau=', self.tstart, self.tend, self.strend)
+        print('nt=', length)
         nt = length
         from pprint import pprint
 
@@ -166,9 +235,9 @@ class BackgroundLoading(Loading):
         )
 
 
-
 LOADING: Dict[str, Type[Loading]] = {
     "step": StepLoading,
     "4points": FourPointLoading,
     "background": BackgroundLoading,
+    "cycle": CyclicLoading,
 }
