@@ -69,3 +69,21 @@ precision = 18
     # strend (background stress rate (=DeltaS/deltat)
     #strend = 0.00001
     strend = 7.0E-5
+  # two stress slopes (change in stress rate)
+  [loading.trendchange]
+    # time of step in seconds (tstart < tstep < tend)
+    # default: tend / 2
+    # tstep = 40_000  
+    # strend and strend2 stress rate before and after tstep (=DeltaS/deltat)
+    strend  = 7.0E-5
+    strend2 = 7.0E-4
+  # three stress slopes (change in stress rate)
+  [loading.ramp]
+    # time of start of ramp in seconds (tstart < tstep < tend)
+    # default: tend / 2
+    # tstep = 40_000  
+    strend  = 7.0E-5
+    strend2 = 7.0E-4
+    strend3 = 7.0E-5
+    # Anzahl der sample der ramp mit steigung strend2
+    nsample2 = 20

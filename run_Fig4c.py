@@ -26,8 +26,10 @@ hours = 3600.
 tstart = 0*hours
 #tend   = 30*hours
 tend   = 200*hours
-#deltat = 0.2*hours
+#deltat = 0.2*hours  # unsolved: if deltat is smaller, the EQ rate becomes larger. This indicatesd that still somehting wrong
 deltat = 600.0
+#deltat = 1200.0
+#deltat = 300.0
 #nt = int(math.ceil((tend - tstart) / deltat))
 nt = np.floor( (tend-tstart) / deltat).astype(int)
 

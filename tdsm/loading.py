@@ -234,10 +234,152 @@ class BackgroundLoading(Loading):
             ]
         )
 
+class TrendchangeLoading(Loading):
+    __name__: str = "Trendchange"
+
+    def __init__(
+        self,
+        _config: "Config",
+        strend: Number = 7.0E-5,
+        strend2: Number = 7.0E-4,
+        tstep: Optional[Number] = None,
+        tstart: Number = 0.,
+        tend: Number = 86400.,
+        deltat: Number = 720. 
+    ):
+        self.config = _config
+        self.strend = strend
+        self.strend2 = strend2
+        self.tstep = tstep or self.config.tend / 2
+        self.tstart = tstart
+        self.tend   = tend
+        self.deltat = deltat
+
+    @property
+    def stress_rate(self) -> float:
+        return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+
+    def values(self, length: int) -> npt.NDArray[np.float64]:
+        n1 = np.floor( (self.tstep - self.tstart) / self.deltat).astype(int) +1
+        nt = length
+        sinterval1 = self.deltat * self.strend
+        sinterval2 = self.deltat * self.strend2
+        ninter1 = n1
+        ninter2 = nt-n1-1
+        sc0 = 0.0
+        sc1 = float(ninter1) * sinterval1
+        sc2 = sc1 + float(ninter2) * sinterval2
+        seg1 = np.linspace(sc0,sc1, num=n1+1)[0:-1]
+        seg2 = np.linspace(sc1,sc2, num=nt-n1)
+
+        from pprint import pprint
+
+        if DEBUG:
+            pprint(
+                dict(
+                    sc0=sc0,
+                    sc1=sc1,
+                    sc2=sc2,
+                    n1=n1,
+                    nt=nt,
+                )
+            )
+        if not (n1 >= 0 and n1+1 <= nt):
+            raise ValueError("tstep must be greater than zero and smaller than tend")
+        return np.hstack(
+            [
+                seg1 , seg2 
+            ]
+        )
+
+class RampLoading(Loading):
+    __name__: str = "Ramp"
+
+    def __init__(
+        self,
+        _config: "Config",
+        strend: Number = 7.0E-5,
+        strend2: Number = 7.0E-4,
+        strend3: Number = 7.0E-5,
+        nsample2: Number = 20,
+        tstep: Optional[Number] = None,
+        tstart: Number = 0.,
+        tend: Number = 86400.,
+        deltat: Number = 720. 
+    ):
+        self.config = _config
+        self.strend = strend
+        self.strend2 = strend2
+        self.strend3 = strend3
+        self.nsample2 = nsample2
+        self.tstep = tstep or self.config.tend / 2
+        self.tstart = tstart
+        self.tend   = tend
+        self.deltat = deltat
+
+    @property
+    def stress_rate(self) -> float:
+        return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+
+    def values(self, length: int) -> npt.NDArray[np.float64]:
+        nt = length
+        n1 = np.floor( (self.tstep - self.tstart) / self.deltat).astype(int) +1
+        n2 = self.nsample2
+        n3 = nt-(n1+n2)
+        sinterval1 = self.deltat * self.strend
+        sinterval2 = self.deltat * self.strend2
+        sinterval3 = self.deltat * self.strend3
+        ninter1 = n1
+        ninter2 = n2
+        ninter3 = n3+1
+        sc0 = 0.0
+        sc1 = float(ninter1) * sinterval1
+        sc2 = sc1 + float(ninter2-1) * sinterval2
+        sc3 = sc2 + float(ninter3-1) * sinterval3
+        seg1 = np.linspace(sc0,sc1, num=n1+1)[0:-1]
+        seg2 = np.linspace(sc1,sc2, num=ninter2)
+        seg3 = np.linspace(sc2,sc3, num=ninter3)[1:]
+        #print(' nt=',nt,' n1=',n1,' n2=',n2,' n3=',n3,' sum=',n1+n2+n3)
+        #print(' test segment 1')
+        #print(seg1[-3:])
+        #print('slope=',seg1[-1]-seg1[-2])
+        #print(' ')
+        #print(' test segment 2')
+        #print(seg2[0:3],seg2[-2:])
+        #print('slope=',seg2[1]-seg2[0])
+        #print(' ')
+        #print(' test segment 3')
+        #print(seg3[0:3])
+        #print('slope=',seg3[1]-seg3[0])
+        #print(' ')
+        #print('len1=',len(seg1),' len2=',len(seg2),' len3=',len(seg3))
+
+        from pprint import pprint
+
+        if DEBUG:
+            pprint(
+                dict(
+                    sc0=sc0,
+                    sc1=sc1,
+                    sc2=sc2,
+                    sc3=sc3,
+                    n1=n1,
+                    nt=nt,
+                )
+            )
+        if not (n1 >= 0 and n1+1 <= nt):
+            raise ValueError("tstep must be greater than zero and smaller than tend")
+        return np.hstack(
+            [
+                seg1 , seg2 , seg3 
+            ]
+        )
 
 LOADING: Dict[str, Type[Loading]] = {
     "step": StepLoading,
     "4points": FourPointLoading,
     "background": BackgroundLoading,
     "cycle": CyclicLoading,
+    "trendchange": TrendchangeLoading,
+    "ramp": RampLoading,
 }

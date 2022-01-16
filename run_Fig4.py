@@ -11,7 +11,7 @@ import numpy as np
 
 current_dir = Path(__file__).parent
 config_file = current_dir / "config.toml"
-pdf_file1 = current_dir / "plots/Dahm_fig4a"
+pdf_file1 = current_dir / "plots/Dahm_fig4b"
 pdf_file2 = current_dir / "plots/Dahm_figB1a"
 
 print("set-up the tdsm, lcm and rsm class environments")
@@ -137,7 +137,7 @@ ax1b.plot((t-t[nstep])/Ta[1] , r_tdsm[i,:]/scal, linewidth=2.0, ls=lstyle[i], co
 ax1b.plot((t-t[nstep])/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM')
 
 plt.legend(loc='upper right',fontsize=20)
-plt.figtext(0.02, 0.87, 'a)', fontsize=20)
+plt.figtext(0.06, 0.87, 'b)', fontsize=20)
 plt.figtext(0.15, 0.82, r'$\Delta\sigma/\delta\sigma=$'+'{:d}'.format(int(-sstep/depthS)), fontsize=20)
 if xrange_set:
     plt.xlim([tmin, tmax])
