@@ -51,6 +51,7 @@ print("Calculate earthquake rates with tdsm, lcm and rsm")
 #-----------------------------------------------------
 cfs    = np.zeros((3,nt))
 r_tdsm = np.zeros((3,nt))
+r_theo = np.zeros((3,nt))
 r_lcm  = np.zeros((3,nt))
 r_rsm  = np.zeros((3,nt))
 n_tdsm = np.zeros((3,nt-1))
@@ -85,6 +86,19 @@ for i in range(3):
     r_rsm[i,:] = r
     n_rsm[i,:] = xn
 
+    # calculate theoretical Omori curves
+    good = t >= (tstep-tstart)
+    dS = -depthS
+    A = chi0*(dS)
+    t0 = 0.1*deltat  # t0 muss deutlich kleiner als deltat sein, damit die peak Amplituden richtig
+    strend_background = strend[i]
+    #t1 = deltat
+    t1 = dS/(sstep/deltat-strend_background)
+    rback = chi0*dS*(1.-np.exp(-strend_background*t0/dS))/t0
+    r_theo[i,good] = A/(t1+(t[good]-tstep))
+    r_theo[i,good] = r_theo[i,good]*(1.-np.exp(-np.exp(-strend_background*(t[good]-tstep)/dS)*(t[good]-tstep+t1)/t0) )
+    r_theo[i,:] = r_theo[i,:]+rback
+
 #-----------------------------------------------------
 print("Plotting Fig. 4a")
 #-----------------------------------------------------
@@ -102,6 +116,8 @@ tmax = 5.5
 xrange_set = False
 xrange_set = True
 lstyle = ('--', '-', '-.')
+plot_theo = False
+#plot_theo = True
 
 fig = plt.figure(1, figsize=(12, 8))
 # ---- Coulomb stress loading (input and interpolated input)
@@ -111,8 +127,8 @@ ax1a.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1a.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 for i in range(3):
-    #ax1a.plot((t-t[nstep])/deltat, cfs[i,:]/(sstep), linewidth=2.0, ls=lstyle[i], color='black', label=r'$\Delta\sigma/\dot{\sigma}_c\Delta t=$'+'{:d}'.format(int(fa[i])))
-    ax1a.plot((t-t[nstep])/Ta[1], cfs[i,:]/(sstep), linewidth=2.0, ls=lstyle[i], color='black', label=r'$T_a/T_{a1}=$'+'{:.2f}'.format(float(Ta[i]/Ta[1])))
+    #ax1a.plot((t-t[nstep]-deltat)/deltat, cfs[i,:]/(sstep), linewidth=2.0, ls=lstyle[i], color='black', label=r'$\Delta\sigma/\dot{\sigma}_c\Delta t=$'+'{:d}'.format(int(fa[i])))
+    ax1a.plot((t-t[nstep]-deltat)/Ta[1], cfs[i,:]/(sstep), linewidth=2.0, ls=lstyle[i], color='black', label=r'$T_a/T_{a1}=$'+'{:.2f}'.format(float(Ta[i]/Ta[1])))
 
 plt.legend(loc='lower right',fontsize=20)
 if xrange_set:
@@ -120,21 +136,25 @@ if xrange_set:
 
 # ---- earthquake rate ------------------------------------
 ax1b = fig.add_subplot(212)
-ax1b.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
+ax1b.set_xlabel(r'$(t-t_s)/T_{a1}$', fontsize=20)
 #ax1b.set_ylabel(r'$r \cdot T_{a1} / \chi_0 V \delta \sigma$', fontsize=20)
 ax1b.set_ylabel(r'$r / \chi_0 V \dot{\sigma}_{c1}$', fontsize=20)
 ax1b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 for i in [0,2]:
-    ax1b.plot((t-t[nstep])/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray')
-    ax1b.plot((t-t[nstep])/Ta[1] , r_tdsm[i,:]/scal, linewidth=2.0, ls=lstyle[i], color='red')
-    ax1b.plot((t-t[nstep])/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue')
+    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray')
+    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=2.5, ls=lstyle[i], color='red')
+    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue')
+    if plot_theo:
+        ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=2.5, ls=lstyle[0], color='green')
 
 i=1
-ax1b.plot((t-t[nstep])/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray', label=r'LCM')
-ax1b.plot((t-t[nstep])/Ta[1] , r_tdsm[i,:]/scal, linewidth=2.0, ls=lstyle[i], color='red', label=r'TDSM')
-ax1b.plot((t-t[nstep])/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM')
+ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray', label=r'LCM')
+ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=2.5, ls=lstyle[i], color='red', label=r'TDSM')
+ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM')
+if plot_theo:
+    ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=2.5, ls=lstyle[0], color='green')
 
 plt.legend(loc='upper right',fontsize=20)
 plt.figtext(0.06, 0.87, 'b)', fontsize=20)
@@ -152,7 +172,7 @@ print("Plotting Fig. B1a")
 #-----------------------------------------------------
 fig = plt.figure(1, figsize=(12, 4))
 ax1c = fig.add_subplot(111)
-ax1c.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
+ax1c.set_xlabel(r'$(t-t_s)/T_{a1}$', fontsize=20)
 ax1c.set_ylabel(r'$n-n_0$', fontsize=20)
 ax1c.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1c.tick_params(axis = 'both', which = 'minor', labelsize = 18)

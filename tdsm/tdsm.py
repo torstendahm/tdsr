@@ -9,6 +9,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 import numpy.typing as npt
+#import nptyping as npt
 
 from tdsm.config import Config
 from tdsm.loading import Loading
@@ -139,8 +140,10 @@ class TDSM(LCM):
 class Traditional(LCM):
     def _compute(self, config: Config) -> Result:
         ratez = np.zeros(self.nt)
+        cf_shad = np.zeros(self.nt)
         S0 = -config.Sshadow
-        self.chiz[0] = self.cf[0] - config.Sshadow
+        #self.chiz[0] = self.cf[0] - config.Sshadow
+        cf_shad[0] = self.cf[0] - config.Sshadow
         for i in range(1, self.nt - 1):
             if self.cf[i] >= self.cf[i - 1] and self.cf[i] >= S0:
                 S0 = self.cf[i]
@@ -149,18 +152,22 @@ class Traditional(LCM):
             else:
                 #ratez[i] = 0.0 / config.deltat
                 ratez[i] = 0.0
-            self.chiz[i] = S0
+            #self.chiz[i] = S0
+            cf_shad[i] = S0
         ratez = ratez * config.chi0 / config.deltat
         neqz = np.zeros(self.nt - 1)
         # neqz[0] = 0.0
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, self.chiz, self.cf, ratez, neqz
+        #return config, self.t, self.chiz, self.cf, ratez, neqz
+        return config, self.t, cf_shad, self.cf, ratez, neqz
 
 class RSM(LCM):
     def _compute(self, config: Config) -> Result:
+        cf_shad = np.zeros(self.nt)
         S0 = -config.Sshadow
-        self.chiz[0] = self.cf[0] - config.Sshadow
+        #self.chiz[0] = self.cf[0] - config.Sshadow
+        cf_shad[0] = self.cf[0] - config.Sshadow
         ratez = np.zeros(self.nt)
         dS = np.ediff1d(self.cf, to_end=config.loading.strend)
         rinfty = config.chi0*config.loading.strend
@@ -174,10 +181,12 @@ class RSM(LCM):
             gamma = (dum - config.deltat/dS[i-1]) * np.exp(-dS[i-1]/Asig) + config.deltat/dS[i-1]
             gamma *= config.loading.strend
             ratez[i] = 1.0 / gamma
-            self.chiz[i] = S0
+            cf_shad[i] = S0
+            #self.chiz[i] = S0
         ratez = rinfty*ratez
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, self.chiz, self.cf, ratez, neqz
+        #return config, self.t, self.chiz, self.cf, ratez, neqz
+        return config, self.t, cf_shad, self.cf, ratez, neqz
 

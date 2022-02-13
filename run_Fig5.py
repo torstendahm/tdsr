@@ -31,8 +31,13 @@ nt = int(math.ceil((tend - tstart) / deltat))
 
 #strend  = [0.25/(75*deltat), 1.0/(75*deltat), 1.75/(75*deltat)]  # stressing rate in MPa/s
 strend = 1.75/(75*deltat) # stressing rate in MPa/s
+#strend = 2*strend
+#strend = 0.5*strend
+#strend = 0.1*strend
 
 ampsin = 1.0E0            # Amplitude of sinusoidal loading
+#ampsin = 0.5*ampsin
+#ampsin = 2.0*ampsin
 Tsin   = 30_000           # Period ofsinusoidal loading
 
 sstep  = [-0.5E0 , -1.0E0] # stress step in MPa
@@ -40,6 +45,7 @@ tstep  = 20.0*hours       # time when stress step is acting
 
 chi0   = 1.E4            # susceptibility to trigger earthquakes by unit stress increase
 depthS = -0.3            # skin depth in MPa (must be defined negativ)
+#depthS = -1.5            # skin depth in MPa (must be defined negativ)
 
 deltaS    = -depthS/60.  # increment do discretize Coulomb stress axis
 sigma_max = 3000.*deltaS # maximum depth on Coulomb axis (limit of integral)
@@ -158,26 +164,47 @@ if xrange_set:
 
 # ---- earthquake rate ------------------------------------
 ax1b = fig.add_subplot(212)
-ax1b.set_xlabel(r'$(t-t_0)/T_a$', fontsize=20)
+ax1b.set_xlabel(r'$(t-t_s)/T_a$', fontsize=20)
 ax1b.set_ylabel(r'$r \, / \chi_0 V \dot{\sigma}_c$', fontsize=20)
 ax1b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 i=0
 ax1b.plot((t-t[nstep])/Ta, r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray')
-ax1b.plot((t-t[nstep])/Ta, r_tdsm[i,:]/scal, linewidth=2.0, ls=lstyle[i], color='red')
+ax1b.plot((t-t[nstep])/Ta, r_tdsm[i,:]/scal, linewidth=2.5, ls=lstyle[i], color='red')
 ax1b.plot((t-t[nstep])/Ta, r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue')
+# ..... Plotte Wendepunkt, d.h. Maximum der Ableitung
+nwend = np.argmax(np.gradient(r_rsm[i,:]))
+#print('Wendepunkt',nwend,(t[nwend]-t[nstep])/Ta,r_tdsm[i,nwend]/scal)
+ax1b.plot((t[nwend]-t[nstep])/Ta, r_rsm[i,nwend]/scal, marker='s', mec='black', mfc='None', mew=1.0, ms=10.)
+# Berechne Anzahl der missong events in gap
+nmiss      = -chi0*sstep[i]
+nmiss_tdsm = np.trapz( (chi0*strend - r_tdsm[i,nstep:]),dx=deltat)
+nmiss_lcm  = np.trapz( (chi0*strend - r_lcm[i,nstep:]),dx=deltat)
+print('step1 nmiss=',nmiss,nmiss_lcm,nmiss_tdsm)
 
 i=1
 ax1b.plot((t-t[nstep])/Ta, r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray', label=r'LCM')
-ax1b.plot((t-t[nstep])/Ta, r_tdsm[i,:]/scal, linewidth=2.0, ls=lstyle[i], color='red', label=r'TDSM')
+ax1b.plot((t-t[nstep])/Ta, r_tdsm[i,:]/scal, linewidth=2.5, ls=lstyle[i], color='red', label=r'TDSM')
 ax1b.plot((t-t[nstep])/Ta, r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM')
+# ..... Plotte Wendepunkt, d.h. Maximum der Ableitung
+nwend = np.argmax(np.gradient(r_rsm[i,:]))
+ax1b.plot((t[nwend]-t[nstep])/Ta, r_rsm[i,nwend]/scal, marker='s', mec='black', mfc='None', mew=1.0, ms=10.)
+# Berechne Anzahl der missong events in gap
+nmiss      = -chi0*sstep[i]
+nmiss_tdsm = np.trapz( (chi0*strend - r_tdsm[i,nstep:]),dx=deltat)
+nmiss_lcm  = np.trapz( (chi0*strend - r_lcm[i,nstep:]),dx=deltat)
+print('step2 nmiss=',nmiss,nmiss_lcm,nmiss_tdsm)
+
+# .. plotte Gitterlinie bei 0.5
+ax1b.plot([(t[0]-t[nstep])/Ta,(t[-1]-t[nstep])/Ta], [0.5,0.5], linewidth=0.5, ls='dotted', color='lightgray')
 
 plt.legend(loc='lower right',fontsize=20)
 plt.figtext(0.02, 0.87, 'a)', fontsize=20)
 #plt.figtext(0.15, 0.82, r'$\Delta \sigma/\dot{\sigma}_c T_a=$'+'{:d}'.format(int(depthS/(strend*Ta))), fontsize=20)
 #plt.figtext(0.15, 0.82, r'$T_a=$'+'{:d}'.format(int(Ta/(hours)))+' hours', fontsize=20)
 plt.figtext(0.15, 0.82, r'$T_a=\delta \sigma/\dot{\sigma}_c$', fontsize=20)
+plt.figtext(0.185, 0.37, r'$n_{red} = \chi_0 V \Delta \sigma$', fontsize=20)
 if xrange_set:
     plt.xlim([tmin, tmax])
 #ax1b.set_yscale('log')
@@ -191,7 +218,7 @@ print("Plotting Fig. B1b")
 #-----------------------------------------------------
 fig = plt.figure(1, figsize=(12, 4))
 ax1c = fig.add_subplot(111)
-ax1c.set_xlabel(r'$(t-t_0)/T_a$', fontsize=20)
+ax1c.set_xlabel(r'$(t-t_s)/T_a$', fontsize=20)
 ax1c.set_ylabel(r'$n-n_0$', fontsize=20)
 ax1c.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1c.tick_params(axis = 'both', which = 'minor', labelsize = 18)
@@ -240,6 +267,18 @@ i=1
 ax1a.plot((t-t[nstep])/Ta, cf_shad_cycle/(strend*Ta), linewidth=1.5, ls=lstyle[i], color='lightgray')
 ax1a.plot((t-t[nstep])/Ta, cfs_cycle/(strend*Ta), linewidth=2.0, ls=lstyle[i], color='black', label=r'$\Delta\sigma/\dot{\sigma}_c\Delta t=$'+'{:d}'.format(int(fa[i])))
 
+# --- integrate area beneath curve    np.trapz(cfs_cycle, dx=deltat)
+# difference of cfs to shadow berechnen innerhalb windows (periode kann analytisch bestimmt werden
+# Intervall t1 bis t2 fuer Integration kann ueber logische Variable good eingheschränkt werden, 
+# dann Integral np.trapz()
+#ntief = np.argmin(cfs_cycle[nstep:])
+ntief = nstep+int(math.ceil(3*Tsin/2. / deltat))
+ntief2 = ntief + int(math.ceil(2*Tsin/deltat))
+ax1a.plot((t[ntief]-t[nstep])/Ta, cf_shad_cycle[ntief]/(strend*Ta), marker='s', mec='gray', mfc='None', mew=1.0, ms=5.)
+ax1a.plot((t[ntief2]-t[nstep])/Ta, cf_shad_cycle[ntief2]/(strend*Ta), marker='s', mec='gray', mfc='None', mew=1.0, ms=5.)
+plt.text((t[ntief]-t[nstep])/Ta, cf_shad_cycle[ntief]/(strend*Ta)+0.2, '1', fontsize=16)
+plt.text((t[ntief2]-t[nstep])/Ta, cf_shad_cycle[ntief2]/(strend*Ta)+0.2, '2', fontsize=16)
+
 #plt.legend(loc='lower right',fontsize=20)
 if xrange_set:
     plt.xlim([tmin1, tmax1])
@@ -247,17 +286,29 @@ if xrange_set:
 
 # ---- earthquake rate ------------------------------------
 ax1b = fig.add_subplot(212)
-ax1b.set_xlabel(r'$(t-t_0)/T_a$', fontsize=20)
+ax1b.set_xlabel(r'$(t-t_s)/T_a$', fontsize=20)
 ax1b.set_ylabel(r'$r \, / \chi_0 V \dot{\sigma}_c$', fontsize=20)
 ax1b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 i=1
 ax1b.plot((t-t[nstep])/Ta, r_lcm_cycle/scal, linewidth=1.5, ls=lstyle[i], color='lightgray')
-ax1b.plot((t-t[nstep])/Ta, r_tdsm_cycle/scal, linewidth=2.0, ls=lstyle[i], color='red')
+ax1b.plot((t-t[nstep])/Ta, r_tdsm_cycle/scal, linewidth=2.5, ls=lstyle[i], color='red')
 ax1b.plot((t-t[nstep])/Ta, r_rsm_cycle/scal, linewidth=1.0, ls=lstyle[1], color='blue')
 
-plt.legend(loc='lower right',fontsize=20)
+# minium of stress cycle
+ax1b.plot((t[ntief]-t[nstep])/Ta, r_rsm_cycle[ntief]/scal, marker='s', mec='black', mfc='None', mew=1.0, ms=5.)
+ax1b.plot((t[ntief2]-t[nstep])/Ta, r_rsm_cycle[ntief2]/scal, marker='s', mec='black', mfc='None', mew=1.0, ms=5.)
+# Berechne Anzahl der missong events in gap
+nmiss      = chi0*(cf_shad_cycle[ntief2]-cf_shad_cycle[ntief])
+nmiss_tdsm = np.trapz( r_tdsm_cycle[ntief:ntief2],dx=deltat)
+nmiss_lcm  = np.trapz( r_lcm_cycle[ntief:ntief2],dx=deltat)
+print('step2 nmiss=',nmiss,nmiss_lcm,nmiss_tdsm)
+
+plt.figtext(0.470, 0.42, r'$n\approx \chi_0 V [\sigma_{sh}(2)-\sigma_{sh}(1)]$', fontsize=20)
+#plt.text((t[ntief]-t[nstep])/Ta, r_rsm_cycle[ntief]/scal+0.2, '1', fontsize=16)
+#plt.text((t[ntief2]-t[nstep])/Ta, r_rsm_cycle[ntief2]/scal+0.2, '2', fontsize=16)
+#plt.legend(loc='lower right',fontsize=20)
 plt.figtext(0.02, 0.87, 'b)', fontsize=20)
 plt.figtext(0.15, 0.82, r'$T/T_a=$'+'{:d}'.format(int(Tsin/Ta)), fontsize=20)
 if xrange_set:
