@@ -4,12 +4,14 @@ from typing import TYPE_CHECKING, Dict, Optional, Type
 import numpy as np
 import numpy.typing as npt
 #from typing import Type as npt
+#from scipy import interpolate
+import os.path
 
 if TYPE_CHECKING:
     from tdsm.config import Config
     from tdsm.tdsm import Result
 
-from tdsm.utils import DEBUG, Number
+from tdsm.utils import DEBUG, Number, gridrange
 
 
 class Loading(ABC):
@@ -375,6 +377,72 @@ class RampLoading(Loading):
             ]
         )
 
+class ExternalFileLoading(Loading):
+    __name__: str = "InFile"
+
+    def __init__(
+        self,
+        _config: "Config",
+        tstart: Number = 0.,
+        tend: Number = 86400.,
+        deltat: Number = 720., 
+        scal_t: Number = 3600*24,
+        scal_cf: Number = 1.E-6,
+        c_tstart: Number = 0.0,
+        iascii: Optional[bool] = None,
+        infile: Optional = None
+    ):
+        self.config = _config
+        self.iascii  = iascii
+        self.infile = infile
+        self.tstart = tstart
+        self.tend   = tend
+        self.deltat = deltat
+        self.c_tstart = c_tstart
+        self.scal_cf = scal_cf
+        self.scal_t  = scal_t
+
+    @property
+    def stress_rate(self) -> float:
+        return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+
+    def values(self, length: int) -> npt.NDArray[np.float64]:
+
+        if self.iascii:
+            if not os.path.isfile(self.infile):
+                raise ValueError("input file does not exist")
+            cf_obs, t_obs = np.loadtxt(self.infile, skiprows=2, usecols=(0,1), unpack=True)
+            t_obs = t_obs*self.scal_t     # scale time 
+            cf_obs = cf_obs*self.scal_cf  # scale stress
+            tmin_obs = t_obs[0]
+            tmax_obs = t_obs[-1]
+            self.tend     = tmax_obs # time series stops with end time of series read in
+            #nt = len(t_obs)
+            #dt = (tmax-tmin)/nt
+        else:
+            raise ValueError("so far only ascii format supported for input file")
+
+        # insert one value before start sample of stress change read in
+        if self.tstart >= tmin_obs:
+            raise ValueError("tstart must be smaller than the begin time of series read in")
+        tmin, tmax, nt, t = gridrange(self.tstart, self.tend, self.deltat)
+        #cf    = np.zeros(nt)
+
+        t_temp = np.insert(t_obs,0,self.tstart,axis=None)
+        c_temp = np.insert(cf_obs,0,self.c_tstart,axis=None)
+        #f = interpolate.interp1d(t_temp,c_temp, kind='linear')
+        #cf = f(t)
+        cf = np.interp(t[0:-1], t_temp, c_temp)
+        print('tstart, tend, deltat=',self.tstart,self.tend,self.deltat)
+        print('t =',len(t))
+        print('cf=',len(cf))
+
+        return np.hstack(
+            [
+                cf, 
+            ]
+        )
+
 LOADING: Dict[str, Type[Loading]] = {
     "step": StepLoading,
     "4points": FourPointLoading,
@@ -382,4 +450,5 @@ LOADING: Dict[str, Type[Loading]] = {
     "cycle": CyclicLoading,
     "trendchange": TrendchangeLoading,
     "ramp": RampLoading,
+    "infile": ExternalFileLoading,
 }

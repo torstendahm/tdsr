@@ -87,3 +87,13 @@ precision = 18
     strend3 = 7.0E-5
     # Anzahl der sample der ramp mit steigung strend2
     nsample2 = 20
+  # read Coulomb stress change as ascii file
+  [loading.infile]
+    # format iascii=0: ascii format,  else: pickle format
+    iascii = true
+    # file name to read with time in t_units and stress in s_units
+    infile  = "data/stresschange_morsleben.dat"
+    scal_t  = 1.0
+    scal_cf = 1.0
+    # first stress value, will be inserted at time tstart before the begin of the read in time series
+    c_tstart = 0.0
