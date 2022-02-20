@@ -1,6 +1,8 @@
 #--------------------------
-# Plot Fig. 7 Morsleben (see manuscript on TDSM ,Dahm 2022) 
+# Plot Fig. 7c Morsleben (see manuscript on TDSM ,Dahm 2022) 
 #--------------------------
+import sys
+sys.path.insert(0, "../")
 from pathlib import Path
 from tdsm import Config, TDSM, LCM, Traditional, RSM
 from tdsm.plotting import plot
@@ -18,16 +20,16 @@ km = 1000.
 hours = 3600.
 days = hours * 24.
 
-current_dir = Path(__file__).parent
+current_dir = Path(__file__).parent.parent
 config_file = current_dir / "config.toml"
-pdf_file1 = current_dir / "plots/Dahm_fig7"
+pdf_file1 = current_dir / "../plots/Dahm_fig7c"
 
-infile     = 'data/stresschange_morsleben.dat'           # input stress loading
+infile     = '../data/stresschange_morsleben.dat'           # input stress loading
 iascii = True
 scal_cf = 1.E-6   # data provided in Pa, to be scaled to  MPa
 scal_t = days     # time provilded in units of days, to be scaled to seconds
 c_tstart = 0.0
-fn_obsrate = 'data/observed_rate_southregion.txt'
+fn_obsrate = '../data/observed_rate_southregion.txt'
 V = 2250      # Volume of the study region in m^3
 
 print("set-up the tdsm, lcm and rsm class environments")
@@ -70,22 +72,16 @@ n_rsm   = np.zeros((3,nt-1))
 for i in range(3):
     loading = ExternalFileLoading(_config=tdsm.config, iascii=True, infile=infile, scal_t=scal_t, scal_cf=scal_cf, c_tstart=c_tstart, tstart=tstart, tend=tend, deltat=deltat)
     config, t, chiz, cf, r, xn = tdsm(loading=loading, equilibrium=False, chi0=chi0[i], depthS=depthS[i], deltaS=deltaS[i], sigma_max=sigma_max[i], deltat=deltat, tstart=tstart, tend=tend)
-    print('tstart, tend, deltat=',tstart,tend,deltat)
-    print('cf=',len(cf))
-    print('t =',len(t),'  nt=',nt)
-    #plot(config, t, cf, r, xn)
     r_tdsm[i,:] = r[:]
     n_tdsm[i,:] = xn[:]
 
     loading = ExternalFileLoading(_config=trad.config, iascii=True, infile=infile, scal_t=scal_t, scal_cf=scal_cf, c_tstart=c_tstart, tstart=tstart, tend=tend, deltat=deltat)
     config, t, cf_shad, cf, r, xn = trad(loading=loading, chi0=chi0[i], deltat=deltat, tstart=tstart, tend=tend)
-    #plot(config, t, cf, r, xn)
     r_lcm[i,:] = r
     n_lcm[i,:] = xn
 
     #loading = ExternalFileLoading(_config=rsm.config, iascii=True, infile=infile, scal_t=scal_t, scal_cf=scal_cf, c_tstart=c_tstart, tstart=tstart, tend=tend, deltat=deltat)
     #config, t, chiz, cf, r, xn = rsm(loading=loading, chi0=chi0[i], depthS=depthS, deltat=deltat, tstart=tstart, tend=tend)
-    #plot(config, t, cf, r, xn)
     #r_rsm[i,:] = r
     #n_rsm[i,:] = xn
 
@@ -95,7 +91,6 @@ print("Plotting Fig. 7")
 n1 = 0
 Ta = 1.0*days   # skalierung ist bereits auf Tage
 scal = 1.*hours/deltat  # die beobachtete Rate wird in events / hour geplottet
-# scal1 = 1.E6  # jetzt bereits auf MPa umgerechnet
 scal1 = 1.0
 
 
@@ -128,7 +123,6 @@ ax1a.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 ax1a.plot(t/Ta, cf_shad/scal1, linewidth=2.0, ls='--',color='darkgray')
 ax1a.plot(t/Ta, cf/scal1, linewidth=2.0, ls='-',color='black', label="Coulomb stress")
-print("time t=",t[0]/Ta,t[-1]/Ta,deltat/Ta)
 ax1a.legend(loc='upper left')
 
 if xrange_set:

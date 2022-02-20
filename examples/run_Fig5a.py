@@ -1,6 +1,8 @@
 #--------------------------
-# Plot Fig. 4 and B1a (see manuscript on TDSM ,Dahm, 2022) 
+# Plot Fig. 5a (see manuscript on TDSM ,Dahm, 2022) 
 #--------------------------
+import sys
+sys.path.insert(0, "../")
 from pathlib import Path
 from tdsm import Config, TDSM, LCM, Traditional, RSM
 from tdsm.plotting import plot
@@ -10,16 +12,16 @@ import matplotlib.ticker
 import math
 import numpy as np
 
-current_dir = Path(__file__).parent
+current_dir = Path(__file__).parent.parent
 config_file = current_dir / "config.toml"
-pdf_file1 = current_dir / "plots/Dahm_fig6a"
+pdf_file1 = current_dir / "../plots/Dahm_fig5a"
 
 # ----  real data for comparison
-fn_m55 = "data/hainzl2008_fig2b_5.5-6.dat"
-fn_m60 = "data/hainzl2008_fig2b_6-6.5.dat"
-fn_m65 = "data/hainzl2008_fig2b_6.5-7.dat"
-fn_m70 = "data/hainzl2008_fig2b_7-7.5.dat"
-fn_m75 = "data/hainzl2008_fig2b_7.5-9.dat"
+fn_m55 = "../data/hainzl2008_fig2b_5.5-6.dat"
+fn_m60 = "../data/hainzl2008_fig2b_6-6.5.dat"
+fn_m65 = "../data/hainzl2008_fig2b_6.5-7.dat"
+fn_m70 = "../data/hainzl2008_fig2b_7-7.5.dat"
+fn_m75 = "../data/hainzl2008_fig2b_7.5-9.dat"
 
 print("set-up the tdsm, lcm and rsm class environments")
 tdsm = TDSM(config=Config.open(config_file))
@@ -35,27 +37,18 @@ for_test_only = False
 hours = 3600.
 days = hours * 24.
 tstart = 0*days
-tend   = 250*days
-tend   = 150*days
 tend   = 1000*days
-deltat = 1.*days
-deltat = 0.1*days
 deltat = 0.04*days
-#nt = int(math.ceil((tend - tstart) / deltat))
 nt = np.floor( (tend-tstart) / deltat).astype(int)
 
 if for_test_only:
     strend  = [ 1.0E-8 , 1.0E-8 ]   # test mit brut force auf kleinere stress rate zu gehen
     sstep  =  [ 0.57E0, 5.9E0 ]  # stress step in MPa
 else:
-    #strend  = [ 2.0E-8 , 3.0E-8 ]   # test mit brut force auf kleinere stress rate zu gehen
-    #sstep  =  [ 0.54E0, 6.0E0 ]     # stress step in MPa
     strend  = [ 5.0E-10 , 5.0E-10 ]
-    sstep  =  [ 0.0249E0, 0.3E0 ]
     sstep  =  [ 0.0270E0, 0.3E0 ]
 
 tstep  = 5.0*days       # time when stress step is acting
-#istep = np.floor( (tstep-tstart) / deltat).astype(int)
 nstep = np.floor( (tstep-tstart) / deltat).astype(int)+1
 
 
@@ -66,14 +59,9 @@ if for_test_only:
     chi0   = 5.00E4            # susceptibility to trigger earthquakes by unit stress increase
     depthS = [-0.072 , -0.55]    
 else:
-    #deltaS    = 1./800.      # increment do discretize Coulomb stress axis
-    #sigma_max = 30000.*deltaS # maximum depth on Coulomb axis (limit of integral)
-    #precision = 28
     deltaS    = 1./3000.     # increment do discretize Coulomb stress axis
     sigma_max = 50000.*deltaS # maximum depth on Coulomb axis (limit of integral)
     precision = 25
-    #chi0   = 4.50E4            # susceptibility to trigger earthquakes by unit stress increase
-    #depthS = [-0.08 , -0.60]    # skin depth in MPa (must be defined negativ)
     chi0   = 1.00E6
     depthS = [-0.0036 , -0.0275]    
 
@@ -136,7 +124,6 @@ rinfty      = np.zeros(ns)
 Ta          = np.zeros(ns)
 
 # ---- calculate equilibrium distribution of tectonic loading, to be used later to avoid initial oscillations
-# loading = BackgroundLoading(_config=tdsm.config, strend=strend)
 for i in range(ns):
     loading = BackgroundLoading(_config=tdsm.config, strend=strend[i], deltat=deltat, tstart=tstart, tend=tend)
     config, t, chiz_background, cf, r, xn = tdsm(loading=loading, chi0=chi0, depthS=depthS[i], deltaS=deltaS, sigma_max=sigma_max, precision=precision, deltat=deltat, tstart=tstart, tend=tend)
@@ -153,7 +140,6 @@ for i in range(ns):
 
     loading = StepLoading(_config=tdsm.config, strend=strend[i], sstep=sstep[i], tstep=tstep, deltat=deltat, tstart=tstart, tend=tend)
     config, t, chiz, cf, r, xn = tdsm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=chi0, depthS=depthS[i], deltaS=deltaS, sigma_max=sigma_max, precision=precision, deltat=deltat, tstart=tstart, tend=tend)
-    #plot(config, t, cf, r, xn)
     cfs[i,:]    = cf[:]
     r_tdsm[i,:] = r[:]
     n_tdsm[i,:] = xn[:]
@@ -203,21 +189,13 @@ for i in range(ns):
             prod[i] = t1
             break
 
-    #print(' t1=',t1,' nev=',nev)
     r_tdsm_theo[i,:] = r_tdsm_theo[i,:]+rback
-
-#A = chi0*(-depthS)
-#t1 = deltat   # t1 muss auf deltat gesetzt werden, damit uebereinstimmung mit numerischer Simulation
-#t0 = 0.1*deltat  # t0 muss deutlich kleiner als deltat sein, damit die peak Amplituden richtig 
-#dS = -depthS
-#p2 = np.exp(-sigma_max/dS)/t0
 
 #-----------------------------------------------------
 print("Plotting Fig. 6c")
 #-----------------------------------------------------
-#scal = 1.0
 Ta   = -np.asarray(depthS)/np.asarray(strend)
-fa   = np.zeros(ns)
+#fa   = np.zeros(ns)
 fa   = -np.asarray(sstep)/np.asarray(depthS)
 Ta0 = 1.0
 tmin = 0.01
@@ -233,21 +211,15 @@ if xrange_set:
     nstart = nstep-0
     nstart = nstep-1
 else:
-    #nstep = 0
-    #nstart = 0
     nstart = nstep-0
     nstart = nstep-1
 
 fig = plt.figure(2, figsize=(6, 8))
 ax1b = fig.add_subplot(111)
-#ax1b.set_xlabel(r'$(t-t_s)/T_a$', fontsize=20)
-#ax1b.set_ylabel(r'$r / \chi_0 V \dot{\sigma}_c$', fontsize=20)
 ax1b.set_xlabel(r'$(t-t_s)$ days', fontsize=20)
 ax1b.set_ylabel(r'$r$ (1/days)', fontsize=20)
 ax1b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
-
-#ax1b.plot([(t[nstart]-t[nstep])/(Ta0*days), (t[nt-1]-t[nstep])/(Ta0*days)], [1, 1], linewidth=1.0, ls='-', color='black')
 
 print('tstart=',nstart,nstep,t[nstart],t[nstep])
 print('infty =',rinfty[0],rinfty[1])
@@ -260,21 +232,6 @@ tshift = [t_m55[0], t_m75[0] ]
 for i in range(ns):
 
     ax1b.plot((t[nstart:]-t[nstep])/(Ta0*days)+tshift[i] , r_tdsm[i,nstart:], linewidth=2.0, ls='-', color=col[i])
-    #ax1b.plot((t[nstart:]-t[nstep])/(Ta0*days)+tshift[i] , r_tdsm[i,nstart:], linewidth=2.0, ls=line[i], color=col[i],label=r'$\delta\sigma=$'+'{:.1f}'.format(float(-depthS[i]))+r'MPa, $T_a=$'+'{:.0f}'.format(float((-depthS[i]/strend[i])/days))+'days')
-
-    #ax1b.plot((t[nstart:]-t[nstep])/(Ta0*days)+tshift[i], r_rsm[i,nstart:], linewidth=1.0, ls='--', color='gray')
-
-    #ax1b.plot((t[nstart:]-t[nstep]+deltat)/Ta0a , r_tdsm_theo[i,nstart:], linewidth=1.5, ls='--', color='blue')
-
-#i=1
-#ax1b.plot((t[nstart:]-t[nstep])/Ta0 , r_rsm[2,nstart:], linewidth=1.5, ls='dotted', color='green', label=r'RSM')
-#plt.text((t[nstart+2]-t[nstep])/Ta0 , 1.3*r_tdsm[i,nstart+2] ,r'$\Delta\sigma/\delta\sigma=$'+'{:.0f}'.format(float(fa[i])), fontsize=20)
-#plt.text((t[nstart+2]-t[nstep])/Ta0 , 0.97*r_tdsm[i,nstart+2] ,r'$t_1/T_a=$'+'{:.4f}'.format(float(prod[i]/Ta)), fontsize=20)
-
-#ax1b.plot((t[nstart:]-t[nstep]+deltat)/Ta0 , r_tdsm_theo[i,nstart:], linewidth=1.5, ls='--', color='blue', label='eq. (12)')
-
-#for i in range(ns-1):
-#    plt.text((t[nstart+2]-t[nstep])/Ta0 , r_tdsm[i,nstart+2] ,r'{:.1f};{:2.3f}'.format(float(fa[i]),float(prod[i]/Ta)), fontsize=20)
 
 #---- sum of masurements between m=5.5 and M=6.5 (M6 +-0.5) and m=7.0 and M=8.0 (M7.5 +-0.5)
 if for_test_only:
@@ -283,8 +240,6 @@ if for_test_only:
 else:
     plt.plot(t_m55[0:18], (r_m55[0:18]+r_m60[0:18])/2., ls='None', ms=15, marker='o', mec= 'blue', mfc='None', mew=2.0, label=r'$M=6\pm 0.5$')
     plt.plot(t_m75, (r_m70+r_m75)/2., ls='None', ms=15, marker='o', mec= 'green', mfc='None', mew=2.0, label=r'$M\geq 7$')
-    #plt.plot(t_m55[0:18], (r_m55[0:18]+r_m60[0:18])/2.+rinfty[0], ls='None', ms=15, marker='o', mec= 'blue', mfc='None', mew=2.0, label=r'$M=6\pm 0.5$')
-    #plt.plot(t_m75, (r_m70+r_m75)/2.+rinfty[1], ls='None', ms=15, marker='o', mec= 'green', mfc='None', mew=2.0, label=r'$M\geq 7$')
 
 plt.legend(loc='upper right',fontsize=20)
 plt.figtext(0.0, 0.87, 'a)', fontsize=20)
@@ -292,7 +247,6 @@ plt.figtext(0.55, 0.70, r'$\delta\sigma=$'+'{:.0f}'.format(float(-depthS[1]*1000
 plt.figtext(0.55, 0.65, r'$T_a=$'+'{:.0f}'.format(float((-depthS[1]/strend[1])/days))+'days', fontsize=20, color='green')
 plt.figtext(0.135, 0.18, r'$\delta\sigma=$'+'{:.0f}'.format(float(-depthS[0]*1000))+r'kPa', fontsize=20, color='blue')
 plt.figtext(0.135, 0.13, r'$T_a=$'+'{:.0f}'.format(float((-depthS[0]/strend[0])/days))+'days', fontsize=20, color='blue')
-#plt.text((t[nstart+2]-t[nstep])/Ta , r_tdsm[i,nstart+2]/rinfty[0] , r'$\Delta\sigma/\delta\sigma=$', fontsize=20)
 if xrange_set:
     plt.xlim([tmin, tmax])
     if for_test_only:
@@ -301,10 +255,7 @@ if xrange_set:
         plt.ylim([0.0003, 50])
     ax1b.set_xscale('log')
     ax1b.set_yscale('log')
-    #ax1b.set_yticks([1,10,50,100])
-    #ax1b.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 else:
-    #plt.ylim([0, 2])
     print(' to be defined')
 
 plt.show()

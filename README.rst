@@ -35,6 +35,27 @@ Usage
     import proto_compile
 
 
+Files:
+-----
+
+directories example:
+
+run_Fig3b.py
+run_Fig5a.py
+run_Fig_appendix_A1.py
+run_rsm.py
+run_traditional.py
+run_Fig3a+c.py
+run_Fig4.py
+run_Fig7c.py
+run_lcm.py
+run_tdsm.py
+
+config.toml
+Model parameter defined on two levels:
+(1) general parameters, defined for all simulatiions moduls, including tdsm, rs,. lcm and traditional
+(2) parameter for specific stress loading scenarios, as e.g. step, background, cyclic, 4points, trendchange, ramp
+
 Development
 -----------
 

@@ -11,3 +11,5 @@ Contributors
 ------------
 
 * Roman Dahm <contact@romnn.com>
+* Sebastian Hainzl <hainzl@gfz-potsdam.de>
+* Gudrun Richter <gudrunr08@web.de>

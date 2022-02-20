@@ -1,6 +1,8 @@
 #--------------------------
-# Plot Fig. 4 and B1a (see manuscript on TDSM ,Dahm, 2022) 
+# Plot Fig. 3b and B1a (see manuscript on TDSM ,Dahm, 2022) 
 #--------------------------
+import sys
+sys.path.insert(0, "../")
 from pathlib import Path
 from tdsm import Config, TDSM, LCM, Traditional, RSM
 from tdsm.plotting import plot
@@ -9,17 +11,16 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 
-current_dir = Path(__file__).parent
+current_dir = Path(__file__).parent.parent
 config_file = current_dir / "config.toml"
-pdf_file1 = current_dir / "plots/Dahm_fig4b"
-pdf_file2 = current_dir / "plots/Dahm_figB1a"
+pdf_file1 = current_dir / "../plots/Dahm_fig3b"
+pdf_file2 = current_dir / "../plots/Dahm_figB1a"
 
 print("set-up the tdsm, lcm and rsm class environments")
 tdsm = TDSM(config=Config.open(config_file))
 lcm  = LCM(config=Config.open(config_file))
 trad = Traditional(config=Config.open(config_file))
 rsm  = RSM(config=Config.open(config_file))
-
 
 print("define model parameter for plotting, if different from config file")
 hours = 3600.
@@ -75,13 +76,13 @@ for i in range(3):
     #config, t, chiz, cf, r, xn = lcm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, deltat=deltat, tstart=0, tend=tend)
 
     loading = StepLoading(_config=trad.config, strend=strend[i], sstep=sstep, tstep=tstep)
-    config, t, chiz, cf, r, xn = trad(loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend)
+    config, t, cf_shadow, cf, r, xn = trad(loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend)
     #plot(config, t, cf, r, xn)
     r_lcm[i,:] = r
     n_lcm[i,:] = xn
 
     loading = StepLoading(_config=rsm.config, strend=strend[i], sstep=sstep, tstep=tstep)
-    config, t, chiz, cf, r, xn = rsm(loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend)
+    config, t, cf_shadow, cf, r, xn = rsm(loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend)
     #plot(config, t, cf, r, xn)
     r_rsm[i,:] = r
     n_rsm[i,:] = xn
@@ -100,16 +101,12 @@ for i in range(3):
     r_theo[i,:] = r_theo[i,:]+rback
 
 #-----------------------------------------------------
-print("Plotting Fig. 4a")
+print("Plotting Fig. 3b")
 #-----------------------------------------------------
-fa   = np.zeros(len(strend))
 fa   = sstep/(np.asarray(strend)*deltat)
-Ta   = np.zeros(len(strend))
-#Ta   = -depthS/(hours*np.asarray(strend))
 Ta   = -depthS/(np.asarray(strend))
 Ta0 = 0.0
 nstep = int(math.ceil((tstep - tstart) / deltat))-1
-#scal = -depthS*chi0/Ta[1]
 scal = chi0*strend[1]
 tmin = -0.5
 tmax = 5.5
@@ -127,7 +124,6 @@ ax1a.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1a.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 for i in range(3):
-    #ax1a.plot((t-t[nstep]-deltat)/deltat, cfs[i,:]/(sstep), linewidth=2.0, ls=lstyle[i], color='black', label=r'$\Delta\sigma/\dot{\sigma}_c\Delta t=$'+'{:d}'.format(int(fa[i])))
     ax1a.plot((t-t[nstep]-deltat)/Ta[1], cfs[i,:]/(sstep), linewidth=2.0, ls=lstyle[i], color='black', label=r'$T_a/T_{a1}=$'+'{:.2f}'.format(float(Ta[i]/Ta[1])))
 
 plt.legend(loc='lower right',fontsize=20)
@@ -137,7 +133,6 @@ if xrange_set:
 # ---- earthquake rate ------------------------------------
 ax1b = fig.add_subplot(212)
 ax1b.set_xlabel(r'$(t-t_s)/T_{a1}$', fontsize=20)
-#ax1b.set_ylabel(r'$r \cdot T_{a1} / \chi_0 V \delta \sigma$', fontsize=20)
 ax1b.set_ylabel(r'$r / \chi_0 V \dot{\sigma}_{c1}$', fontsize=20)
 ax1b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
@@ -183,9 +178,9 @@ for i in [0,2]:
     #ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue')
 
 i=1
+ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM ($T_a/T_{a1}=$'+'{:.0f})'.format(float(Ta[i]/Ta[1])))
 ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_lcm[i,:]-n_lcm[i,nstep], linewidth=1.5, ls=lstyle[i], color='black', label=r'LCM')
 ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_tdsm[i,:]-n_tdsm[i,nstep], linewidth=2.0, ls=lstyle[i], color='red', label=r'TDSM')
-ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM')
 
 plt.legend(loc='upper left',fontsize=20)
 plt.figtext(0.02, 0.87, 'a)', fontsize=20)
