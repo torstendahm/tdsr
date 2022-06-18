@@ -1,11 +1,9 @@
 ##### physical model parameters
-# susceptibility
-#chi0 = 10.0 
+# susceptibility to trigger events - this parameter representes chi= V in Dahm (2022)
 chi0 = 1.0E4
-# depth of stress shadow
-#depthS = -0.2
+# skin parameter to describe probability , unit e.g. MPa
 depthS = -0.5E0
-# loading function to be used
+# loading function to be used (default)
 use_loading = "step"
 # use_loading = "4points"
 # use_loading = "background"
@@ -13,6 +11,7 @@ use_loading = "step"
 ##### starting state
 # initial stress shadow , usually set to zero
 Sshadow = 0.0
+# if equilibrium is set to true, a pre-calculated distribution chiz_background is readed and used as starting value
 equilibrium = false
 
 ##### discretisation parameter
@@ -23,77 +22,65 @@ tstart = 0
 # end time in seconds (default 24 hours)
 tend = 86_400
 
-# sampling of coulomb stress axis
-#deltaS = 0.01
-#deltaS = -depthS/40.
+# sampling of Coulomb stress axis, e.g. deltaS = -depthS/40.
 deltaS = 0.0125
-# range to sample
-#sigma_max = 10.0
-#sigma_max = 2000.*deltaS
+# range to sample , e.g. sigma_max 2000.*deltaS
 sigma_max = 25.0
-# precision
-#precision = 12
+# precision for integration over stress axis, e.g. precision = 12
 precision = 18
 
 ##### stress loading models
 [loading]
-  # step function overlaying steady stressing rate
+  # ------- stress function defined by defining 4 stress points for increasing time steps
   [loading.4points]
-    # fist phase must be larger at least 2
+    # time index of first point (must be larger then 2)
     n1 = 50          
-    # second phase at least n1+1, better n1+2 as central differences taken
+    # time index of second point (at least n1+1, better n1+2 as central differences taken)
     n2 = 51          
-    # coulomb stress values
+    # coulomb stress at time index 0, n1, n2 and n_end
     sc0 = 0.0        
     sc1 = 0.5E0
     sc2 = 1.0E0
     sc3 = 2.0E0
-  # step function overlaying steady stressing rate
+  # ------- step function overlaying steady stressing rate
   [loading.step]
-    # strend (background stress rate (=DeltaS/deltat)
-    #strend = 0.00001
+    # strend is background stress rate, e.g. in stress_units / time_units (=DeltaS/deltat)
     strend = 7.0E-5
-    # time of step in seconds (tstart < tstep < tend)
-    # default: tend / 2
-    # tstep = 40_000  
+    # time of step in seconds defined when calling loading - default: tstep = tend / 2
     # coulomb stress step 
     sstep = 1.0E0
-  # cyclic sinusoidal ooading added to background stress rate
+  # ------- cyclic sinusoidal ooading added to background stress rate
   [loading.cycle]
-    # strend (background stress rate (=DeltaS/deltat)
+    # strend is background stress rate, e.g. in stress_units / time_units (=DeltaS/deltat)
     strend = 7.0E-5
     ampsin = 0.2E0
     Tsin   = 43_200
-  # background loading 
+  # ------- background loading 
   [loading.background]
-    # strend (background stress rate (=DeltaS/deltat)
-    #strend = 0.00001
+    # strend is background stress rate, e.g. in stress_units / time_units (=DeltaS/deltat)
     strend = 7.0E-5
-  # two stress slopes (change in stress rate)
+  # ------- two stress slopes (change in stress rate)
   [loading.trendchange]
-    # time of step in seconds (tstart < tstep < tend)
-    # default: tend / 2
-    # tstep = 40_000  
-    # strend and strend2 stress rate before and after tstep (=DeltaS/deltat)
+    # time of step in seconds defined when calling loading - default: tstep = tend / 2
+    # strend1 and strend2, background stress rate in stress_units / time_units
     strend  = 7.0E-5
     strend2 = 7.0E-4
-  # three stress slopes (change in stress rate)
+  # ------- three stress slopes (change in stress rate)
   [loading.ramp]
-    # time of start of ramp in seconds (tstart < tstep < tend)
-    # default: tend / 2
-    # tstep = 40_000  
+    # time of step in seconds defined when calling loading - default: tstep = tend / 2
+    # stress rates in egment 1, 2 and 3 to define ramp (in stress_units / time_units)
     strend  = 7.0E-5
     strend2 = 7.0E-4
     strend3 = 7.0E-5
-    # Anzahl der sample der ramp mit steigung strend2
+    # length of segment 2, i.e. ramp with slope strend2
     nsample2 = 20
-  # read Coulomb stress change as ascii file
+  # ------- read Coulomb stress change as ascii file
   [loading.infile]
-    # format iascii=0: ascii format,  else: pickle format
+    # format iascii=0: ascii format,  else: pickle format (not yet implemented)
     iascii = true
     # file name to read with time in t_units and stress in s_units
     infile  = "data/stresschange_morsleben.dat"
     scal_t  = 1.0
     scal_cf = 1.0
-    # first stress value, will be inserted at time tstart before the begin of the read in time series
+    # stress value at a time before first sample, as a section is introduced to allow to equilibrate system
     c_tstart = 0.0

@@ -1,10 +1,11 @@
 #--------------------------
-# Plot Fig. 3b and B1a (see manuscript on TDSM ,Dahm, 2022) 
+# Plot Fig. 3a (see manuscript on TDSR ,Dahm and Hainzl, 2022) 
 #--------------------------
 import sys
 sys.path.insert(0, "../")
 from pathlib import Path
-from tdsm import Config, TDSM, LCM, Traditional, RSM
+#from tdsm import Config, TDSM, LCM, CFM, Traditional, RSM , RSD
+from tdsm import Config, TDSM, TDSR, LCM, CFM, RSM , RSD
 from tdsm.plotting import plot
 from tdsm.loading import StepLoading, FourPointLoading, BackgroundLoading
 import matplotlib.pyplot as plt
@@ -13,14 +14,15 @@ import numpy as np
 
 current_dir = Path(__file__).parent.parent
 config_file = current_dir / "config.toml"
-pdf_file1 = current_dir / "../plots/Dahm_fig3b"
-pdf_file2 = current_dir / "../plots/Dahm_figB1a"
+pdf_file1 = current_dir / "../plots/fig3a"
 
 print("set-up the tdsm, lcm and rsm class environments")
 tdsm = TDSM(config=Config.open(config_file))
 lcm  = LCM(config=Config.open(config_file))
-trad = Traditional(config=Config.open(config_file))
+#trad = Traditional(config=Config.open(config_file))
+cfm  = CFM(config=Config.open(config_file))
 rsm  = RSM(config=Config.open(config_file))
+rsd  = RSD(config=Config.open(config_file))
 
 print("define model parameter for plotting, if different from config file")
 hours = 3600.
@@ -63,9 +65,11 @@ r_tdsm = np.zeros((3,nt))
 r_theo = np.zeros((3,nt))
 r_lcm  = np.zeros((3,nt))
 r_rsm  = np.zeros((3,nt))
+r_rsd  = np.zeros((3,nt))
 n_tdsm = np.zeros((3,nt-1))
 n_lcm  = np.zeros((3,nt-1))
 n_rsm  = np.zeros((3,nt-1))
+n_rsd  = np.zeros((3,nt-1))
 
 for i in range(3):
 
@@ -79,13 +83,10 @@ for i in range(3):
     cfs[i,:]    = cf[:]
     r_tdsm[i,:] = r[:]
     n_tdsm[i,:] = xn[:]
-    #print('t[nstep]=',t[nstep]/hours,' h, tstep=',tstep/hours, (nstep+0)*deltat/hours,nstep)
-
-    #loading = StepLoading(_config=lcm.config, strend=strend[1], sstep=sstep, tstep=tstep)
-    #config, t, chiz, cf, r, xn = lcm(loading=loading, equilibrium=True, chiz=chiz_background, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, deltat=deltat, tstart=0, tend=tend)
-
-    loading = StepLoading(_config=trad.config, strend=strend[i], sstep=sstep, tstep=tstep, deltat=deltat)
-    config, t, cf_shadow, cf, r, xn = trad(loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend)
+    #loading = StepLoading(_config=trad.config, strend=strend[i], sstep=sstep, tstep=tstep, deltat=deltat)
+    #config, t, cf_shadow, cf, r, xn = trad(loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend)
+    loading = StepLoading(_config=cfm.config, strend=strend[i], sstep=sstep, tstep=tstep, deltat=deltat)
+    config, t, cf_shadow, cf, r, xn = cfm(loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend)
     #plot(config, t, cf, r, xn)
     r_lcm[i,:] = r
     n_lcm[i,:] = xn
@@ -95,6 +96,12 @@ for i in range(3):
     #plot(config, t, cf, r, xn)
     r_rsm[i,:] = r
     n_rsm[i,:] = xn
+
+    loading = StepLoading(_config=rsd.config, strend=strend[i], sstep=sstep, tstep=tstep, deltat=deltat)
+    config, t, cf_shadow, cf, r, xn = rsd(loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend)
+    #plot(config, t, cf, r, xn)
+    r_rsd[i,:] = r
+    n_rsd[i,:] = xn
 
     # calculate theoretical Omori curves
     good = t >= (tstep-tstart)
@@ -154,14 +161,16 @@ ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 for i in [0,2]:
     ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray')
     ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=thicknum, ls=lstyle[i], color=colnum)
-    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue')
+    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=4.0, ls=lstyle[1], color='green')
+    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsd[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue')
     if plot_theo:
         ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=thicktheo, ls=lstyle[0], color=coltheo)
 
 i=1
 ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray', label=r'LCM')
 ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=thicknum, ls=lstyle[i], color=colnum, label=r'TDSM')
-ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM')
+ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=4.0, ls=lstyle[1], color='green', label=r'RSM')
+ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsd[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSD')
 if plot_theo:
     ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=thicktheo, ls=lstyle[0], color=coltheo)
 
@@ -175,36 +184,3 @@ ax1b.set_yscale('log')
 plt.show()
 fig.savefig(str(pdf_file1)+'.pdf', format='pdf',bbox_inches='tight')
 fig.savefig(str(pdf_file1)+'.png', format='png',bbox_inches='tight')
-
-#-----------------------------------------------------
-print("Plotting Fig. B1a")
-#-----------------------------------------------------
-#fig = plt.figure(1, figsize=(12, 4))
-fig = plt.figure(1, figsize=(12, 5.5))
-ax1c = fig.add_subplot(111)
-ax1c.set_xlabel(r'$(t-t_s)/T_{a1}$', fontsize=20)
-ax1c.set_ylabel(r'$n-n_0$', fontsize=20)
-ax1c.tick_params(axis = 'both', which = 'major', labelsize = 20)
-ax1c.tick_params(axis = 'both', which = 'minor', labelsize = 18)
-
-for i in [0,2]:
-    ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_tdsm[i,:]-n_tdsm[i,nstep], linewidth=thicknum, ls=lstyle[i], color=colnum)
-    #ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue')
-    ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_lcm[i,:]-n_lcm[i,nstep], linewidth=1.5, ls=lstyle[i], color='black')
-
-i=1
-ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM ($T_a/T_{a1}=$'+'{:.0f})'.format(float(Ta[i]/Ta[1])))
-ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_tdsm[i,:]-n_tdsm[i,nstep], linewidth=thicknum, ls=lstyle[i], color=colnum, label=r'TDSM')
-ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_lcm[i,:]-n_lcm[i,nstep], linewidth=1.5, ls=lstyle[i], color='black', label=r'LCM')
-
-plt.legend(loc='upper left',fontsize=20)
-plt.figtext(0.02, 0.87, 'a)', fontsize=20)
-if xrange_set:
-    plt.xlim([tmin, tmax])
-    plt.ylim([-10, 60])
-    plt.ylim([-10, 120])
-#ax1c.set_yscale('log')
-
-plt.show()
-fig.savefig(str(pdf_file2)+'.pdf', format='pdf', bbox_inches='tight')
-fig.savefig(str(pdf_file2)+'.png', format='png', bbox_inches='tight')

@@ -32,21 +32,13 @@ nt = np.floor( (tend-tstart) / deltat).astype(int)
 
 strend1  = 2.5E-6
 #strend2  = 3.0E-6
-#strend2  = 5.0E-6
-strend2  = 1.0E-5
+strend2  = 5.0E-6
 #strend2  = 2.5E-5
-
-#   -- test negative step
-#strend2  = 2.5E-6
-##strend1  = 3.0E-6
-##strend1  = 5.0E-6
-#strend1  = 1.0E-5
-
 strend3  = strend1
 nsample2 = 100
-#nsample2 = 150
-#nsample2 = 50
+#nsample2 = 220
 #nsample2 = 70
+#nsample2 = 40
 
 sstep  =  0.0
 tstep  = 80.0*hours         # time when stress step is acting
@@ -198,25 +190,12 @@ rinfty1 = strend1*chi0
 rinfty2 = strend2*chi0
 rinfty3 = strend3*chi0
 
-dS = -depthS
-t0 = deltat/10.
-#t0 = 0.0001*deltat
-f = 1.0
-fact = 1.
-fact1 = (1. - np.exp(-(t+Ta1)*np.exp(-(strend2*t0/dS))/t0) )
-fact2 = (1. - np.exp(-(t+Ta2)*np.exp(-(strend2*t0/dS))/t0) )
-fact1 = -np.exp(-(t+Ta1)/t0)
-fact2 = -np.exp(-(t+Ta2)/t0)
-fact2=1.
-fact1 = fact2
-#r_theo1 = -chi0*depthS*(fact2*Ta2-fact1*Ta1)/((t+f*Ta1)*(t+f*Ta2)) + rinfty2
-#r_theo2 = -chi0*depthS*(fact2*Ta1-fact1*Ta2)/((t+f*Ta1)*(t+f*Ta2)) + rinfty1
-# ---- final correct equation
-fact1 = np.exp(-t/Ta1)
-fact2 = np.exp(-t/Ta2)
-r_theo1 = rinfty2/( fact2*(Ta1-Ta2)/Ta2 +1)
-r_theo2 = rinfty1/( fact1*(Ta2-Ta1)/Ta1 +1)
-
+r_theo1 = -chi0*depthS*np.exp(-t/Ta1)/(deltat + t)
+r_theo1 = r_theo1 +rinfty1
+Ta = 0.5*(Ta2+Ta3)
+r_theo2[good] = -chi0*depthS*np.exp(-(t[good]-tstep)/Ta)/(Ta+(t[good]-tstep))
+rmax = np.amax(r_theo2[good])
+r_theo2[good] = (rinfty2-rinfty1)*(1.-r_theo2[good]/rmax)
 
 # ---------- ramp scenario very rough approximation - not general 
 r_theo1_ramp = -chi0*depthS*np.exp(-t/Ta1)/(deltat + t)
@@ -275,33 +254,29 @@ r_theo22[good] = (rinfty22-rinfty12)*(1.-r_theo22[good]/rmax)
 #-----------------------------------------------------
 print("Plotting Fig. 4d and 4e Appendix")
 #-----------------------------------------------------
+tmin = -0.5
+tmax = 1.5
+tmax = 2.5
 xrange_set = False
 xrange_set = True
-
 ymaxs = (strend1*tstep+strend2*(tstep3-tstep))/(Ta1*strend1) + 1.5
 lstyle = '-'
 
 if xrange_set:
     nstart = 0
-    if strend1 <= strend2:
-        tmin = -0.5
-        tmax = 2.5
-    else:
-        tmin = -0.5
-        tmax = 10.0
 else:
     nstart = 0
 
 # ---- Coulomb stress loading (input and interpolated input)
 fig = plt.figure(1, figsize=(12, 6))
 ax1a = fig.add_subplot(131)
-ax1a.set_ylabel('$\sigma_c/\dot{\sigma}_{c0} T_{0}$', fontsize=20)
-ax1a.set_xlabel(r'$(t-t_1)/T_{0}$', fontsize=20)
+ax1a.set_ylabel('$\sigma_c/\dot{\sigma}_{c1} T_{a1}$', fontsize=20)
+ax1a.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
 plt.figtext(0.09, 0.87, 'a)', fontsize=20)
 ax1a.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1a.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
-ax1a.plot((t[nstart:]-t[nstep])/Ta1, cfs1[nstart:]/(Ta1*strend1), linewidth=2.0, ls=lstyle, color='black', label=r'$\dot{\sigma}_{c1}/\dot{\sigma}_{c0}=$'+'{:.1f}'.format(float(strend2/strend1)))
+ax1a.plot((t[nstart:]-t[nstep])/Ta1, cfs1[nstart:]/(Ta1*strend1), linewidth=2.0, ls=lstyle, color='black', label=r'$\dot{\sigma}_{c2}/\dot{\sigma}_{c1}=$'+'{:.1f}'.format(float(strend2/strend1)))
 
 plt.legend(loc='upper left',fontsize=20)
 if xrange_set:
@@ -310,12 +285,12 @@ if xrange_set:
 
 # ----------------- zweites Beispiel stress loading
 ax12a = fig.add_subplot(132)
-ax12a.set_xlabel(r'$(t-t_1)/T_{0}$', fontsize=20)
+ax12a.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
 plt.figtext(0.365, 0.87, 'b)', fontsize=20)
 ax12a.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax12a.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
-ax12a.plot((t[nstart:]-t[nstep])/Ta1, cfs2[nstart:]/(Ta1*strend1), linewidth=2.0, ls=lstyle, color='black', label=r'$\dot{\sigma}_{c1}/\dot{\sigma}_{c0}=$'+'{:.1f}'.format(float(strend1/strend2)))
+ax12a.plot((t[nstart:]-t[nstep])/Ta1, cfs2[nstart:]/(Ta1*strend1), linewidth=2.0, ls=lstyle, color='black', label=r'$\dot{\sigma}_{c2}/\dot{\sigma}_{c1}=$'+'{:.1f}'.format(float(strend1/strend2)))
 
 plt.legend(loc='lower right',fontsize=20)
 if xrange_set:
@@ -324,7 +299,7 @@ if xrange_set:
 
 # ----------------- drittes Beispiel ramp function
 ax13a = fig.add_subplot(133)
-ax13a.set_xlabel(r'$(t-t_1)/T_{0}$', fontsize=20)
+ax13a.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
 plt.figtext(0.635, 0.87, 'c)', fontsize=20)
 ax13a.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax13a.tick_params(axis = 'both', which = 'minor', labelsize = 18)
@@ -340,108 +315,97 @@ plt.show()
 #----------------------------------------------------------
 # ---- earthquake rate ------------------------------------
 #----------------------------------------------------------
-if strend1 <= strend2:
-    ymin = 0.0*strend2/strend1
-    ymax = 1.2*strend2/strend1
-else:
-    ymin = 0.8*strend2/strend1
-    ymax = 1.1
+ymax = 1.2*strend2/strend1
 fig = plt.figure(2, figsize=(12, 6))
 ax1b = fig.add_subplot(131)
-ax1b.set_xlabel(r'$(t-t_1)/T_{0}$', fontsize=20)
-ax1b.set_ylabel(r'$r / \chi_0 V \dot{\sigma}_{c0}$', fontsize=20)
+ax1b.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
+ax1b.set_ylabel(r'$r / \chi_0 V \dot{\sigma}_{c1}$', fontsize=20)
 ax1b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
-# dotted gray line as reference at y=1
 ax1b.plot([(t[nstart]-t[nstep])/Ta1, (t[nt-1]-t[nstep])/Ta1], [1, 1], linewidth=1.0, ls='dotted', color='gray')
 
+ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm[nstart:]/rinfty1, linewidth=2.0, ls='-', color='red', label=r'TDSM')
+ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_rsm[nstart:]/rinfty1, linewidth=1.0, ls='--', color='blue', label=r'RSM')
 ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_lcm[nstart:]/rinfty1, linewidth=1.0, ls='--', color='gray', label=r'LCM')
-ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm[nstart:]/rinfty1, linewidth=3.5, ls='-', color='red', label=r'TDSM')
-#ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_rsm[nstart:]/rinfty1, linewidth=2.5, ls='--', color='blue', label=r'RSM')
-ax1b.plot((t[nstart:]-0.*t[nstep])/Ta1 , r_theo1[nstart:]/rinfty1, linewidth=2.0, ls='--', color='blue', label=r'theory')
 
 # -------------- first part of response in black ddotted line ---
-#ax1b.plot((t[nstart:nstart+nsample1+nsample2]-t[nstep])/Ta1 , r_tdsm[nstart:nstart+nsample1+nsample2]/rinfty1, linewidth=3.0, ls='dotted', color='black')
+ax1b.plot((t[nstart:nstart+nsample1+nsample2]-t[nstep])/Ta1 , r_tdsm[nstart:nstart+nsample1+nsample2]/rinfty1, linewidth=3.0, ls='dotted', color='black')
+yval = r_tdsm[nstart+nsample1+nsample2]
+
+#ax1b.plot((t[nstart:]-t[nstep])/Ta1 , (r_theo1[nstart:]+r_theo2[nstart:])/rinfty1, linewidth=2.5, ls='dotted', color='black')
+# ---- theo1_ramp2 only for testing , to be deleted ---
+#ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo1_ramp2[nstart:]/rinfty1, linewidth=1.5, ls='dashed', color='orange')
 
 plt.legend(loc='lower right',fontsize=20)
 plt.figtext(0.09, 0.87, 'a)', fontsize=20)
-plt.figtext(0.13, 0.82, r'$T_{0}/T_{1}=$'+'{:.1f}'.format(float(Ta1/Ta2)), fontsize=20)
+plt.figtext(0.13, 0.82, r'$T_{a1}/T_{a2}=$'+'{:.1f}'.format(float(Ta1/Ta2)), fontsize=20)
 if xrange_set:
     plt.xlim([tmin, tmax])
-    plt.ylim([ymin, ymax])
+    plt.ylim([0, ymax])
 else:
-    print(' nothing defined')
-    #ax1b.plot((t[nstart:]-0.*t[nstep])/Ta1 , r_theo1[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
-    #ax1b.plot((t[nstart:]-0.*t[nstep])/Ta1 , r_theo2[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
+    ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo1[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
+    ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo2[nstart:]/rinfty1, linewidth=1.5, ls='--', color='green')
 
 # ---- second case in right panel ------------------------------------
 ax12b = fig.add_subplot(132)
-ax12b.set_xlabel(r'$(t-t_1)/T_{0}$', fontsize=20)
+ax12b.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
 ax12b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax12b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 ax12b.plot([(t[nstart]-t[nstep])/Ta1, (t[nt-1]-t[nstep])/Ta12], [1, 1], linewidth=1.0, ls='dotted', color='gray')
 
-
+ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm2[nstart:]/rinfty1, linewidth=2.0, ls='-', color='red', label=r'TDSM')
+ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_rsm2[nstart:]/rinfty1, linewidth=1.0, ls='--', color='blue', label=r'RSM')
 ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_lcm2[nstart:]/rinfty1, linewidth=1.0, ls='--', color='gray', label=r'LCM')
-ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm2[nstart:]/rinfty1, linewidth=3.5, ls='-', color='red', label=r'TDSM')
-#ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_rsm2[nstart:]/rinfty1, linewidth=2.5, ls='--', color='blue', label=r'RSM')
-ax12b.plot((t[nstart:]-0.*t[nstep])/Ta1 , r_theo2[nstart:]/rinfty1, linewidth=2.0, ls='--', color='blue', label=r'theory')
 
 # -------------- second part of response in black dotted line ---
-#yval = r_tdsm[nstart+nsample1+nsample2]
-#n2nd = np.argmax(r_tdsm2[nsample1:] <= yval)
+n2nd = np.argmax(r_tdsm2[nsample1:] <= yval)
 #n2nd = np.min(np.where(r_tdsm2[nsample1:] <= yval))
-#ax12b.plot((t[nstart+nsample1+n2nd:]-t[nstep])/Ta1 , r_tdsm2[nstart+nsample1+n2nd:]/rinfty1, linewidth=4.0, ls='dotted', color='black')
+ax12b.plot((t[nstart+nsample1+n2nd:]-t[nstep])/Ta1 , r_tdsm2[nstart+nsample1+n2nd:]/rinfty1, linewidth=3.0, ls='dotted', color='black')
+#ax12b.plot((t[nstart+nsample1+nsample2:]-t[nstep])/Ta1 , r_tdsm2[nstart+nsample1+nsample2:]/rinfty1, linewidth=3.0, ls='dotted', color='black')
+
+#ax12b.plot((t[nstart:]-t[nstep])/Ta1 , (r_theo12[nstart:]+r_theo22[nstart:])/rinfty1, linewidth=2.5, ls='dotted', color='black')
+# ---- theo2_ramp2 only for testing , to be deleted ---
+#ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo2_ramp2[nstart:]/rinfty1, linewidth=1.5, ls='dashed', color='orange')
 
 plt.figtext(0.365, 0.87, 'b)', fontsize=20)
-plt.figtext(0.41, 0.82, r'$T_{0}/T_{1}=$'+'{:.1f}'.format(float(Ta12/Ta22)), fontsize=20)
+plt.figtext(0.41, 0.82, r'$T_{a1}/T_{a2}=$'+'{:.1f}'.format(float(Ta12/Ta22)), fontsize=20)
 if xrange_set:
     plt.xlim([tmin, tmax])
-    plt.ylim([ymin, ymax])
+    plt.ylim([0, ymax])
 else:
-    print('nothing defined')
-    #ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo12[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
-    #ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo22[nstart:]/rinfty1, linewidth=1.5, ls='--', color='green')
+    ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo12[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
+    ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo22[nstart:]/rinfty1, linewidth=1.5, ls='--', color='green')
 
 # ---- third case, ramp function  ------------------------------------
 ax13b = fig.add_subplot(133)
-ax13b.set_xlabel(r'$(t-t_1)/T_{0}$', fontsize=20)
+ax13b.set_xlabel(r'$(t-t_0)/T_{a1}$', fontsize=20)
 ax13b.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax13b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 ax13b.plot([(t[nstart]-t[nstep])/Ta1, (t[nt-1]-t[nstep])/Ta12], [1, 1], linewidth=1.0, ls='dotted', color='gray')
 
+ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm_ramp[nstart:]/rinfty1, linewidth=2.0, ls='-', color='red', label=r'TDSM')
+ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_rsm_ramp[nstart:]/rinfty1, linewidth=1.0, ls='--', color='blue', label=r'RSM')
 ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_lcm_ramp[nstart:]/rinfty1, linewidth=1.0, ls='--', color='gray', label=r'LCM')
-ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm_ramp[nstart:]/rinfty1, linewidth=3.5, ls='-', color='red', label=r'TDSM')
-#ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_rsm_ramp[nstart:]/rinfty1, linewidth=1.0, ls='--', color='blue', label=r'RSM')
 
 # -------------- constructing ramp response from two stress rate change solutions ---
-#ax13b.plot((t[nstart:nstart+nsample1+nsample2]-t[nstep])/Ta1 , r_tdsm[nstart:nstart+nsample1+nsample2]/rinfty1, linewidth=3.0, ls='dotted', color='black')
-#ax13b.plot((t[nstart+nsample1+n2nd:]-t[nstep-nsample2+n2nd])/Ta1 , r_tdsm2[nstart+nsample1+n2nd:]/rinfty1, linewidth=3.0, ls='dotted', color='black')
+ax13b.plot((t[nstart:nstart+nsample1+nsample2]-t[nstep])/Ta1 , r_tdsm[nstart:nstart+nsample1+nsample2]/rinfty1, linewidth=3.0, ls='dotted', color='black')
+ax13b.plot((t[nstart+nsample1+n2nd:]-t[nstep-nsample2+n2nd])/Ta1 , r_tdsm2[nstart+nsample1+n2nd:]/rinfty1, linewidth=3.0, ls='dotted', color='black')
+#ax13b.plot((t[nstart+nsample1+nsample2:]-t[nstep])/Ta1 , r_tdsm2[nstart+nsample1+nsample2:]/rinfty1, linewidth=3.0, ls='dotted', color='black')
 
-yval = r_theo1[nstart+nsample2]
-if strend1 <= strend2:
-    n2nd2 = np.argmax(r_theo2 <= yval)
-else:
-    n2nd2 = np.argmax(r_theo2 >= yval)
-ti = -Ta1*np.log(1.-np.exp(-t[nsample2]/Ta2))
-n2nd = np.floor(ti/deltat).astype(int) +1
-
-print('yval=',yval/rinfty1,' nsample2=',nsample2,' n2nd_num=',n2nd2,' nstep=',nstep)
-print('t(n2nd)==',t[n2nd],' ti=',ti,' n2nd=',n2nd)
-ax13b.plot((t[nstart:nstart+nsample2])/Ta1 , r_theo1[nstart:nstart+nsample2]/rinfty1, linewidth=2.0, ls='--', color='blue', label=r'theory')
-ax13b.plot((t[n2nd:]+t[nsample2]-t[n2nd])/Ta1 , r_theo2[n2nd:]/rinfty1, linewidth=2.0, ls='--', color='blue', label=r'theory')
+#ax13b.plot((t[nstart:]-t[nstep])/Ta1 , (r_theo1_ramp[nstart:]+r_theo2_ramp[nstart:]+r_theo3_ramp[nstart:])/rinfty1, linewidth=2.5, ls='dotted', color='black')
+# ---- ramp2 model ---
+#ax13b.plot((t[nstart:]-t[nstep])/Ta1 , (r_theo1_ramp2[nstart:]+r_theo2_ramp2[nstart:]+r_theo3_ramp2[nstart:])/rinfty1, linewidth=1.5, ls='dashed', color='orange')
 
 plt.figtext(0.635, 0.87, 'c)', fontsize=20)
 if xrange_set:
     plt.xlim([tmin, tmax])
-    plt.ylim([ymin, ymax])
+    plt.ylim([0, ymax])
 else:
-    print('nothing defined')
-    #ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo1_ramp[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
-    #ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo2_ramp[nstart:]/rinfty1, linewidth=1.5, ls='--', color='green')
+    ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo1_ramp[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
+    ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo2_ramp[nstart:]/rinfty1, linewidth=1.5, ls='--', color='green')
 
 plt.show()
 fig.savefig(str(pdf_file1)+'.pdf', format='pdf',bbox_inches='tight')

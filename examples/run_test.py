@@ -112,11 +112,6 @@ for i in range(3):
 #-----------------------------------------------------
 print("Plotting Fig. 3b")
 #-----------------------------------------------------
-coltheo = 'black'
-colnum  = 'orange'
-thicktheo = 1.5
-thicknum = 5.0
-
 Ta   = -depthS/(np.asarray(strend))
 Ta0 = 0.0
 nstep = int(math.ceil((tstep - tstart) / deltat))-1
@@ -153,17 +148,17 @@ ax1b.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 for i in [0,2]:
     ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray')
-    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=thicknum, ls=lstyle[i], color=colnum)
+    ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=2.5, ls=lstyle[i], color='red')
     ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue')
     if plot_theo:
-        ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=thicktheo, ls=lstyle[0], color=coltheo)
+        ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=2.5, ls=lstyle[0], color='green')
 
 i=1
 ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_lcm[i,:]/scal, linewidth=1.5, ls=lstyle[i], color='lightgray', label=r'LCM')
-ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=thicknum, ls=lstyle[i], color=colnum, label=r'TDSM')
+ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_tdsm[i,:]/scal, linewidth=2.5, ls=lstyle[i], color='red', label=r'TDSM')
 ax1b.plot((t-t[nstep]-deltat)/Ta[1] , r_rsm[i,:]/scal, linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM')
 if plot_theo:
-    ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=thicktheo, ls=lstyle[0], color=coltheo)
+    ax1b.plot((t-t[nstep])/Ta[1] , r_theo[i,:]/scal, linewidth=2.5, ls=lstyle[0], color='green')
 
 plt.legend(loc='upper right',fontsize=20)
 plt.figtext(0.06, 0.87, 'b)', fontsize=20)
@@ -188,14 +183,14 @@ ax1c.tick_params(axis = 'both', which = 'major', labelsize = 20)
 ax1c.tick_params(axis = 'both', which = 'minor', labelsize = 18)
 
 for i in [0,2]:
-    ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_tdsm[i,:]-n_tdsm[i,nstep], linewidth=thicknum, ls=lstyle[i], color=colnum)
-    #ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue')
     ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_lcm[i,:]-n_lcm[i,nstep], linewidth=1.5, ls=lstyle[i], color='black')
+    ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_tdsm[i,:]-n_tdsm[i,nstep], linewidth=2.0, ls=lstyle[i], color='red')
+    #ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue')
 
 i=1
 ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_rsm[i,:]-n_rsm[i,nstep], linewidth=1.0, ls=lstyle[1], color='blue', label=r'RSM ($T_a/T_{a1}=$'+'{:.0f})'.format(float(Ta[i]/Ta[1])))
-ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_tdsm[i,:]-n_tdsm[i,nstep], linewidth=thicknum, ls=lstyle[i], color=colnum, label=r'TDSM')
 ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_lcm[i,:]-n_lcm[i,nstep], linewidth=1.5, ls=lstyle[i], color='black', label=r'LCM')
+ax1c.plot((t[0:-1]-t[nstep])/Ta[1] , n_tdsm[i,:]-n_tdsm[i,nstep], linewidth=2.0, ls=lstyle[i], color='red', label=r'TDSM')
 
 plt.legend(loc='upper left',fontsize=20)
 plt.figtext(0.02, 0.87, 'a)', fontsize=20)
