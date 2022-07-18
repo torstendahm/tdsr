@@ -57,7 +57,7 @@ Model parameter defined on two levels:
 Development
 -----------
 
-If you want to contribute to `tdsm`, we highly recommend setting up a virtual environment for local development. You can easily do so with `pipenv`, which can be installed with `pip install --user pipenv` (`instructions <https://pipenv.pypa.io/en/latest/install/>`_) by following the steps below. Note that all commands should be run in the top level directory of the cloned `tdsm` repository.
+If you want to contribute to ``tdsm``, we highly recommend setting up a virtual environment for local development. You can easily do so with ``pipenv``, which can be installed with ``pip install --user pipenv`` (`instructions <https://pipenv.pypa.io/en/latest/install/>`_) by following the steps below. Note that all commands should be run in the top level directory of the cloned ``tdsm`` repository.
 
 .. code-block:: bash
 
@@ -65,6 +65,6 @@ If you want to contribute to `tdsm`, we highly recommend setting up a virtual en
     $ cd tdsm
     $ pipenv install --dev
 
-With the virtual environment set up, activate it with `pipenv shell`. To exit the virtual environment, run `exit`.
+With the virtual environment set up, activate it with ``pipenv shell``. To exit the virtual environment, run ``exit``.
 
 invoke, linting, formatting, code checks t.b.a
