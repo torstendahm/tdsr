@@ -1,23 +1,19 @@
 
 ===============================
-proto-compile
+tdsm
 ===============================
 
-.. image:: https://github.com/romnn/proto-compile/workflows/test/badge.svg
-        :target: https://github.com/romnn/proto-compile/actions
+.. image:: https://github.com/torstendahm/tdsm/workflows/test/badge.svg
+        :target: https://github.com/torstendahm/tdsm/actions
         :alt: Build Status
 
-.. image:: https://img.shields.io/pypi/v/proto-compile.svg
-        :target: https://pypi.python.org/pypi/proto-compile
+.. image:: https://img.shields.io/pypi/v/tdsm.svg
+        :target: https://pypi.python.org/pypi/tdsm
         :alt: PyPI version
 
-.. image:: https://img.shields.io/github/license/romnn/proto-compile
-        :target: https://github.com/romnn/proto-compile
+.. image:: https://img.shields.io/github/license/torstendahm/tdsm
+        :target: https://github.com/torstendahm/tdsm
         :alt: License
-
-.. image:: https://codecov.io/gh/romnn/proto-compile/branch/master/graph/badge.svg
-        :target: https://codecov.io/gh/romnn/proto-compile
-        :alt: Test Coverage
 
 """"""""
 
@@ -25,14 +21,16 @@ Your short description here.
 
 .. code-block:: console
 
-    $ pip install proto-compile
+    $ pip install tdsm
 
 Usage
 -----
 
+Usage instructions t.b.a.
+
 .. code-block:: python
 
-    import proto_compile
+    import tdsm
 
 
 Files:
@@ -59,4 +57,14 @@ Model parameter defined on two levels:
 Development
 -----------
 
-For detailed instructions see the invoke pre-commit
+If you want to contribute to `tdsm`, we highly recommend setting up a virtual environment for local development. You can easily do so with `pipenv`, which can be installed with `pip install --user pipenv` (`instructions <https://pipenv.pypa.io/en/latest/install/>`_) by following the steps below. Note that all commands should be run in the top level directory of the cloned `tdsm` repository.
+
+.. code-block:: bash
+
+    $ git clone https://github.com/torstendahm/tdsm.git
+    $ cd tdsm
+    $ pipenv install --dev
+
+With the virtual environment set up, activate it with `pipenv shell`. To exit the virtual environment, run `exit`.
+
+invoke, linting, formatting, code checks t.b.a
