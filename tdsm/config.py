@@ -13,10 +13,16 @@ class Config(object):
         chi0: Number = 10000.0,
         depthS: Number = -0.5,
         Sshadow: Number = 0.0,
+        t0: Number = 0.2 * HOURS,
         deltat: Number = 0.2 * HOURS,
         tstart: Number = 0 * HOURS,
         tend: Number = 30 * HOURS,
+        taxis_log: int = 0,
+        ntlog: int = 1000,
         deltaS: Number = 0.0125,
+        iX0switch: int = 0,
+        Zmean: float = 0.0,
+        Zstd: float = 1.0,
         equilibrium: bool = False,
         sigma_max: int = 25,
         precision: int = 18,
@@ -25,13 +31,19 @@ class Config(object):
         self.chi0 = float(chi0)
         self.depthS = float(depthS)
         self.Sshadow = float(Sshadow)
+        self.Zmean = float(Zmean)
+        self.Zstd = float(Zstd)
         self.Equilibrium = bool(equilibrium)
+        self.t0 = float(t0)
         self.deltat = float(deltat)
         self.tstart = float(tstart)
         self.tend = float(tend)
+        self.taxis_log = int(taxis_log)
+        self.ntlog = int(ntlog)
         self.deltaS = float(deltaS)
-        self.sigma_max = sigma_max
-        self.precision = precision
+        self.sigma_max = float(sigma_max)
+        self.precision = int(precision)
+        self.iX0switch = int(iX0switch) 
         self.loading = loading
         if loading is None:
             self.loading = StepLoading(_config=self)
@@ -40,6 +52,8 @@ class Config(object):
         config = {k: v for k, v in config.items() if v is not None}
         if "chi0" in config:
             self.chi0 = config["chi0"]
+        if "t0" in config:
+            self.t0 = config["t0"]
         if "depthS" in config:
             self.depthS = config["depthS"]
         if "Sshadow" in config:
@@ -52,10 +66,20 @@ class Config(object):
             self.tstart = config["tstart"]
         if "tend" in config:
             self.tend = config["tend"]
+        if "taxis_log" in config:
+            self.taxis_log = config["taxis_log"]
+        if "ntlog" in config:
+            self.ntlog = config["ntlog"]
         if "deltaS" in config:
             self.deltaS = config["deltaS"]
         if "sigma_max" in config:
             self.sigma_max = config["sigma_max"]
+        if "iX0switch" in config:
+            self.iX0switch = config["iX0switch"] 
+        if "Zmean" in config:
+            self.Zmean = config["Zmean"] 
+        if "Zstd" in config:
+            self.Zstd = config["Zstd"] 
         if "precision" in config:
             self.precision = config["precision"]
 

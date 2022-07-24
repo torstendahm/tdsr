@@ -35,21 +35,43 @@ def gridrange(
     amax: Number,
     astep: Number,
     rounding: Callable[[float], float] = np.ceil,
-) -> Tuple[float, float, int, npt.NDArray[np.float64]]:
+) -> Tuple[float, float, int, npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     amin = float(amin)
     amax = float(amax)
     astep = float(astep)
     na = int(rounding((amax - amin) / astep))
     amax = amin + (na - 1) * astep
     a = np.linspace(amin, amax, na)
-    return amin, amax, na, a
+    da = np.ediff1d(a, to_end=a[-1]-a[-2])
+    return amin, amax, na, a, da
+
+def gridrange_log(
+    amin: Number,
+    amax: Number,
+    na: Number,
+    rounding: Callable[[float], int] = np.ceil,
+) -> Tuple[float, float, int, npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    amin = float(amin)
+    amax = float(amax)
+    na = int(na)
+    if amin <=0:
+        print('tstart <= 0 , not possible for taxis_log==1 (logarithmic scale)')
+        exit()
+    a = np.logspace(np.log10(amin), np.log10(amax), na)
+    da = np.append(a[0], a[1:]-a[:-1])
+    return amin, amax, na, a, da
 
 def Zvalues(S, Sstep, t0, dsig):
-    NZ = 1000
+    #NZ = 1000
+    #NZ = 10000
+    #NZ = 50000
+    NZ = 100000
     dS = np.ediff1d(S, to_end=S[-1]-S[-2])
     Smax = np.maximum(0, Sstep + np.max(np.cumsum(dS)))
     Z1 = -Smax - 10 * dsig
     Z2 = Smax + 10 * dsig
+    #Z1 = -Smax - 20 * dsig
+    #Z2 = Smax + 20 * dsig
     Z = np.linspace(Z1, Z2, NZ)
     return Z
 
@@ -61,6 +83,23 @@ def shifted(x: npt.NDArray[np.float64], nshift: int) -> npt.NDArray[np.float64]:
     elif nshift < 0:
         x[nshift:] = 0.0
     return x
+
+def tf(Z, t0, dsig):
+    arg = Z/dsig
+    #good = arg <= 30
+    #x = np.exp(30)
+    #failuretime = t0*x*np.ones(len(Z))
+    #failuretime[good]  = t0 * np.exp(arg[good])
+    #print('failtime=',failuretime)
+    failuretime  = t0 * np.exp(arg, where=arg > 30)
+    return failuretime
+
+def pf(Z, t0, dsig):
+    argmax = 0  # if the argument in exp() becomes > argmax,
+    arg = -Z/dsig
+    n = len(arg)
+    ptrigger = np.exp(arg, out=t0*np.ones(n), where= (arg < argmax) ) / t0
+    return ptrigger
 
 ##### INITIAL CONDITIONS #####################
 
@@ -80,7 +119,7 @@ def X0uniform(Z, Zmin, X0):
     X = X0 * np.heaviside(Z-Zmin, 1)
     return X
 
-def X0gaussian(Z, Zmean, Zstd, X0):
+def X0gaussian(Z, Z0mean, Z0std, X0):
     '''
     Normal initial stress disribution with mean Zmean and standard deviation Zstd
     '''

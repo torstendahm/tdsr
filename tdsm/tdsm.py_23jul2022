@@ -108,7 +108,7 @@ class LCM(object):
         return self._compute(config)
 
     def _prepare(self, config: Config) -> None:
-        (self.smin, self.smax, self.nsigma, self.sigma, self.dZ) = gridrange(
+        (self.smin, self.smax, self.nsigma, self.sigma) = gridrange(
             -config.sigma_max, +config.sigma_max, config.deltaS
         )
         if config.taxis_log == 1:
@@ -117,15 +117,12 @@ class LCM(object):
             #self.tmax = config.tend
             #self.nt   = config.ntlog
             (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange_log(
-                config.tstart, config.tend, config.ntlog)
+                config.tstart, config.tend, config.nt)
         else:
-            (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange(
+            (self.tmin, self.tmax, self.nt, self.t) = gridrange(
                 config.tstart, config.tend, config.deltat)
-
         self.chiz = np.zeros(self.nsigma)
-        #  self.pz wird ueberschrieben, wenn TDSM benutzt wird
         self.pz = np.heaviside(self.sigma, 1)
-
         loading = config.loading
         if loading is None:
             raise ValueError("missing loading function")
@@ -146,26 +143,20 @@ class LCM(object):
         ratez[0] = 0.0
         resid = 0.0
         for i in range(1, self.nt):
-            # optional to be changed: config.deltaS may be replaced by self.dZ[i] if sigma axis not discretized with equal sampling (see gridrange output)
             deltacf = self.cf[i] - (self.cf[i - 1] - resid)
             nshift = np.around(deltacf / config.deltaS, 0).astype(int)
             resid = deltacf - nshift * config.deltaS
             # shift chiz (memory effect)
             self.chiz = shifted(self.chiz, nshift)
-
-            #ratez[i] = np.trapz(self.chiz * self.pz) * config.deltaS
-            ratez[i] = np.trapz(config.chi0*self.chiz*self.pz *config.deltaS ) / self.dt[i]
+            ratez[i] = np.trapz(self.chiz * self.pz) * config.deltaS  # type: ignore
             # cut off chiz
             self.chiz = self.chiz * (1.0 - self.pz)
 
-        #ratez = ratez * config.chi0 / config.deltat
-        #ratez = ratez
+        ratez = ratez * config.chi0 / config.deltat
         neqz = np.zeros(self.nt - 1)
         # neqz[0] = 0.0
-        # replace loop by numpy.cumsum to directly calculate  the cumulative sum 
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-            #neqz[i] = np.trapz(ratez[0 : i + 1] , self.t[0:i+1])  # 24 july 2022: beruecksichtigt, dass zeitreihe nicht gelichabstaendig sein kann
         return config, self.t, self.chiz, self.cf, ratez, neqz
 
 
@@ -234,7 +225,6 @@ class TDSR1(object):
                 tstart=tstart,
                 tend=tend,
                 taxis_log=taxis_log,
-                ntlog=ntlog,
                 deltaS=deltaS,
                 sigma_max=sigma_max,
                 precision=precision,
@@ -254,19 +244,16 @@ class TDSR1(object):
         return self._compute(config)
 
     def _prepare(self, config: Config) -> None:
-        (self.smin, self.smax, self.nsigma, self.sigma, self.dZ) = gridrange(
+        (self.smin, self.smax, self.nsigma, self.sigma) = gridrange(
             -config.sigma_max, +config.sigma_max, config.deltaS
         )
-        print('taxis_log=',config.taxis_log,' ntlog=', config.ntlog)
         if config.taxis_log == 1:
-            #self.t = np.logspace(config.tstart, config.tend, config.ntlog)
-            #self.tmin = config.tstart
-            #self.tmax = config.tend
-            #self.nt   = config.ntlog
-            (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange_log(
-                config.tstart, config.tend, config.ntlog)
+            self.t = np.logspace(config.tstart, config.tend, config.ntlog)
+            self.tmin = config.tstart
+            self.tmax = config.tend
+            self.nt   = config.ntlog
         else:
-            (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange(
+            (self.tmin, self.tmax, self.nt, self.t) = gridrange(
                 config.tstart, config.tend, config.deltat
         )
         #self.chiz = np.zeros(self.nsigma)

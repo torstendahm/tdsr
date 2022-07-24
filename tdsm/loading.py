@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from tdsm.config import Config
     from tdsm.tdsm import Result
 
-from tdsm.utils import DEBUG, Number, gridrange
+from tdsm.utils import DEBUG, Number, gridrange, gridrange_log
 
 
 class Loading(ABC):
@@ -81,6 +81,8 @@ class StepLoading(Loading):
         sstep: Number = 1.0,
         tstart: Number = 0.,
         tend: Number = 86400.,
+        taxis_log: Number = 0,
+        ntlog: Number = 1000,
         deltat: Number = 720. 
     ):
         self.config = _config
@@ -89,6 +91,8 @@ class StepLoading(Loading):
         self.sstep = sstep
         self.tstart = tstart
         self.tend   = tend
+        self.taxis_log   = taxis_log
+        self.ntlog   = ntlog
         self.deltat = deltat
 
     @property
@@ -202,24 +206,40 @@ class BackgroundLoading(Loading):
         strend: Number = 7.0E-5,
         tstart: Number = 0.,
         tend: Number = 86400.,
-        deltat: Number = 720. 
+        deltat: Number = 720., 
+        taxis_log: Number = 0,
+        ntlog: Number = 1000
     ):
         self.config = _config
         self.strend = strend
         self.tstart = tstart
         self.tend   = tend
         self.deltat = deltat
+        self.taxis_log = taxis_log
+        self.ntlog = ntlog
 
     @property
     def stress_rate(self) -> float:
-        return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+        #return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
+        return (self.sc3 - self.sc0) / (self.tend - self.tstart)
 
     def values(self, length: int) -> npt.NDArray[np.float64]:
         sc0 = 0.0
-        sc3 = (self.tend - self.tstart) * self.strend
+        #sc3 = (self.tend - self.tstart) * self.strend
+        sc3 = self.tend*self.strend
+        if self.taxis_log == 1:
+            nt = self.ntlog
+            tvalues = np.logspace(np.log10(self.tstart), np.log10(self.tend), nt)
+            cf = sc0 +tvalues*self.strend
+        else:
+            nt = length
+            cf = np.linspace(sc0, sc3, num=nt)
+
         print('in background: tstart, tend, dottau=', self.tstart, self.tend, self.strend)
-        print('nt=', length)
-        nt = length
+        print('taxis_log=', self.taxis_log)
+        print('ntlog=', self.ntlog)
+        print('nt=', length, nt,' len(cf)=',len(cf))
+        print('cf=', cf)
         from pprint import pprint
 
         if DEBUG:
@@ -230,11 +250,7 @@ class BackgroundLoading(Loading):
                     nt=nt,
                 )
             )
-        return np.hstack(
-            [
-                np.linspace(sc0, sc3, num=nt),
-            ]
-        )
+        return np.hstack( [ cf, ])
 
 class TrendchangeLoading(Loading):
     __name__: str = "Trendchange"
@@ -385,6 +401,7 @@ class ExternalFileLoading(Loading):
         _config: "Config",
         tstart: Number = 0.,
         tend: Number = 86400.,
+        taxis_log: int = 0,
         deltat: Number = 720., 
         scal_t: Number = 3600*24,
         scal_cf: Number = 1.E-6,
@@ -397,6 +414,7 @@ class ExternalFileLoading(Loading):
         self.infile = infile
         self.tstart = tstart
         self.tend   = tend
+        self.taxis_log = taxis_log
         self.deltat = deltat
         self.c_tstart = c_tstart
         self.scal_cf = scal_cf
@@ -408,6 +426,9 @@ class ExternalFileLoading(Loading):
 
     def values(self, length: int) -> npt.NDArray[np.float64]:
 
+        if self.taxis_log != 0:
+            print(' logarithmic time samples not possible when reading in stress loading function. Set taxis_log = 0')
+            exit()
         if self.iascii:
             if not os.path.isfile(self.infile):
                 raise ValueError("input file does not exist")
@@ -425,13 +446,10 @@ class ExternalFileLoading(Loading):
         # insert one value before start sample of stress change read in
         if self.tstart >= tmin_obs:
             raise ValueError("tstart must be smaller than the begin time of series read in")
-        tmin, tmax, nt, t = gridrange(self.tstart, self.tend, self.deltat)
-        #cf    = np.zeros(nt)
+        tmin, tmax, nt, t, dt  = gridrange(self.tstart, self.tend, self.deltat)
 
         t_temp = np.insert(t_obs,0,self.tstart,axis=None)
         c_temp = np.insert(cf_obs,0,self.c_tstart,axis=None)
-        #f = interpolate.interp1d(t_temp,c_temp, kind='linear')
-        #cf = f(t)
         cf = np.interp(t[0:-1], t_temp, c_temp)
         print('tstart, tend, deltat=',self.tstart,self.tend,self.deltat)
         print('t =',len(t))
