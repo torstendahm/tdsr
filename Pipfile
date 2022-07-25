@@ -6,7 +6,7 @@ name = "pypi"
 [dev-packages]
 # Formatting
 flake8 = "*"
-black = "==21.12b0"
+black = "*"
 isort = "*"
 # Testing
 tox = "*"
@@ -17,13 +17,10 @@ pytest-sugar = "*"
 pytest-subtests = "*"
 pyfakefs = "*"
 mypy = "*"
-# Coverage
-coverage = "*"
 # Tools
 pre-commit = "*"
 twine = "*"
 invoke = "*"
-m2r = "*"
 bump2version = "*"
 types-setuptools = "*"
 # Exploration
@@ -34,6 +31,6 @@ sphinx = "*"
 types-toml = "*"
 
 [packages]
-numpy = "*"
+numpy = ">=1.21"
 click = "*"
 toml = "*"
