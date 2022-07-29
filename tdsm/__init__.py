@@ -7,7 +7,7 @@ __email__ = "torsten.dahm@gfz-potsdam.de"
 __version__ = "0.0.1"
 
 from tdsm.config import Config
-from tdsm.tdsm import LCM, TDSM, TDSR1, Result, Traditional, CFM, RSM, RSD
+from tdsm.tdsm import LCM, TDSM, TDSR1, Result, Traditional, CFM, RSM, RSD, RSD1
 from tdsm.utils import load, save
 
 __all__ = [
@@ -21,5 +21,6 @@ __all__ = [
     "Traditional",
     "CFM",
     "RSD",
+    "RSD1",
     "RSM",
 ]

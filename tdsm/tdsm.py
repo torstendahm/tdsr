@@ -282,12 +282,20 @@ class TDSR1(object):
         dsig = -config.depthS
         t0 = config.t0
         X0 = config.chi0
-        Zmin = config.Sshadow
-        dt = np.ediff1d(self.t, to_end=self.t[-1]-self.t[-2])
-        #Z = functions.Zvalues(self.cf, 0, t0, dsig)
-        Z = Zvalues(self.cf,0, 0.0, dsig)    # t0 kann hier eigentlich raus da nicht benutzt
+        if config.taxis_log == 1:   # nicht gut geloest, macht nur Sinn wenn Background mit step verwendet wird (tstep=0) 
+            #Zmin = config.Sshadow  # nicht gut geloest, sstep bei tstep=0 sollte mit sstep definiert werden - noch zu aendern
+            Zmin = config.loading.sstep
+        else:
+            Zmin = 0.0
+        print('Zmin ',Zmin,' config.loading.strend=',config.loading.strend,' chi0=',config.chi0,' t0=',t0,' X0=',X0,' dsig=',dsig)
+        #dt = np.ediff1d(self.t, to_end=self.t[-1]-self.t[-2])  # wird bereits in  gridrange berechnet
+        #Z = functions.Zvalues(self.cf, 0, t0, dsig) # t0 kann  raus, da nicht benutzt
+        #Z = Zvalues(self.cf, 0.0, 0.0, dsig)
+        Z = Zvalues(self.cf, Zmin, 0.0, dsig)
         #Z = 0.04*Z  # falls es mit dem zu grossen Range und der groben Diskretisierung der zeta Achse zu Problemen kommt
         dZ = np.ediff1d(Z, to_end=Z[-1]-Z[-2])
+        #print('smin=',np.amin(self.cf),' smax=',np.amax(self.cf),' ns=',len(self.cf))
+        #print('zmin=',np.amin(Z),' zmax=',np.amax(Z),' nz=',len(Z))
         #print('zvalues ',Z)
         dS = np.ediff1d(self.cf, to_end=self.cf[-1]-self.cf[-2])
 
@@ -298,24 +306,30 @@ class TDSR1(object):
         elif config.iX0switch == 2:
             # ----- Gaussian  distribution before loading starts
             print('Gaussian distribution with Zmean=',config.Zmean,' Zstd=',config.Zstd)
-            X = X0gaussian(Z, config.Zmean, config.Zstd, config.chi0)
+            X = X0gaussian(Z+Zmin, config.Zmean, config.Zstd, config.chi0)
         else:
             # ----- default is steady state distribution before loading starts
             r0 = config.chi0*config.loading.strend
-            X = X0steady(Z, r0, config.t0, -config.depthS, config.loading.strend)
+            #X = X0steady(Z+Zmin, r0, config.t0, -config.depthS, config.loading.strend)
+            X = X0steady(Z+Zmin, r0, config.t0, -config.depthS, config.loading.strend)
 
         self.chiz = X
-        for i in range(1, self.nt):
-            #dX = self.chiz/ tf(Z, t0, config.deltaS) * dt[i]
-            #dX = X / tf(Z, t0, -config.depthS) * dt[i]
-            #dX = X / tf(Z, config.t0, -config.depthS) * dt[i]
-            dX = X * pf(Z, config.t0, -config.depthS) * dt[i]
+        #print('xmin=',np.amin(X),' xmax=',np.amax(X),' nx=',len(X))
+        print('i=0 1/pf=',1./pf(Z, config.t0, -config.depthS)[0:3],' ... ',1./pf(Z, config.t0, -config.depthS)[-3:-1])
+        #for i in range(1, self.nt):
+        for i in range(self.nt):
+            #dX = self.chiz/ tf(Z, t0, config.deltaS) * self.dt[i]
+            #dX = X / tf(Z, t0, -config.depthS) * self.dt[i]
+            #dX = X / tf(Z, config.t0, -config.depthS) * self.dt[i]
+            dX = X * pf(Z, config.t0, -config.depthS) * self.dt[i]
             dX[(dX>X)] = X[(dX>X)]              # wenn diese Zeile entfaellt, dann muss nicht mit dt multipliziert werden
-            ratez[i] = np.sum(dX * dZ) / dt[i]  # oben wird dX mit dt multipliziert, hier dividiert.
-            #ratez[i] = np.trapz(dX * dZ) / dt[i]  # oben wird dX mit dt multipliziert, hier dividiert.
+            ratez[i] = np.sum(dX * dZ) / self.dt[i]  # oben wird dX mit dt multipliziert, hier dividiert.
+            #ratez[i] = np.trapz(dX * dZ) / self.dt[i]  # oben wird dX mit dt multipliziert, hier dividiert.
             Z -= dS[i]
             X -= dX
 
+        print('i=nt-1 1/pf=',1./pf(Z, config.t0, -config.depthS)[0:3],' ... ',1./pf(Z, config.t0, -config.depthS)[-3:-1])
+        print('rmin=',np.amin(ratez),' rmax=',np.amax(ratez),' nx=',len(ratez))
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
@@ -330,7 +344,7 @@ class Traditional(LCM):
     def _compute(self, config: Config) -> Result:
         ratez = np.zeros(self.nt)
         cf_shad = np.zeros(self.nt)
-        S0 = -config.Sshadow
+        S0 = +config.Sshadow
         cf_shad[0] = self.cf[0] - config.Sshadow
         for i in range(1, self.nt - 1):
             if self.cf[i] >= self.cf[i - 1] and self.cf[i] >= S0:
@@ -354,7 +368,7 @@ class CFM(LCM):
     def _compute(self, config: Config) -> Result:
         ratez = np.zeros(self.nt)
         cf_shad = np.zeros(self.nt)
-        S0 = -config.Sshadow
+        S0 = +config.Sshadow
         cf_shad[0] = self.cf[0] - config.Sshadow
         for i in range(1, self.nt - 1):
             if self.cf[i] >= self.cf[i - 1] and self.cf[i] >= S0:
@@ -410,8 +424,6 @@ class RSD(LCM):
 
     def _compute(self, config: Config) -> Result:
         cf_shad = np.zeros(self.nt)
-        S0 = -config.Sshadow
-        cf_shad[0] = self.cf[0] - config.Sshadow
         ratez = np.zeros(self.nt)  # nt = len(S)
         gamma = 1.0
         ratez[0] = 1.0
@@ -433,6 +445,38 @@ class RSD(LCM):
             ratez[i] = 1.0 / gamma
             cf_shad[i] = S0
         ratez = rinfty*ratez
+        neqz = np.zeros(self.nt - 1)
+        for i in range(1, self.nt - 2):
+            neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
+        return config, self.t, cf_shad, self.cf, ratez, neqz
+
+class RSD1(LCM):
+    """
+    Seismicity response of RS for a continuous stress evolution S(t) for times t
+    according to Heimisson & Segall, JGR 2018, Eq.(20) & Eq.(29) & Eq.(34)
+    """
+
+    def _compute(self, config: Config) -> Result:
+        cf_shad = np.zeros(self.nt)
+        S0 = +config.Sshadow
+        cf_shad[0] = self.cf[0] - config.Sshadow
+        t1 = np.min(self.t[(self.cf>config.Sshadow)])
+        if t1 > self.t[0]:
+            i0 = np.argmax(self.t[(self.t<t1)])
+            tb = np.interp(config.Sshadow, self.cf[i0:i0+2], self.t[i0:i0+2])
+        else:
+            tb = self.t[0]
+        ti = self.t[(self.t>=tb)] - tb
+        Si = self.cf[(self.t>=tb)] - config.Sshadow
+        dt = np.ediff1d(ti, to_end=ti[-1]-ti[-2])
+        Asig = -config.depthS
+        ta =  Asig / config.loading.strend
+        r0 = config.chi0*config.loading.strend
+        K = np.exp(Si/Asig)
+        integK = np.cumsum(K * dt)
+        ratez = np.zeros(len(self.t))
+        ratez[(self.t>=tb)] = r0 * K / (1.0 + integK / ta)
+
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore

@@ -57,7 +57,7 @@ class Config(object):
         if "depthS" in config:
             self.depthS = config["depthS"]
         if "Sshadow" in config:
-            self.depthS = config["Sshadow"]
+            self.Sshadow = config["Sshadow"]
         if "equilibrium" in config:
             self.equilibrium = config["equilibrium"]
         if "deltat" in config:

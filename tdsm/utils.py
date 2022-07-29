@@ -58,18 +58,19 @@ def gridrange_log(
         print('tstart <= 0 , not possible for taxis_log==1 (logarithmic scale)')
         exit()
     a = np.logspace(np.log10(amin), np.log10(amax), na)
-    da = np.append(a[0], a[1:]-a[:-1])
+    da = np.ediff1d(a, to_end=a[-1]-a[-2])
+    #da = np.append(a[0], a[1:]-a[:-1])
     return amin, amax, na, a, da
 
 def Zvalues(S, Sstep, t0, dsig):
     #NZ = 1000
-    #NZ = 10000
+    NZ = 10000
     #NZ = 50000
-    NZ = 100000
+    #NZ = 100000
     dS = np.ediff1d(S, to_end=S[-1]-S[-2])
     Smax = np.maximum(0, Sstep + np.max(np.cumsum(dS)))
-    Z1 = -Smax - 10 * dsig
-    Z2 = Smax + 10 * dsig
+    Z1 = -Smax - 20 * dsig
+    Z2 = Smax + 20 * dsig
     #Z1 = -Smax - 20 * dsig
     #Z2 = Smax + 20 * dsig
     Z = np.linspace(Z1, Z2, NZ)
@@ -98,7 +99,8 @@ def pf(Z, t0, dsig):
     argmax = 0  # if the argument in exp() becomes > argmax,
     arg = -Z/dsig
     n = len(arg)
-    ptrigger = np.exp(arg, out=t0*np.ones(n), where= (arg < argmax) ) / t0
+    #ptrigger = np.exp(arg, out=t0*np.ones(n), where= (arg < argmax) ) / t0
+    ptrigger = np.exp(arg) / t0
     return ptrigger
 
 ##### INITIAL CONDITIONS #####################
