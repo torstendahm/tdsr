@@ -1,5 +1,5 @@
 #--------------------------
-# Plot Fig. 3b (see Dahm and Hainzl, 2022)
+# Plot Fig. 3c. Same as figure 3b, but assuming a Gaussian distribution of source
 #--------------------------
 import sys
 sys.path.insert(0, "../")
@@ -16,10 +16,9 @@ import matplotlib.pyplot as plt
 
 current_dir = Path(__file__).parent.parent
 config_file = current_dir / "config.toml"
-figname = current_dir / "../plots_tdsr/fig3b"
+figname = current_dir / "../plots_tdsr/fig3c"
 
 print("set-up the tdsr, linear Coulomb failure and Rate and State models")
-#tdsm = TDSM(config=Config.open(config_file))
 tdsr = TDSR1(config=Config.open(config_file))
 
 #----------------------------------------
@@ -47,9 +46,11 @@ tstartl = 1.E-6 *hours
 # ---- discretizing stress axis for integration with
 deltaS    = -depthS/60.  # increment do discretize Coulomb stress axis
 sigma_max = 3000.*deltaS # maximum depth on Coulomb axis (limit of integral)
-#precision = 18   # wird bisher nicht beneotigt in tdsr
 
-iX0switch = 0           # steady state distribution
+#iX0switch = 0           # steady state distribution
+iX0switch = 2           # Gaussin distribution
+Z0mean = 1.0
+Z0std  = 0.2
 
 #----------------------------------------
 # Plot Properties
@@ -67,19 +68,14 @@ fig, ax = plt.subplots(1, 1, figsize=(7,5) )
 # Calculate earthquake rates for cyclic loading
 #----------------------------------------
 ns   = len(sstep)
-#r_tdsm = np.zeros((ns,ntlog))
 r_tdsr = np.zeros((ns,ntlog))
 
 #for k, Sstep in enumerate(sstep):
 for k in range(ns):
     #loading = StepLoading(_config=tdsr.config, strend=strend, sstep=sstep[k], tstep=tstep, taxis_log=taxis_log, ntlog=ntlog, tstart=tstartl, tend=tend)
     loading = BackgroundLoading(_config=tdsr.config, strend=strend, sstep=sstep[k], taxis_log=taxis_log, ntlog=ntlog, tstart=tstartl, tend=tend)
-    config, t, chiz, cf, r, xn = tdsr(loading=loading, chi0=chi0, t0=t0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, iX0switch=iX0switch, Sshadow=sstep[k], taxis_log=taxis_log, ntlog=ntlog, tstart=tstartl, tend=tend)
+    config, t, chiz, cf, r, xn = tdsr(loading=loading, chi0=chi0, t0=t0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, iX0switch=iX0switch, Zmean=Z0mean, Zstd=Z0std, Sshadow=sstep[k], taxis_log=taxis_log, ntlog=ntlog, tstart=tstartl, tend=tend)
     r_tdsr[k,:] = r
-
-#    loading = BackgroundLoading(_config=tdsm.config, strend=strend, sstep=sstep[k], taxis_log=taxis_log, ntlog=ntlog, tstart=tstartl, tend=tend)
-#    config, t, chiz, cf, r, xn = tdsm(loading=loading, chi0=chi0, t0=t0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, iX0switch=iX0switch, Sshadow=sstep[k], taxis_log=taxis_log, ntlog=ntlog, tstart=tstartl, tend=tend)
-#    r_tdsm[k,:] = r
 
 
 #----------------------------------------
@@ -87,7 +83,6 @@ for k in range(ns):
 #----------------------------------------
 for k, Sstep in enumerate(sstep):
     ax.plot(t, r_tdsr[k,:], c='b', ls='solid', lw=3, alpha=al[k], label=r'$\Delta\sigma_c / \delta\sigma$=%.1f' % (Sstep))
-    #ax.plot(t, r_tdsm[k,:], c='b', ls='dotted', lw=5, alpha=al[k])
     r_theo = Eq7(t, sstep[k], chi0*strend, -depthS, strend, strend)
     ax.plot(t, r_theo, c='r', ls='dashed', lw=1, alpha=1, zorder=10)
 
@@ -98,6 +93,7 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_xlabel(r'Time  $t$ / ($\delta\sigma / \dot\sigma_c$)')
 ax.set_ylabel(r'Rate $R$ / $r_0$', labelpad=-3)
+plt.figtext(0.15, 0.84, r'Gaussian distribution with $\zeta_{mean}$=%.1f , $\delta$=%.1f' % (Z0mean, Z0std), fontsize=12)
 ax.legend()
 
 plt.show()

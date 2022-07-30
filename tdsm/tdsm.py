@@ -139,7 +139,8 @@ class LCM(object):
         else: 
             self.chiz = np.heaviside(-self.sigma, 0)
 
-        nshift = np.around(config.Sshadow / config.deltaS, 0).astype(int)
+        #nshift = np.around(config.Sshadow / config.deltaS, 0).astype(int)
+        nshift = np.around(-1.*config.Sshadow / config.deltaS, 0).astype(int)
         self.chiz = shifted(self.chiz, nshift)
 
         ratez = np.zeros(self.nt)
@@ -267,8 +268,7 @@ class TDSR1(object):
                 config.tstart, config.tend, config.ntlog)
         else:
             (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange(
-                config.tstart, config.tend, config.deltat
-        )
+                config.tstart, config.tend, config.deltat)
         #self.chiz = np.zeros(self.nsigma)
         #self.pz = np.heaviside(self.sigma, 1)
         loading = config.loading
@@ -287,7 +287,7 @@ class TDSR1(object):
             Zmin = config.loading.sstep
         else:
             Zmin = 0.0
-        print('Zmin ',Zmin,' config.loading.strend=',config.loading.strend,' chi0=',config.chi0,' t0=',t0,' X0=',X0,' dsig=',dsig)
+        #print('Zmin ',Zmin,' config.loading.strend=',config.loading.strend,' chi0=',config.chi0,' t0=',t0,' X0=',X0,' dsig=',dsig)
         #dt = np.ediff1d(self.t, to_end=self.t[-1]-self.t[-2])  # wird bereits in  gridrange berechnet
         #Z = functions.Zvalues(self.cf, 0, t0, dsig) # t0 kann  raus, da nicht benutzt
         #Z = Zvalues(self.cf, 0.0, 0.0, dsig)
@@ -315,7 +315,8 @@ class TDSR1(object):
 
         self.chiz = X
         #print('xmin=',np.amin(X),' xmax=',np.amax(X),' nx=',len(X))
-        print('i=0 1/pf=',1./pf(Z, config.t0, -config.depthS)[0:3],' ... ',1./pf(Z, config.t0, -config.depthS)[-3:-1])
+        #print('i=0 1/pf=',1./pf(Z, config.t0, -config.depthS)[0:3],' ... ',1./pf(Z, config.t0, -config.depthS)[-3:-1])
+        #for i in range(self.nt):
         #for i in range(1, self.nt):
         for i in range(self.nt):
             #dX = self.chiz/ tf(Z, t0, config.deltaS) * self.dt[i]
@@ -325,11 +326,12 @@ class TDSR1(object):
             dX[(dX>X)] = X[(dX>X)]              # wenn diese Zeile entfaellt, dann muss nicht mit dt multipliziert werden
             ratez[i] = np.sum(dX * dZ) / self.dt[i]  # oben wird dX mit dt multipliziert, hier dividiert.
             #ratez[i] = np.trapz(dX * dZ) / self.dt[i]  # oben wird dX mit dt multipliziert, hier dividiert.
+            #print('len(Z)=',len(Z),' len(dS)=',len(dS),' nt=',self.nt)
             Z -= dS[i]
             X -= dX
 
-        print('i=nt-1 1/pf=',1./pf(Z, config.t0, -config.depthS)[0:3],' ... ',1./pf(Z, config.t0, -config.depthS)[-3:-1])
-        print('rmin=',np.amin(ratez),' rmax=',np.amax(ratez),' nx=',len(ratez))
+        #print('i=nt-1 1/pf=',1./pf(Z, config.t0, -config.depthS)[0:3],' ... ',1./pf(Z, config.t0, -config.depthS)[-3:-1])
+        #print('rmin=',np.amin(ratez),' rmax=',np.amax(ratez),' nx=',len(ratez))
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
@@ -443,7 +445,7 @@ class RSD(LCM):
             # Cattania, PhD Eq.(6.2), Dieterich JGR 1994, Eq.(17):
             gamma = (dum - config.deltat/dS[i-1]) * np.exp((-dS[i-1]+Asig*np.log(config.loading.strend))/Asig) +config.loading.strend* config.deltat/dS[i-1]
             ratez[i] = 1.0 / gamma
-            cf_shad[i] = S0
+            #cf_shad[i] = S0
         ratez = rinfty*ratez
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):

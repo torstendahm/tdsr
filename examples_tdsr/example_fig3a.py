@@ -19,7 +19,7 @@ config_file = current_dir / "config.toml"
 figname = current_dir / "../plots_tdsr/fig3a"
 
 print("set-up the tdsr, linear Coulomb failure and Rate and State models")
-#tdsm = TDSM(config=Config.open(config_file))
+tdsm = TDSM(config=Config.open(config_file))
 tdsr = TDSR1(config=Config.open(config_file))
 #lcm  = LCM(config=Config.open(config_file))
 cfm  = CFM(config=Config.open(config_file))
@@ -76,13 +76,16 @@ ns   = len(Sshadow)
 #r_tdsm = np.zeros((ns,nt))
 r_tdsr = np.zeros((ns,nt))
 r_cfm  = np.zeros((ns,nt))
-#r_rsm  = np.zeros((ns,nt))
 r_rsd  = np.zeros((ns,nt))
 
 for k, Zmin in enumerate(Sshadow):
     loading = BackgroundLoading(_config=tdsr.config, strend=strend, taxis_log=taxis_log, ntlog=ntlog, deltat=deltat, tstart=tstartl, tend=tend)
     config, t, chiz, cf, r, xn = tdsr(loading=loading, chi0=chi0, t0=t0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, iX0switch=iX0switch, Sshadow=Sshadow[k], taxis_log=taxis_log, ntlog=ntlog, deltat=deltat, tstart=tstartl, tend=tend)
     r_tdsr[k,:] = r
+
+#    loading = BackgroundLoading(_config=tdsm.config, strend=strend, taxis_log=taxis_log, ntlog=ntlog, deltat=deltat, tstart=tstartl, tend=tend)
+#    config, t, chiz, cf, r, xn = tdsm(loading=loading, chi0=chi0, t0=t0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, iX0switch=iX0switch, Sshadow=Sshadow[k], taxis_log=taxis_log, ntlog=ntlog, deltat=deltat, tstart=tstartl, tend=tend)
+#    r_tdsm[k,:] = r
 
     loading = BackgroundLoading(_config=cfm.config, strend=strend, taxis_log=taxis_log, ntlog=ntlog, deltat=deltat, tstart=tstartl, tend=tend)
     config, t, chiz, cf, r, xn = cfm(loading=loading, chi0=chi0, depthS=depthS, deltaS=deltaS, Sshadow=Sshadow[k], taxis_log=taxis_log, ntlog=ntlog, deltat=deltat, tstart=tstartl, tend=tend)
@@ -100,10 +103,12 @@ for k, Zmin in enumerate(Sshadow):
     r_theo = Eq5(t, Sshadow[k], chi0, t0, -depthS, strend)
     ax.plot(t, r_cfm[k,:]/r0, c=cb[k], lw=1, alpha=0.3, ls='dashed', label=r'CF')
     ax.plot(t, r_rsd[k,:], c=cb[k], lw=1, alpha=0.9, ls='dotted', label=r'RS$_\mathrm{subcrit}$')
+    #ax.plot(t, r_tdsm[k,:]/r0, c='black', ls='dotted', lw=5, alpha=0.3, zorder=2)
     ax.plot(t, r_tdsr[k,:]/r0, c=cb[k], lw=3, alpha=0.5, zorder=2, label=r'$\zeta_\mathrm{min}=%.0f$' % (Zmin))
     ax.plot(t, r_theo/r0, c=cb[k], lw=1, alpha=1.0, zorder=2, label='Eq.(5)')
 
 ax.set_xlim(Tmin, Tmax)
+ax.set_ylim(-0.2, 5.2)
 ax.set_xlabel('Time')
 ax.set_ylabel(r'Rate  $R \, / \, (\chi_0\, \dot\sigma_{c})$')
 ax.legend()

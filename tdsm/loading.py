@@ -408,6 +408,7 @@ class ExternalFileLoading(Loading):
     def __init__(
         self,
         _config: "Config",
+        strend: Number = 7.0E-5,
         tstart: Number = 0.,
         tend: Number = 86400.,
         taxis_log: int = 0,
@@ -419,6 +420,7 @@ class ExternalFileLoading(Loading):
         infile: Optional = None
     ):
         self.config = _config
+        self.strend = strend
         self.iascii  = iascii
         self.infile = infile
         self.tstart = tstart
@@ -446,23 +448,29 @@ class ExternalFileLoading(Loading):
             cf_obs = cf_obs*self.scal_cf  # scale stress
             tmin_obs = t_obs[0]
             tmax_obs = t_obs[-1]
-            self.tend     = tmax_obs # time series stops with end time of series read in
+            ## self.tend     = tmax_obs # time series stops with end time of series read in
             #nt = len(t_obs)
             #dt = (tmax-tmin)/nt
         else:
             raise ValueError("so far only ascii format supported for input file")
 
         # insert one value before start sample of stress change read in
-        if self.tstart >= tmin_obs:
+        if self.tstart > tmin_obs:
+            print('tmin_obs=',tmin_obs,' tstart=',self.tstart)
             raise ValueError("tstart must be smaller than the begin time of series read in")
         tmin, tmax, nt, t, dt  = gridrange(self.tstart, self.tend, self.deltat)
 
-        t_temp = np.insert(t_obs,0,self.tstart,axis=None)
-        c_temp = np.insert(cf_obs,0,self.c_tstart,axis=None)
-        cf = np.interp(t[0:-1], t_temp, c_temp)
-        print('tstart, tend, deltat=',self.tstart,self.tend,self.deltat)
-        print('t =',len(t))
-        print('cf=',len(cf))
+        if self.tstart < tmin_obs:
+            t_temp = np.insert(t_obs,0,self.tstart,axis=None)
+            c_temp = np.insert(cf_obs,0,self.c_tstart,axis=None)
+            #cf = np.interp(t[0:-1], t_temp, c_temp)
+            cf = np.interp(t, t_temp, c_temp)
+            #print('t_temp =',len(t_temp),' len(cf_temp)=',len(c_temp))
+        else:
+            cf = np.interp(t, t_obs, cf_obs)
+        #print('tstart, tend, deltat=',self.tstart,self.tend,self.deltat)
+        #print('t =',len(t),' len(cf)=',len(cf))
+        #print('t_ob   =',len(t_obs),' len(cf_ob  )=',len(cf_obs))
 
         return np.hstack(
             [
