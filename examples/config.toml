@@ -18,8 +18,7 @@ Sshadow = 0.0
 # sample interval in seconds (default 12 minutes)
 deltat = 720
 # start time in seconds (default 0 seconds)
-#tstart = 0
-tstart = 720
+tstart = 0
 # end time in seconds (default 24 hours)
 tend = 86_400
 # linear (=0) or logarithmic scale (=1:  if logarithmictstart < 0 required)
