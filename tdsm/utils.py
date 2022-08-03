@@ -1,20 +1,20 @@
 import os
-#import sys
 import pickle as pkl
 from typing import TYPE_CHECKING, Callable, Tuple, Union
+from tdsm.types import PathLike, Number
 
 import numpy as np
 import numpy.typing as npt
-#from typing import Type as npt
 
-from scipy.stats import norm
+# from scipy.stats import norm
+def norm(*args, **kwargs):
+    raise NotImplementedError
+
 
 if TYPE_CHECKING:
     from tdsm.tdsm import Result
 
 DEBUG = os.environ.get("DEBUG") is not None
-Number = Union[int, float]
-PathLike = Union[str, os.PathLike]
 
 
 def save(result: "Result", filename: PathLike) -> None:
@@ -30,6 +30,7 @@ def load(filename: PathLike) -> "Result":
 
 ##### Discretization ##############################
 
+
 def gridrange(
     amin: Number,
     amax: Number,
@@ -42,8 +43,9 @@ def gridrange(
     na = int(rounding((amax - amin) / astep))
     amax = amin + (na - 1) * astep
     a = np.linspace(amin, amax, na)
-    da = np.ediff1d(a, to_end=a[-1]-a[-2])
+    da = np.ediff1d(a, to_end=a[-1] - a[-2])
     return amin, amax, na, a, da
+
 
 def gridrange_log(
     amin: Number,
@@ -54,27 +56,29 @@ def gridrange_log(
     amin = float(amin)
     amax = float(amax)
     na = int(na)
-    if amin <=0:
-        print('tstart <= 0 , not possible for taxis_log==1 (logarithmic scale)')
+    if amin <= 0:
+        print("tstart <= 0 , not possible for taxis_log==1 (logarithmic scale)")
         exit()
     a = np.logspace(np.log10(amin), np.log10(amax), na)
-    da = np.ediff1d(a, to_end=a[-1]-a[-2])
-    #da = np.append(a[0], a[1:]-a[:-1])
+    da = np.ediff1d(a, to_end=a[-1] - a[-2])
+    # da = np.append(a[0], a[1:]-a[:-1])
     return amin, amax, na, a, da
 
+
 def Zvalues(S, Sstep, t0, dsig):
-    #NZ = 1000
+    # NZ = 1000
     NZ = 10000
-    #NZ = 50000
-    #NZ = 100000
-    dS = np.ediff1d(S, to_end=S[-1]-S[-2])
+    # NZ = 50000
+    # NZ = 100000
+    dS = np.ediff1d(S, to_end=S[-1] - S[-2])
     Smax = np.maximum(0, Sstep + np.max(np.cumsum(dS)))
     Z1 = -Smax - 20 * dsig
     Z2 = Smax + 20 * dsig
-    #Z1 = -Smax - 20 * dsig
-    #Z2 = Smax + 20 * dsig
+    # Z1 = -Smax - 20 * dsig
+    # Z2 = Smax + 20 * dsig
     Z = np.linspace(Z1, Z2, NZ)
     return Z
+
 
 def shifted(x: npt.NDArray[np.float64], nshift: int) -> npt.NDArray[np.float64]:
     # other option: use padding and cut
@@ -85,78 +89,90 @@ def shifted(x: npt.NDArray[np.float64], nshift: int) -> npt.NDArray[np.float64]:
         x[nshift:] = 0.0
     return x
 
+
 def tf(Z, t0, dsig):
-    arg = Z/dsig
-    #good = arg <= 30
-    #x = np.exp(30)
-    #failuretime = t0*x*np.ones(len(Z))
-    #failuretime[good]  = t0 * np.exp(arg[good])
-    #print('failtime=',failuretime)
-    failuretime  = t0 * np.exp(arg, where=arg > 30)
+    arg = Z / dsig
+    # good = arg <= 30
+    # x = np.exp(30)
+    # failuretime = t0*x*np.ones(len(Z))
+    # failuretime[good]  = t0 * np.exp(arg[good])
+    # print('failtime=',failuretime)
+    failuretime = t0 * np.exp(arg, where=arg > 30)
     return failuretime
+
 
 def pf(Z, t0, dsig):
     argmax = 0  # if the argument in exp() becomes > argmax,
-    arg = -Z/dsig
+    arg = -Z / dsig
     n = len(arg)
-    #ptrigger = np.exp(arg, out=t0*np.ones(n), where= (arg < argmax) ) / t0
+    # ptrigger = np.exp(arg, out=t0*np.ones(n), where= (arg < argmax) ) / t0
     ptrigger = np.exp(arg) / t0
     return ptrigger
 
+
 ##### INITIAL CONDITIONS #####################
 
+
 def X0steady(Z, r0, t0, dsig, dotsigc):
-    '''
-    Steady state initial stress distribution 
+    """
+    Steady state initial stress distribution
     --> R(t)=r0 for stressing rate dotS = dotsigc
     Eq.(6) of Dahm & Hainzl (2022)
-    '''
-    X = (r0 / dotsigc) * np.exp(-np.exp(-Z/dsig) * dsig /(t0 * dotsigc))   
+    """
+    X = (r0 / dotsigc) * np.exp(-np.exp(-Z / dsig) * dsig / (t0 * dotsigc))
     return X
+
 
 def X0uniform(Z, Zmin, X0):
-    '''
+    """
     Uniform initial stress disribution for Z>=Zmin
-    '''
-    X = X0 * np.heaviside(Z-Zmin, 1)
+    """
+    X = X0 * np.heaviside(Z - Zmin, 1)
     return X
 
+
 def X0gaussian(Z, Z0mean, Z0std, X0):
-    '''
+    """
     Normal initial stress disribution with mean Zmean and standard deviation Zstd
-    '''
+    """
     X = X0 * norm.pdf(Z, loc=Z0mean, scale=Z0std)
     return X
 
+
 ##### THEORETICAL FUNCTIONS #######################
 
+
 def Eq5(t, Zmin, X0, t0, dsig, dotsigc):
-    '''
+    """
     Constant stressing (with rate dotsigc) given an initially uniform stress distribution
     Eq.(5) in Dahm & Hainzl (2022)
-    '''
-    ta = dsig / dotsigc 
+    """
+    ta = dsig / dotsigc
     fac = X0 * dotsigc
-    nominator = 1.0 - np.exp(-(ta/t0) * (1 - np.exp(-t/ta)) * np.exp(-(Zmin - dotsigc*t)/dsig))
-    denominator = 1.0 - np.exp(-t/ta)
+    nominator = 1.0 - np.exp(
+        -(ta / t0) * (1 - np.exp(-t / ta)) * np.exp(-(Zmin - dotsigc * t) / dsig)
+    )
+    denominator = 1.0 - np.exp(-t / ta)
     R = fac * nominator / denominator
     return R
- 
+
+
 def Eq7(t, dS, r0, dsig, dotsigc, dotsigca):
-    '''
+    """
     Stress step dS at time t=0 given an initial steady state state related constant rate r0 for dotsigc
     with constant stressing rate dotsigca for t>0
     Eq.(8) in Dahm & Hainzl (2022)
-    '''
+    """
     f = dotsigca / dotsigc
-    R = f * r0 / ((f * np.exp(-dS/dsig) - 1) * np.exp(-dotsigca*t/dsig) + 1)
+    R = f * r0 / ((f * np.exp(-dS / dsig) - 1) * np.exp(-dotsigca * t / dsig) + 1)
     return R
 
+
 def Eq8(t, dS, r0, dsig, dotsigc):
-    '''
+    """
     Stress step dS at time t=0 given an initial steady state state related constant rate r0 for dotsigc
     without stress changes for t>0
     Eq.(7) in Dahm & Hainzl (2022)
-    '''
-    R = r0 / (np.exp(-dS/dsig) + (dotsigc/dsig) * t)
+    """
+    R = r0 / (np.exp(-dS / dsig) + (dotsigc / dsig) * t)
     return R

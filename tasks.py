@@ -1,7 +1,7 @@
 """
 Tasks for maintaining the project.
 
-Execute 'invoke --list' for guidance on using Invoke
+Execute 'invoke --list' for guidance on using invoke
 """
 import shutil
 import pprint
@@ -9,29 +9,21 @@ import pprint
 from invoke import task
 import webbrowser
 from pathlib import Path
+import utils
 
 Path().expanduser()
 
 ROOT_DIR = Path(__file__).parent
 SETUP_FILE = ROOT_DIR / "setup.py"
 TEST_DIR = ROOT_DIR / "tests"
+DOCS_DIR = ROOT_DIR / "docs"
+DOCS_BUILD_DIR = DOCS_DIR / "_build"
 SOURCE_DIR = ROOT_DIR / "tdsm"
 TOX_DIR = ROOT_DIR / ".tox"
 COVERAGE_FILE = ROOT_DIR / ".coverage"
 COVERAGE_DIR = ROOT_DIR / "htmlcov"
 COVERAGE_REPORT = COVERAGE_DIR / "index.html"
 PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR]]
-
-
-def _delete_file(file):
-    try:
-        file.unlink(missing_ok=True)
-    except TypeError:
-        # missing_ok argument added in 3.8
-        try:
-            file.unlink()
-        except FileNotFoundError:
-            pass
 
 
 @task(help={"check": "Checks if source is formatted without applying changes"})
@@ -58,19 +50,17 @@ def test(c, min_coverage=None):
 
 
 @task
+def docs(c, target="html", serve=True):
+    """Generate documentation and serve locally"""
+    c.run(f"make -C {DOCS_DIR} {target}")
+    if serve and target == "html":
+        utils.serve_dir(DOCS_BUILD_DIR / "html")
+
+
+@task
 def type_check(c):
     """Check types"""
     c.run("pipenv run mypy")
-
-
-def _create(d, *keys):
-    current = d
-    for key in keys:
-        try:
-            current = current[key]
-        except (TypeError, KeyError):
-            current[key] = dict()
-            current = current[key]
 
 
 @task
@@ -101,7 +91,13 @@ def coverage(c, publish=False, provider="codecov"):
     else:
         # Build a local report
         c.run("pipenv run coverage html -d {}".format(COVERAGE_DIR))
-        webbrowser.open(COVERAGE_REPORT.as_uri())
+        webbrowser.open_new_tab(COVERAGE_REPORT.as_uri())
+
+
+@task
+def clean_docs(c):
+    """Clean up documentation build files"""
+    utils.delete_dir(DOCS_BUILD_DIR)
 
 
 @task
@@ -126,25 +122,12 @@ def clean_python(c):
 @task
 def clean_tests(c):
     """Clean up files from testing"""
-    _delete_file(COVERAGE_FILE)
-    shutil.rmtree(TOX_DIR, ignore_errors=True)
-    shutil.rmtree(COVERAGE_DIR, ignore_errors=True)
+    utils.delete_file(COVERAGE_FILE)
+    utils.delete_dir(TOX_DIR)
+    utils.delete_dir(COVERAGE_DIR)
 
 
-@task(pre=[clean_build, clean_python, clean_tests])
+@task(pre=[clean_build, clean_python, clean_tests, clean_docs])
 def clean(c):
     """Runs all clean sub-tasks"""
     pass
-
-
-@task(clean)
-def dist(c):
-    """Build source and wheel packages"""
-    c.run("python setup.py sdist")
-    c.run("python setup.py bdist_wheel")
-
-
-@task(pre=[clean, dist])
-def release(c):
-    """Make a release of the python package to pypi"""
-    c.run("twine upload dist/*")
