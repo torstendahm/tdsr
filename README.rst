@@ -15,6 +15,10 @@ tdsm
         :target: https://github.com/torstendahm/tdsm
         :alt: License
 
+.. image:: https://img.shields.io/badge/docs-tdsr-green
+        :target: https://torstendahm.github.io/tdsr
+        :alt: Documentation
+
 """"""""
 
 Your short description here. 
