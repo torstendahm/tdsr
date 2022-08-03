@@ -1,9 +1,9 @@
-name: test
+name: docs
 
 on: [push]
 
 jobs:
-    docs:
+    deploy:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
