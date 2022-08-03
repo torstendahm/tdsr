@@ -43,7 +43,7 @@ class Config(object):
         self.deltaS = float(deltaS)
         self.sigma_max = float(sigma_max)
         self.precision = int(precision)
-        self.iX0switch = int(iX0switch) 
+        self.iX0switch = int(iX0switch)
         self.loading = loading
         if loading is None:
             self.loading = StepLoading(_config=self)
@@ -75,11 +75,11 @@ class Config(object):
         if "sigma_max" in config:
             self.sigma_max = config["sigma_max"]
         if "iX0switch" in config:
-            self.iX0switch = config["iX0switch"] 
+            self.iX0switch = config["iX0switch"]
         if "Zmean" in config:
-            self.Zmean = config["Zmean"] 
+            self.Zmean = config["Zmean"]
         if "Zstd" in config:
-            self.Zstd = config["Zstd"] 
+            self.Zstd = config["Zstd"]
         if "precision" in config:
             self.precision = config["precision"]
 

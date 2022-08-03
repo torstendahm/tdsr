@@ -1,10 +1,12 @@
 import os
 import pickle as pkl
 from typing import TYPE_CHECKING, Callable, Tuple, Union
-from tdsm.types import PathLike, Number
 
 import numpy as np
 import numpy.typing as npt
+
+from tdsm.types import Number, PathLike
+
 
 # from scipy.stats import norm
 def norm(*args, **kwargs):
