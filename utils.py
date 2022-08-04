@@ -4,7 +4,7 @@ import shutil
 import webbrowser
 from pathlib import Path, PurePath
 import socketserver
-from tdsm.types import PathLike
+from tdsr.types import PathLike
 import pprint
 from typing import List
 

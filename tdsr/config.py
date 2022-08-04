@@ -1,10 +1,15 @@
+################################
+# Time Dependent Seismicity Model - Config
+# T. Dahm, R. Dahm 26.12.2021
+################################
+
 from typing import Any, Dict, Optional
 
 import toml
 
-from tdsm.constants import HOURS
-from tdsm.loading import LOADING, Loading, StepLoading
-from tdsm.utils import Number, PathLike
+from tdsr.constants import HOURS
+from tdsr.loading import LOADING, Loading, StepLoading
+from tdsr.utils import Number, PathLike
 
 
 class Config(object):
@@ -33,7 +38,7 @@ class Config(object):
         self.Sshadow = float(Sshadow)
         self.Zmean = float(Zmean)
         self.Zstd = float(Zstd)
-        self.Equilibrium = bool(equilibrium)
+        self.equilibrium = bool(equilibrium)
         self.t0 = float(t0)
         self.deltat = float(deltat)
         self.tstart = float(tstart)
@@ -97,3 +102,6 @@ class Config(object):
             # todo: warn about missing loading
             pass
         return config
+
+
+DEFAULT_CONFIG = Config()

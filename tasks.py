@@ -13,40 +13,45 @@ import utils
 
 Path().expanduser()
 
-ROOT_DIR = Path(__file__).parent
-SETUP_FILE = ROOT_DIR / "setup.py"
-TEST_DIR = ROOT_DIR / "tests"
-DOCS_DIR = ROOT_DIR / "docs"
+REPO_ROOT = Path(__file__).parent
+SETUP_FILE = REPO_ROOT / "setup.py"
+TEST_DIR = REPO_ROOT / "tests"
+DOCS_DIR = REPO_ROOT / "docs"
 DOCS_BUILD_DIR = DOCS_DIR / "_build"
-SOURCE_DIR = ROOT_DIR / "tdsm"
-TOX_DIR = ROOT_DIR / ".tox"
-COVERAGE_FILE = ROOT_DIR / ".coverage"
-COVERAGE_DIR = ROOT_DIR / "htmlcov"
+SOURCE_DIR = REPO_ROOT / "tdsr"
+TOX_DIR = REPO_ROOT / ".tox"
+COVERAGE_FILE = REPO_ROOT / ".coverage"
+COVERAGE_DIR = REPO_ROOT / "htmlcov"
 COVERAGE_REPORT = COVERAGE_DIR / "index.html"
-PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR]]
+PYTHON_FILES = list(REPO_ROOT.glob("**/*.py"))
 
 
 @task(help={"check": "Checks if source is formatted without applying changes"})
 def format(c, check=False):
     """Format code"""
-    python_dirs_string = " ".join(PYTHON_DIRS)
+    python_files = " ".join([str(f) for f in PYTHON_FILES])
     black_options = "--diff" if check else ""
-    c.run("pipenv run black {} {}".format(black_options, python_dirs_string))
-    isort_options = "{}".format("--check-only" if check else "")
-    c.run("pipenv run isort {} {}".format(isort_options, python_dirs_string))
+    c.run(f"pipenv run black {black_options} {python_files}")
 
 
 @task
 def lint(c):
     """Lint code"""
-    c.run("pipenv run flake8 {}".format(SOURCE_DIR))
+    c.run(f"pipenv run flake8 {SOURCE_DIR}")
 
 
 @task
-def test(c, min_coverage=None):
+def test(c, min_coverage=None, parallel=False, fail_fast=True):
     """Run tests"""
-    pytest_options = "--cov-fail-under={}".format(min_coverage) if min_coverage else ""
-    c.run("pipenv run pytest --cov={} {}".format(SOURCE_DIR, pytest_options))
+    pytest_options = []
+    if min_coverage:
+        pytest_options.append(f"--cov-fail-under={min_coverage}")
+    if parallel:
+        pytest_options.append("-n auto")
+    if fail_fast:
+        pytest_options.append("-x")
+
+    c.run(f"pipenv run pytest --force-sugar {' '.join(pytest_options)} {TEST_DIR}")
 
 
 @task
@@ -87,10 +92,10 @@ def coverage(c, publish=False, provider="codecov"):
     """Create coverage report"""
     if publish:
         # Publish the results via provider (e.g. codecov or coveralls)
-        c.run("pipenv run {}".format(provider))
+        c.run(f"pipenv run {provider}")
     else:
         # Build a local report
-        c.run("pipenv run coverage html -d {}".format(COVERAGE_DIR))
+        c.run(f"pipenv run coverage html -d {COVERAGE_DIR}")
         webbrowser.open_new_tab(COVERAGE_REPORT.as_uri())
 
 

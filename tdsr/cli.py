@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
-"""Console script for tdsm."""
+################################
+# Time Dependent Seismicity Model - CLI for tdsr
+# T. Dahm, R. Dahm 26.12.2021
+################################
+
+
+"""Console script for tdsr."""
 import sys
 from pathlib import Path
 from typing import Optional
 
 import click
 
-from tdsm import LCM, TDSM, Traditional, save
-from tdsm.config import Config
-from tdsm.utils import PathLike
+from tdsr import LCM, TDSR, Traditional, save
+from tdsr.config import Config, DEFAULT_CONFIG
+from tdsr.utils import PathLike
 
 
 def optional_valid_dir_or_file(
@@ -20,9 +26,6 @@ def optional_valid_dir_or_file(
     if Path(value).exists() and Path(value).is_file():
         return value
     raise click.BadParameter("%s is not a file" % (value), ctx=ctx, param=param)
-
-
-DEFAULT_CONFIG = Config()
 
 
 def get_output_file(out: PathLike, name: str) -> PathLike:
@@ -144,7 +147,7 @@ def check_output_file(
     % ("None" if DEFAULT_CONFIG.loading is None else DEFAULT_CONFIG.loading.name),
 )
 @click.pass_context
-def tdsm(
+def tdsr(
     ctx: click.Context,
     input: PathLike,
     output: Optional[PathLike],
@@ -161,13 +164,13 @@ def tdsm(
     precision: Optional[int],
     loading: Optional[str],
 ) -> None:
-    """TDSM method"""
+    """tdsr method"""
     output_file: Optional[PathLike] = None
     input_file: Optional[PathLike] = None
     if output:
         # try:
         output_path = Path(output).resolve()
-        output_file = get_output_file(output_path, name="tdsm")
+        output_file = get_output_file(output_path, name="tdsr")
         output_file = check_output_file(output_file, force=force)
         # except FileExistsError:
         #     raise Click
@@ -191,8 +194,8 @@ def tdsm(
     )
 
     if ctx.invoked_subcommand is None:
-        tdsm = TDSM(config=conf)
-        result = tdsm()
+        tdsr = TDSR(config=conf)
+        result = tdsr()
         if output_file:
             save(result, output_file)
             print("saved to ", output_file)
@@ -206,7 +209,7 @@ def tdsm(
         )
 
 
-@tdsm.command()
+@tdsr.command()
 @click.pass_context
 def lcm(
     ctx: click.Context,
@@ -222,7 +225,7 @@ def lcm(
     return 0
 
 
-@tdsm.command()
+@tdsr.command()
 @click.pass_context
 def traditional(
     ctx: click.Context,
@@ -239,4 +242,4 @@ def traditional(
 
 
 if __name__ == "__main__":
-    sys.exit(tdsm(obj=dict()))  # pragma: no cover
+    sys.exit(tdsr(obj=dict()))  # pragma: no cover

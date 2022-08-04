@@ -7,9 +7,7 @@ name = "pypi"
 # Formatting
 flake8 = "*"
 black = "*"
-isort = "*"
 # Testing
-tox = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-xdist = "*"
@@ -23,9 +21,10 @@ twine = "*"
 invoke = "*"
 bump2version = "*"
 types-setuptools = "*"
-# Exploration
+# Examples and experiments
 jupyterlab = "*"
 matplotlib = "*"
+scipy = "*"
 # Documentation
 sphinx = "*"
 types-toml = "*"

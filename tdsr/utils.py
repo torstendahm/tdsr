@@ -1,3 +1,8 @@
+################################
+# Time Dependent Seismicity Model - Utility functions
+# T. Dahm, R. Dahm 26.12.2021
+################################
+
 import os
 import pickle as pkl
 from typing import TYPE_CHECKING, Callable, Tuple, Union
@@ -5,16 +10,11 @@ from typing import TYPE_CHECKING, Callable, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 
-from tdsm.types import Number, PathLike
-
-
-# from scipy.stats import norm
-def norm(*args, **kwargs):
-    raise NotImplementedError
+from tdsr.types import Number, PathLike
 
 
 if TYPE_CHECKING:
-    from tdsm.tdsm import Result
+    from tdsr.tdsr import Result
 
 DEBUG = os.environ.get("DEBUG") is not None
 
@@ -133,11 +133,20 @@ def X0uniform(Z, Zmin, X0):
     return X
 
 
+def pdf(x, loc=0.0, scale=1.0):
+    """probability density function (PDF) of normal distribution"""
+    if scale < 0.0:
+        return np.nan
+    y = (x - loc) / scale
+    pdf = np.exp(-(y ** 2) / 2.0) / np.sqrt(2 * np.pi)
+    return pdf / scale
+
+
 def X0gaussian(Z, Z0mean, Z0std, X0):
     """
     Normal initial stress disribution with mean Zmean and standard deviation Zstd
     """
-    X = X0 * norm.pdf(Z, loc=Z0mean, scale=Z0std)
+    X = X0 * pdf(Z, loc=Z0mean, scale=Z0std)
     return X
 
 

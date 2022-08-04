@@ -4,22 +4,25 @@
 """The setup script."""
 
 from setuptools import find_packages, setup
-import os
+from pathlib import Path
+import tdsr
 
-short_description = "tdsm"
+Path().expanduser()
 
-version = "0.0.1"
+REPO_ROOT = Path(__file__).parent
 
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+short_description = "tdsr"
+
+# version = "0.0.1"
 
 try:
-    readme_rst = os.path.join(PROJECT_ROOT, "README.rst")
+    readme_rst = REPO_ROOT / "README.rst"
     with open(readme_rst) as readme_file:
         long_description = readme_file.read()
 except (ImportError, AssertionError):
     long_description = short_description
 
-requirements = ["Click"]
+requirements = ["click"]
 test_requirements = [
     "tox",
     "pytest",
@@ -64,7 +67,7 @@ setup(
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-    entry_points={"console_scripts": ["tdsm=tdsm.cli:tdsm"]},
+    entry_points={"console_scripts": ["tdsr=tdsr.cli:tdsr"]},
     python_requires=">=3.6",
     install_requires=requirements,
     setup_requires=tool_requirements,
@@ -74,12 +77,12 @@ setup(
     description=short_description,
     long_description=long_description,
     include_package_data=True,
-    package_data={"tdsm": []},
-    keywords="tdsm",
-    name="tdsm",
-    packages=find_packages(include=["tdsm"]),
+    package_data={"tdsr": []},
+    keywords="tdsr",
+    name="tdsr",
+    packages=find_packages(include=["tdsr"]),
     test_suite="tests",
-    url="https://github.com/torstendahm/tdsm",
-    version=version,
+    url="https://github.com/torstendahm/tdsr",
+    version=tdsr.__version__,
     zip_safe=False,
 )

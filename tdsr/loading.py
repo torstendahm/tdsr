@@ -1,6 +1,9 @@
-# from typing import Type as npt
-# from scipy import interpolate
-import os.path
+################################
+# Time Dependent Seismicity Model - Loading implementations
+# T. Dahm, R. Dahm 26.12.2021
+################################
+
+from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, Optional, Type
 
@@ -8,10 +11,10 @@ import numpy as np
 import numpy.typing as npt
 
 if TYPE_CHECKING:
-    from tdsm.config import Config
-    from tdsm.tdsm import Result
+    from tdsr.config import Config
+    from tdsr.tdsr import Result
 
-from tdsm.utils import DEBUG, Number, gridrange, gridrange_log
+from tdsr.utils import DEBUG, Number, gridrange, gridrange_log
 
 
 class Loading(ABC):
@@ -444,7 +447,7 @@ class ExternalFileLoading(Loading):
             )
             exit()
         if self.iascii:
-            if not os.path.isfile(self.infile):
+            if not Path(self.infile).is_file():
                 raise ValueError("input file does not exist")
             cf_obs, t_obs = np.loadtxt(
                 self.infile, skiprows=2, usecols=(0, 1), unpack=True

@@ -30,6 +30,6 @@ repos:
             name: test
             stages: [commit]
             language: system
-            entry: pipenv run invoke test
+            entry: pipenv run invoke test --parallel
             pass_filenames: false
             types: [python]

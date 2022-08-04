@@ -3,12 +3,13 @@ name: docs
 on: [push]
 
 jobs:
-    deploy:
+    publish:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
             - uses: actions/setup-python@v2
-            - run: |
+            - name: Install dependencies
+              run: |
                   pip install pipenv
                   pipenv install --dev
 
@@ -17,7 +18,7 @@ jobs:
                   pipenv run invoke docs --no-serve
                   touch docs/_build/html/.nojekyll
 
-            - name: Deploy to pages
+            - name: Publish documentation
               uses: JamesIves/github-pages-deploy-action@3.7.1
               with:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

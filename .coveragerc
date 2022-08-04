@@ -1,7 +1,6 @@
 [run]
-source = tdsm
+source = tdsr
 omit =
-    .tox
     tests
     tasks.py
     setup.py

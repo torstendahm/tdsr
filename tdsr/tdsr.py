@@ -1,17 +1,17 @@
 """
-TDSM (Time Dependent Seismicity Model)
+tdsr (Time Dependent Seismicity Model)
 ====================================
-TDSM is python tool to simulate time dependent earthquake rates for different stress loading scenarios. 
+tdsr is python tool to simulate time dependent earthquake rates for different stress loading scenarios. 
 Earthquake rate is definded as number of events per time unit with magnitudes above a completeness magntiude. 
-Stress loading is understood as Coulomb stress as a function of time. The stress loading is assumed homogeneous within the rock volume for which the simulation is performed. The details of the TDSM model are given in the paper by Dahm (2022) submitted. 
+Stress loading is understood as Coulomb stress as a function of time. The stress loading is assumed homogeneous within the rock volume for which the simulation is performed. The details of the tdsr model are given in the paper by Dahm (2022) submitted. 
 
-Additional  to the TDSM model simulations, the tdsm tool can simulate earthquakes rates for a rate and state seismicity model and a linear Coulomb failure model, which can be loaded from tdsm. Different loading scenarios are supported, including step in Coulomb stress, a constant background stress rate, a change in stres rate, a cyclic stress rate superposed to a constant background trend, a stress curve defined by 4 points, a ramp like loading scenario, or a loading tome function readed from an exernal file. The loading classes are imported from tdsm.loading.  
+Additional  to the tdsr model simulations, the tdsr tool can simulate earthquakes rates for a rate and state seismicity model and a linear Coulomb failure model, which can be loaded from tdsr. Different loading scenarios are supported, including step in Coulomb stress, a constant background stress rate, a change in stres rate, a cyclic stress rate superposed to a constant background trend, a stress curve defined by 4 points, a ramp like loading scenario, or a loading tome function readed from an exernal file. The loading classes are imported from tdsr.loading.  
 
-An elementary plotting class is supported, which is imported from tdsm.plotting.
+An elementary plotting class is supported, which is imported from tdsr.plotting.
 
 Input parameter can be defined in config.toml (default settings)  or when calling the seismicity models or loading scenarios. 
 
-Examples how to use the tdsm tools  are provided in python scripts in directory examples. Example scripts reproduce figures published in Dahm (2022) submitted.
+Examples how to use the tdsr tools  are provided in python scripts in directory examples. Example scripts reproduce figures published in Dahm (2022) submitted.
 
 Please cite Dahm (2022) and Dahm et al. (2022) when using the software. No warranty is given. 
 """
@@ -22,9 +22,9 @@ from typing import Optional, Tuple
 import numpy as np
 import numpy.typing as npt
 
-from tdsm.config import Config
-from tdsm.loading import Loading
-from tdsm.utils import (
+from tdsr.config import Config
+from tdsr.loading import Loading
+from tdsr.utils import (
     X0gaussian,
     X0steady,
     X0uniform,
@@ -50,7 +50,7 @@ Result = Tuple[
 
 class LCM(object):
     """Linear Coulomb Failure Model (LCM ) ,according to Dahm (2022), class documentation.
-    This LCM class  is used as base for calculating time dependent seismicity with class tdsm. For calculation of
+    This LCM class  is used as base for calculating time dependent seismicity with class tdsr. For calculation of
     responses with a linear Coulomb Failure model the class "Traditional" is recommended.
     """
 
@@ -138,7 +138,7 @@ class LCM(object):
             )
 
         self.chiz = np.zeros(self.nsigma)
-        #  self.pz wird ueberschrieben, wenn TDSM benutzt wird
+        #  self.pz wird ueberschrieben, wenn tdsr benutzt wird
         self.pz = np.heaviside(self.sigma, 1)
 
         loading = config.loading
@@ -187,9 +187,9 @@ class LCM(object):
         return config, self.t, self.chiz, self.cf, ratez, neqz
 
 
-class TDSM(LCM):
-    """TDSM class documentation.
-    TDSM estimates the time dependent seimicity response for a given stress loading scenario.
+class TDSR(LCM):
+    """tdsr class documentation.
+    tdsr estimates the time dependent seimicity response for a given stress loading scenario.
     Theory is described in Dahm (2022), submitted.
     """
 
