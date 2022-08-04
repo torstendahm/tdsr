@@ -138,7 +138,7 @@ def pdf(x, loc=0.0, scale=1.0):
     if scale < 0.0:
         return np.nan
     y = (x - loc) / scale
-    pdf = np.exp(-(y ** 2) / 2.0) / np.sqrt(2 * np.pi)
+    pdf = np.exp(-(y**2) / 2.0) / np.sqrt(2 * np.pi)
     return pdf / scale
 
 
