@@ -1,0 +1,101 @@
+##### physical model parameters
+# susceptibility to trigger events - this parameter representes chi= V in Dahm (2022)
+chi0 = 1.0E4
+# skin parameter to describe probability , unit e.g. MPa
+depthS = -0.5E0
+# mean failurtime for critical stress state
+t0 = 720  #  for instance t0  is set to deltat, e.g. 720 sec = 12 min
+# loading function to be used (default)
+use_loading = "step"
+# use_loading = "4points"
+# use_loading = "background"
+
+##### starting state
+# initial stress shadow , usually set to zero
+Sshadow = 0.0
+
+##### discretisation parameter
+# sample interval in seconds (default 12 minutes)
+deltat = 720
+# start time in seconds (default 0 seconds)
+tstart = 0
+# end time in seconds (default 24 hours)
+tend = 86_400
+# linear (=0) or logarithmic scale (=1:  if logarithmictstart < 0 required)
+taxis_log = 0
+ntlog = 1000
+
+# sampling of Coulomb stress axis, e.g. deltaS = -depthS/40.
+deltaS = 0.0125
+# range to sample , e.g. sigma_max 2000.*deltaS
+sigma_max = 25.0
+# precision for integration over stress axis, e.g. precision = 12
+precision = 18
+
+##### pre-loading chi0 (X0) distributions controlled by switch iX0switch 
+# steady state equilibrium = 0
+# uniform distribution = 1
+# Gaussian distribution = 2
+iX0switch = 0
+# --- parameter needed for gaussian
+Zmean = 0.0
+Zstd  = 1.0
+# if equilibrium is set to true, a pre-calculated distribution chiz_background is readed and used as starting value
+equilibrium = false
+
+
+##### stress loading models
+[loading]
+  # ------- stress function defined by defining 4 stress points for increasing time steps
+  [loading.4points]
+    # time index of first point (must be larger then 2)
+    n1 = 50          
+    # time index of second point (at least n1+1, better n1+2 as central differences taken)
+    n2 = 51          
+    # coulomb stress at time index 0, n1, n2 and n_end
+    sc0 = 0.0        
+    sc1 = 0.5E0
+    sc2 = 1.0E0
+    sc3 = 2.0E0
+  # ------- step function overlaying steady stressing rate
+  [loading.step]
+    # strend is background stress rate, e.g. in stress_units / time_units (=DeltaS/deltat)
+    strend = 7.0E-5
+    # time of step in seconds defined when calling loading - default: tstep = tend / 2
+    # coulomb stress step 
+    sstep = 1.0E0
+  # ------- cyclic sinusoidal ooading added to background stress rate
+  [loading.cycle]
+    # strend is background stress rate, e.g. in stress_units / time_units (=DeltaS/deltat)
+    strend = 7.0E-5
+    ampsin = 0.2E0
+    Tsin   = 43_200
+  # ------- background loading 
+  [loading.background]
+    # strend is background stress rate, e.g. in stress_units / time_units (=DeltaS/deltat)
+    strend = 7.0E-5
+  # ------- two stress slopes (change in stress rate)
+  [loading.trendchange]
+    # time of step in seconds defined when calling loading - default: tstep = tend / 2
+    # strend1 and strend2, background stress rate in stress_units / time_units
+    strend  = 7.0E-5
+    strend2 = 7.0E-4
+  # ------- three stress slopes (change in stress rate)
+  [loading.ramp]
+    # time of step in seconds defined when calling loading - default: tstep = tend / 2
+    # stress rates in egment 1, 2 and 3 to define ramp (in stress_units / time_units)
+    strend  = 7.0E-5
+    strend2 = 7.0E-4
+    strend3 = 7.0E-5
+    # length of segment 2, i.e. ramp with slope strend2
+    nsample2 = 20
+  # ------- read Coulomb stress change as ascii file
+  [loading.infile]
+    # format iascii=0: ascii format,  else: pickle format (not yet implemented)
+    iascii = true
+    # file name to read with time in t_units and stress in s_units
+    infile  = "data/stresschange_morsleben.dat"
+    scal_t  = 1.0
+    scal_cf = 1.0
+    # stress value at a time before first sample, as a section is introduced to allow to equilibrate system
+    c_tstart = 0.0
