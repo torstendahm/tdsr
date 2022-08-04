@@ -1,7 +1,7 @@
-Welcome to tdsm's documentation!
+Welcome to tdsr's documentation!
 ================================
 
-.. automodule:: tdsm.tdsm
+.. automodule:: tdsr.tdsr
    :members:
 
 .. toctree::
