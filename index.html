@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Welcome to tdsm’s documentation! &#8212; tdsm 0.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -32,80 +32,8 @@
 
           <div class="body" role="main">
             
-  <section id="module-tdsm.tdsm">
-<span id="welcome-to-tdsm-s-documentation"></span><h1>Welcome to tdsm’s documentation!<a class="headerlink" href="#module-tdsm.tdsm" title="Permalink to this heading">¶</a></h1>
-<section id="tdsm-time-dependent-seismicity-model">
-<h2>TDSM (Time Dependent Seismicity Model)<a class="headerlink" href="#tdsm-time-dependent-seismicity-model" title="Permalink to this heading">¶</a></h2>
-<p>TDSM is python tool to simulate time dependent earthquake rates for different stress loading scenarios.
-Earthquake rate is definded as number of events per time unit with magnitudes above a completeness magntiude.
-Stress loading is understood as Coulomb stress as a function of time. The stress loading is assumed homogeneous within the rock volume for which the simulation is performed. The details of the TDSM model are given in the paper by Dahm (2022) submitted.</p>
-<p>Additional  to the TDSM model simulations, the tdsm tool can simulate earthquakes rates for a rate and state seismicity model and a linear Coulomb failure model, which can be loaded from tdsm. Different loading scenarios are supported, including step in Coulomb stress, a constant background stress rate, a change in stres rate, a cyclic stress rate superposed to a constant background trend, a stress curve defined by 4 points, a ramp like loading scenario, or a loading tome function readed from an exernal file. The loading classes are imported from tdsm.loading.</p>
-<p>An elementary plotting class is supported, which is imported from tdsm.plotting.</p>
-<p>Input parameter can be defined in config.toml (default settings)  or when calling the seismicity models or loading scenarios.</p>
-<p>Examples how to use the tdsm tools  are provided in python scripts in directory examples. Example scripts reproduce figures published in Dahm (2022) submitted.</p>
-<p>Please cite Dahm (2022) and Dahm et al. (2022) when using the software. No warranty is given.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.CFM">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">CFM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.CFM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Linear Coulomb Failure Model (CFM ) - traditional way of calculation, class documentation.
-DFM estimtes the linear, instantaneous seimicity response for a given stress loading scenario.
-Simulations with the CFM cannot account for delayed failure,.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.LCM">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">LCM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.LCM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Linear Coulomb Failure Model (LCM ) ,according to Dahm (2022), class documentation.
-This LCM class  is used as base for calculating time dependent seismicity with class tdsm. For calculation of
-responses with a linear Coulomb Failure model the class “Traditional” is recommended.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.RSD">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">RSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.RSD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rate and State Model a la Dietrich (RSrate_Dietrich) class documentation.
-RSrate_Dietrich estimates the time dependent seimicity response for a given stress loading scenario.
-Theory is described in Dietrich (1994), JGR.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.RSD1">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">RSD1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.RSD1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Seismicity response of RS for a continuous stress evolution S(t) for times t
-according to Heimisson &amp; Segall, JGR 2018, Eq.(20) &amp; Eq.(29) &amp; Eq.(34)</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.RSM">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">RSM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.RSM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rate and State Model (RCM) class documentation.
-RSM estimates the time dependent seimicity response for a given stress loading scenario.
-Theory is described in Dietrich (1994), JGR.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.TDSM">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">TDSM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.TDSM" title="Permalink to this definition">¶</a></dt>
-<dd><p>TDSM class documentation.
-TDSM estimates the time dependent seimicity response for a given stress loading scenario.
-Theory is described in Dahm (2022), submitted.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.TDSR1">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">TDSR1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.TDSR1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Time dependent seismicity response ccording to Dahm and Hainzland Hainzl  (2022), class documentation.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="tdsm.tdsm.Traditional">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsm.tdsm.</span></span><span class="sig-name descname"><span class="pre">Traditional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsm.tdsm.Traditional" title="Permalink to this definition">¶</a></dt>
-<dd><p>Linear Coulomb Failure Model (LCM ) - traditional way of calculation, class documentation.
-LCM estimtes the linear, instantaneous seimicity response for a given stress loading scenario.
-Simulations with the LCM cannot account for delayed failure,.</p>
-</dd></dl>
-
-</section>
+  <section id="welcome-to-tdsm-s-documentation">
+<h1>Welcome to tdsm’s documentation!<a class="headerlink" href="#welcome-to-tdsm-s-documentation" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
 </section>
@@ -169,7 +97,7 @@ Simulations with the LCM cannot account for delayed failure,.</p>
       &copy;2021, Torsten Dahm.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
