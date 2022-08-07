@@ -51,7 +51,7 @@ dev_requirements = (
 
 setup(
     author="torstendahm",
-    author_email="contact@romnn.com",
+    author_email="torsten.dahm@gfz-potsdam.de",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
