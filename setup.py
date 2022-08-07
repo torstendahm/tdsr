@@ -5,15 +5,17 @@
 
 from setuptools import find_packages, setup
 from pathlib import Path
-import tdsr
+import importlib
+
+spec = importlib.util.spec_from_file_location("version", "tdsr/version.py")
+version = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(version)
 
 Path().expanduser()
 
 REPO_ROOT = Path(__file__).parent
 
 short_description = "tdsr"
-
-# version = "0.0.1"
 
 try:
     readme_rst = REPO_ROOT / "README.rst"
@@ -83,6 +85,6 @@ setup(
     packages=find_packages(include=["tdsr"]),
     test_suite="tests",
     url="https://github.com/torstendahm/tdsr",
-    version=tdsr.__version__,
+    version=version.version,
     zip_safe=False,
 )
