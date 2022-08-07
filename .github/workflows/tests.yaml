@@ -21,7 +21,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    name: python ${{ matrix.python }}
+    name: test python ${{ matrix.python }}
     strategy:
       fail-fast: false
       matrix:
