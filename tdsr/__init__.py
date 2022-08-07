@@ -4,7 +4,7 @@
 
 __author__ = """torstendahm"""
 __email__ = "torsten.dahm@gfz-potsdam.de"
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 from tdsr.config import Config
 from tdsr.tdsr import CFM, LCM, RSD, RSD1, RSM, TDSR, TDSR1, Result, Traditional
