@@ -1,0 +1,42 @@
+name: tests
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --dev
+      - name: Code checks
+        uses: pre-commit/action@v2.0.0
+        env:
+          SKIP: test
+        with:
+          extra_args: --all-files
+
+  test:
+    runs-on: ubuntu-latest
+    name: python ${{ matrix.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --dev
+      - name: Run tests
+        run: |
+          pipenv run invoke test --no-fail-fast
+      - uses: codecov/codecov-action@v1
