@@ -95,7 +95,7 @@ def test_fig3c():
 
     for k in range(ns):
         loading = BackgroundLoading(
-            _config=tdsr.config,
+            # _config=tdsr.config,
             strend=strend,
             sstep=sstep[k],
             taxis_log=taxis_log,

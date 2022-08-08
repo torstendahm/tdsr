@@ -151,7 +151,7 @@ def test_fig4ab():
         print("i=", i, " Sstep=", Sstep, " sstep[i]=", sstep[i], " tstep=", tstep)
         print("deltat=", deltat, " tstart=", tstart, " tend=", tend)
         loading = StepLoading(
-            _config=tdsr.config,
+            # _config=tdsr.config,
             strend=strend,
             sstep=Sstep,
             tstep=tstep,
@@ -177,7 +177,7 @@ def test_fig4ab():
         r_tdsr[i, :] = r[:]
 
         loading = StepLoading(
-            _config=rsd.config,
+            # _config=rsd.config,
             strend=strend,
             sstep=Sstep,
             tstep=tstep,
@@ -197,7 +197,7 @@ def test_fig4ab():
         r_rsd[i, :] = r
 
         loading = StepLoading(
-            _config=cfm.config,
+            # _config=cfm.config,
             strend=strend,
             sstep=Sstep,
             tstep=tstep,

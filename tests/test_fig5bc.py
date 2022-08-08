@@ -12,6 +12,22 @@ from tdsr import CFM, RSD1, TDSR1
 from tdsr.loading import ExternalFileLoading
 
 
+def compute_groningen_stress_loading(tstart, tend):
+    # Earthquake data
+    data = np.loadtxt(DATA_DIR / "groningenEQ.dat")
+    teq = data[:, 0]
+    # Pressure data
+    data = np.loadtxt(DATA_DIR / "groningenP.dat")
+    tgrid = data[:, 0]
+    p = data[:, 1]
+
+    # Coulomb stress function
+    S = -p
+    dS = np.ediff1d(S, to_begin=0.0)
+    S = np.cumsum(dS)
+    return teq, np.transpose([tgrid, S])
+
+
 def plot_fig5bc(
     out,
     t,
@@ -103,7 +119,10 @@ def test_fig5bc():
     taRSsub = 60.0  # [years] relaxation time in the subcritical RS model
     dotsigc = dsig / ta
     dotsigc_sub = dsig / taRSsub
-    t0 = 1e-4  # [years] mean failure time of a source at critical stress in the TDRS model
+
+    # [years] mean failure time of a source at critical stress
+    # in the TDRS model
+    t0 = 1e-4
 
     # ---- discretizing stress axis for integration with
     deltaS = -depthS / 60.0  # increment do discretize Coulomb stress axis
@@ -114,22 +133,12 @@ def test_fig5bc():
     T1 = 1991  # start time period for fit
     T2 = tend  # end time period for fit
 
-    ########## INPUTS:
-    # Earthquake data:
-    data = np.loadtxt(DATA_DIR / "groningenEQ.dat")
-    teq = data[:, 0]
-    NEQ = len(teq[((teq >= T1) & (teq <= T2))])
-    # Pressure data:
-    data = np.loadtxt(DATA_DIR / "groningenP.dat")
+    teq, data = compute_groningen_stress_loading(tstart=tstart, tend=tend)
     tgrid = data[:, 0]
+    S = data[:, 1]
+    NEQ = len(teq[((teq >= T1) & (teq <= T2))])
     dt = tgrid[1] - tgrid[0]
-    nt = int(np.ceil((tend - tstart) / dt))  # =NT = len(t)
-    p = data[:, 1]
-
-    ##### Coulomb stress function, saved in tmp file  #####
-    S = -p
-    dS = np.ediff1d(S, to_begin=0.0)
-    S = np.cumsum(dS)
+    nt = int(np.ceil((tend - tstart) / dt))
     t00 = np.min(tgrid[((S >= dS0) & (tgrid <= teq[0]))])
     print(
         "time when EQ start, t00=",
@@ -138,25 +147,10 @@ def test_fig5bc():
         dotsigc * (t00 - tgrid[0]),
         dotsigc_sub * (t00 - tgrid[0]),
     )
-    data_file = DATA_DIR / "groningenCFS.dat"
-    np.savetxt(
-        data_file,
-        np.transpose([S, tgrid]),
-        header="\n".join(
-            [
-                "Ascii loading file is expected to have two header lines",
-                "1st column: Coulomb stress, 2nd column: time",
-            ]
-        ),
-    )
 
-    ######## MODEL SIMULATIONS: ######
-
-    #  ------ loading assuming that faults under critical stress exists --------
+    # loading assuming that faults under critical stress exists
     loading = ExternalFileLoading(
-        _config=tdsr.config,
-        iascii=True,
-        infile=data_file,
+        data=data,
         scal_t=1.0,
         scal_cf=1.0,
         strend=dotsigc,
@@ -225,11 +219,10 @@ def test_fig5bc():
     fac = NEQ / np.sum(R_TDSR[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
     R_TDSR *= fac
 
-    #  ------ assuming that no faults exists under critical stress (needed for TDSR and RS) -----
+    # assuming that no faults exists under critical stress
+    # (needed for TDSR and RS)
     loading = ExternalFileLoading(
-        _config=tdsr.config,
-        iascii=True,
-        infile=data_file,
+        data=data,
         scal_t=1.0,
         scal_cf=1.0,
         strend=dotsigc_sub,

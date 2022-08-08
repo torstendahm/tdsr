@@ -23,6 +23,11 @@ def plot_fig7cd(out, t, tstart, tend, teq, cfs, cf_shad, Req, r_tdsr):
     fig, ax = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1, 1]}, figsize=(7, 8))
     plt.subplots_adjust(hspace=0, wspace=0.2)
 
+    # this fails
+    # t is 10000, cfs is 44003
+    print(t.shape)
+    print(cfs.shape)
+    print(cfs.shape)
     ax[0].plot(t, cfs - cfs[0], c="k", ls="solid", lw=1, alpha=0.9)
     ax[0].plot(t, cf_shad, c="k", ls="dotted", lw=1, alpha=0.3)
     ax[0].set_xlim(tstart, tend)
@@ -80,7 +85,6 @@ def plot_fig7cd(out, t, tstart, tend, teq, cfs, cf_shad, Req, r_tdsr):
 
 
 def test_fig7cd():
-    data_cfs = DATA_DIR / "stresschange_morsleben.dat"
     fn_obsrate = DATA_DIR / "morsleben_EQ.dat"
 
     print("set-up the tdsm, lcm and rsm class environments")
@@ -139,10 +143,14 @@ def test_fig7cd():
             depthS = -0.5
             Sshadow = 4.5
 
+        morsleben_data_cfs = np.loadtxt(
+            DATA_DIR / "stresschange_morsleben.dat",
+            skiprows=2,
+            usecols=(1, 0),
+            unpack=False,
+        )
         loading = ExternalFileLoading(
-            _config=tdsr.config,
-            iascii=True,
-            infile=data_cfs,
+            data=morsleben_data_cfs,
             scal_t=scal_t,
             scal_cf=scal_cf,
             strend=strend,

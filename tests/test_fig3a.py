@@ -102,7 +102,7 @@ def test_fig3a():
 
     for k, Zmin in enumerate(Sshadow):
         loading = BackgroundLoading(
-            _config=tdsr.config,
+            # _config=tdsr.config,
             strend=strend,
             taxis_log=taxis_log,
             ntlog=ntlog,
@@ -128,7 +128,7 @@ def test_fig3a():
         r_tdsr[k, :] = r
 
         loading = BackgroundLoading(
-            _config=cfm.config,
+            # _config=cfm.config,
             strend=strend,
             taxis_log=taxis_log,
             ntlog=ntlog,
@@ -151,7 +151,7 @@ def test_fig3a():
         r_cfm[k, :] = r
 
         loading = BackgroundLoading(
-            _config=rsd.config,
+            # _config=rsd.config,
             strend=strend,
             taxis_log=taxis_log,
             ntlog=ntlog,

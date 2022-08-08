@@ -7,7 +7,7 @@ import inspect
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .utils import dump_values, load_values, PLOT_DIR, DATA_DIR, TEST_DIR
+from .utils import dump_values, load_values, PLOT_DIR
 from tdsr import Config, RSD1, TDSR1
 from tdsr.loading import ExternalFileLoading
 
@@ -37,13 +37,29 @@ def plot_read_loading(out, t, tstart, tend, S, r_tdsr, r_rsd):
     fig.savefig(str(out) + ".png", dpi=300, format="png", bbox_inches="tight")
 
 
-def test_read_loading():
-    config_file = TEST_DIR / "config.toml"
-    data_file = DATA_DIR / "CFSloading_synthetic.dat"
+def compute_stress_loading(depthS, tstart, tend, nt, strend, deltat):
+    dsig = -depthS
+    t = np.linspace(tstart, tend, nt)
+    dS = np.zeros(nt)
 
-    print("set-up the tdsm, lcm and rsm class environments")
-    tdsr = TDSR1(config=Config.open(config_file))
-    rsd1 = RSD1(config=Config.open(config_file))
+    N1 = int(0.1 * nt)
+    N2 = int(0.3 * nt)
+    N3 = int(0.5 * nt)
+    N4 = int(0.6 * nt)
+
+    dS[:N1] = strend * deltat
+    dS[N2:N3] = 3 * strend * deltat
+    dS[N4:] = 0.5 * strend * deltat
+    dS[N1] += 5 * dsig
+    dS[N2] -= 5 * dsig
+    dS[N4] += 2 * dsig
+    S = np.cumsum(dS)
+    return t, S
+
+
+def test_read_loading():
+    tdsr = TDSR1()
+    rsd1 = RSD1()
 
     print("define model parameter for plotting, if different from config file")
     hours = 1.0
@@ -66,37 +82,8 @@ def test_read_loading():
     scal_t = 1.0  # time provilded in units of days, to be scaled to seconds
     c_tstart = 0.0
 
-    # -----------------------------------------------------
-    print("Calculate stress loading function and save in directory ", data_file)
-    # -----------------------------------------------------
-    dsig = -depthS
-    t = np.linspace(tstart, tend, nt)
-    dS = np.zeros(nt)
-
-    N1 = int(0.1 * nt)
-    N2 = int(0.3 * nt)
-    N3 = int(0.5 * nt)
-    N4 = int(0.6 * nt)
-
-    dS[:N1] = strend * deltat
-    dS[N2:N3] = 3 * strend * deltat
-    dS[N4:] = 0.5 * strend * deltat
-    dS[N1] += 5 * dsig
-    dS[N2] -= 5 * dsig
-    dS[N4] += 2 * dsig
-    S = np.cumsum(dS)
-
-    # External loading file is expected to have two headin lines (see tdsm/loading.py mthod ExternalFileLoading
-    # first column is Coulomb stress , secind column is time (note that scaling factors can be provided during call)
-    np.savetxt(
-        data_file,
-        np.transpose([S, t]),
-        header="\n".join(
-            [
-                "Ascii loading file is expected to have two header lines",
-                "1st column: Coulomb stress, 2nd column: time",
-            ]
-        ),
+    t, S = compute_stress_loading(
+        depthS=depthS, tstart=tstart, tend=tend, nt=nt, strend=strend, deltat=deltat
     )
 
     # -----------------------------------------------------
@@ -106,9 +93,7 @@ def test_read_loading():
     r_rsd = np.zeros(nt)
 
     loading = ExternalFileLoading(
-        _config=tdsr.config,
-        iascii=True,
-        infile=data_file,
+        data=np.transpose([t, S]),
         scal_t=scal_t,
         scal_cf=scal_cf,
         strend=strend,
@@ -132,9 +117,7 @@ def test_read_loading():
     )
 
     loading = ExternalFileLoading(
-        _config=rsd1.config,
-        iascii=True,
-        infile=data_file,
+        data=np.transpose([t, S]),
         scal_t=scal_t,
         scal_cf=scal_cf,
         strend=strend,

@@ -95,7 +95,7 @@ def test_fig4cd():
     # Calculate earthquake rates for cyclic loading
     # ----------------------------------------
     loading = CyclicLoading(
-        _config=tdsr.config,
+        # _config=tdsr.config,
         strend=strend,
         ampsin=ampsin,
         Tsin=Tsin,
@@ -120,7 +120,7 @@ def test_fig4cd():
     r_tdsr = r
 
     loading = CyclicLoading(
-        _config=cfm.config,
+        # _config=cfm.config,
         strend=strend,
         ampsin=ampsin,
         Tsin=Tsin,
@@ -135,7 +135,7 @@ def test_fig4cd():
     r_cfm = r
 
     loading = CyclicLoading(
-        _config=rsd.config,
+        # _config=rsd.config,
         strend=strend,
         ampsin=ampsin,
         Tsin=Tsin,
