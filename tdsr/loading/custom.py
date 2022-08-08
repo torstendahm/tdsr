@@ -12,12 +12,12 @@ if TYPE_CHECKING:
     from tdsr.config import Config
 
 
-class ExternalFileLoading(Loading):
+class CustomLoading(Loading):
     """
-    Class ExternalFileLoading (short  name "InFile") is used to read an arbitrary stress loading file from disk. Both ascii and binary files can be loaded if the formatting is correct. See examples for further explanations
+    CustomLoading (short  name "custom") is used to read an arbitrary stress loading file from disk or via an argument. Both ascii and binary files can be loaded if the formatting is correct. See examples for further explanations
     """
 
-    __name__: str = "InFile"
+    __name__: str = "Custom"
 
     def __init__(
         self,

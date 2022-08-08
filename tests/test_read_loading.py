@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from .utils import dump_values, load_values, PLOT_DIR
 from tdsr import RSD1, TDSR1
-from tdsr.loading import ExternalFileLoading
+from tdsr.loading import CustomLoading
 
 
 def plot_read_loading(out, t, tstart, tend, S, r_tdsr, r_rsd):
@@ -92,7 +92,7 @@ def test_read_loading():
     r_tdsr = np.zeros(nt)
     r_rsd = np.zeros(nt)
 
-    loading = ExternalFileLoading(
+    loading = CustomLoading(
         data=np.transpose([t, S]),
         scal_t=scal_t,
         scal_cf=scal_cf,
@@ -116,7 +116,7 @@ def test_read_loading():
         tend=tend,
     )
 
-    loading = ExternalFileLoading(
+    loading = CustomLoading(
         data=np.transpose([t, S]),
         scal_t=scal_t,
         scal_cf=scal_cf,

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from .utils import dump_values, load_values, PLOT_DIR, DATA_DIR
 from tdsr import Traditional, TDSR1
-from tdsr.loading import ExternalFileLoading
+from tdsr.loading import CustomLoading
 
 
 def plot_fig7cd(out, t, tstart, tend, teq, cfs, cf_shad, Req, r_tdsr):
@@ -149,7 +149,7 @@ def test_fig7cd():
             usecols=(1, 0),
             unpack=False,
         )
-        loading = ExternalFileLoading(
+        loading = CustomLoading(
             data=morsleben_data_cfs,
             scal_t=scal_t,
             scal_cf=scal_cf,

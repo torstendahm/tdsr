@@ -90,11 +90,9 @@ equilibrium = false
     # length of segment 2, i.e. ramp with slope strend2
     nsample2 = 20
   # ------- read Coulomb stress change as ascii file
-  [loading.infile]
-    # format iascii=0: ascii format,  else: pickle format (not yet implemented)
-    iascii = true
+  [loading.custom]
     # file name to read with time in t_units and stress in s_units
-    infile  = "data/stresschange_morsleben.dat"
+    file  = "data/stresschange_morsleben.dat"
     scal_t  = 1.0
     scal_cf = 1.0
     # stress value at a time before first sample, as a section is introduced to allow to equilibrate system

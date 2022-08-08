@@ -6,7 +6,7 @@
 import numpy as np
 
 from .utils import DATA_DIR
-from tdsr.loading import ExternalFileLoading
+from tdsr.loading import CustomLoading
 from tests.test_fig5bc import compute_groningen_stress_loading
 
 
@@ -46,8 +46,8 @@ def test_custom_loading_file_and_data(fs):
             ),
         )
 
-    expected = ExternalFileLoading(data=data, **loading_params)
-    ascii_loading = ExternalFileLoading(file=ascii_data_file, **loading_params)
+    expected = CustomLoading(data=data, **loading_params)
+    ascii_loading = CustomLoading(file=ascii_data_file, **loading_params)
 
     assert np.allclose(expected.values(0), ascii_loading.values(0))
     # assert np.allclose(expected.stress_rate, ascii_loading.stress_rate)

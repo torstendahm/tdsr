@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from .utils import dump_values, load_values, PLOT_DIR, DATA_DIR
 from tdsr import CFM, RSD1, TDSR1
-from tdsr.loading import ExternalFileLoading
+from tdsr.loading import CustomLoading
 
 
 def compute_groningen_stress_loading(tstart, tend):
@@ -149,7 +149,7 @@ def test_fig5bc():
     )
 
     # loading assuming that faults under critical stress exists
-    loading = ExternalFileLoading(
+    loading = CustomLoading(
         data=data,
         scal_t=1.0,
         scal_cf=1.0,
@@ -221,7 +221,7 @@ def test_fig5bc():
 
     # assuming that no faults exists under critical stress
     # (needed for TDSR and RS)
-    loading = ExternalFileLoading(
+    loading = CustomLoading(
         data=data,
         scal_t=1.0,
         scal_cf=1.0,

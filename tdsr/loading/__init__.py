@@ -11,7 +11,7 @@ from tdsr.loading.cyclic import CyclicLoading
 from tdsr.loading.background import BackgroundLoading
 from tdsr.loading.trend_change import TrendchangeLoading
 from tdsr.loading.ramp import RampLoading
-from tdsr.loading.external import ExternalFileLoading
+from tdsr.loading.custom import CustomLoading
 
 LOADING: Dict[str, Type[Loading]] = {
     "step": StepLoading,
@@ -20,5 +20,5 @@ LOADING: Dict[str, Type[Loading]] = {
     "cycle": CyclicLoading,
     "trendchange": TrendchangeLoading,
     "ramp": RampLoading,
-    "infile": ExternalFileLoading,
+    "custom": CustomLoading,
 }
