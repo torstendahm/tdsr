@@ -3,25 +3,25 @@ name: docs
 on: [push]
 
 jobs:
-    publish:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-python@v2
-            - name: Install dependencies
-              run: |
-                  pip install pipenv
-                  pipenv install --dev
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --dev
 
-            - name: Build docs
-              run: |
-                  pipenv run invoke docs --no-serve
-                  touch docs/_build/html/.nojekyll
+      - name: Build docs
+        run: |
+          pipenv run invoke docs --no-serve
+          touch docs/_build/html/.nojekyll
 
-            - name: Publish documentation
-              uses: JamesIves/github-pages-deploy-action@3.7.1
-              with:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  BRANCH: gh-pages
-                  FOLDER: docs/_build/html/
-                  CLEAN: true
+      - name: Publish documentation
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: docs/_build/html/
+          CLEAN: true
