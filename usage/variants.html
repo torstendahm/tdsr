@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Variants &#8212; TDSR 0.0.5 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Loadings" href="loadings.html" />
+    <link rel="prev" title="Configuration" href="configuration.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="variants">
+<h1>Variants<a class="headerlink" href="#variants" title="Permalink to this heading">¶</a></h1>
+<p>TODO: explain variants here</p>
+<p>TODO: maybe add an image</p>
+<span class="target" id="module-tdsr.tdsr"></span><section id="tdsr-time-dependent-stress-response-seismicity-models">
+<h2>TDSR (Time Dependent Stress Response) seismicity models<a class="headerlink" href="#tdsr-time-dependent-stress-response-seismicity-models" title="Permalink to this heading">¶</a></h2>
+<p>TDSR is a python tool to simulate time dependent earthquake rates for different stress loading scenarios.
+Earthquake rate is definded as number of events per time unit with magnitudes above a completeness magnitude.
+Stress loading is understood as Coulomb stress as a function of time. The stress loading is assumed homogeneous within the rock volume for which the simulation is performed. The details of the TDSR seismicity model and examles are described in Dahm and Hainzl (2022), JGR, in review.</p>
+<p>Different loading scenarios are supported and defined by loading classes which are imported from tdsr.loading. Loading classes include step in Coulomb stress (class StepLoading), a constant background stress rate (class BackgroundLoading), a change in stress rate (class TrendchangeLoading), a cyclic stress rate superposed to a constant background trend (class CyclicLoading), a stress curve defined by 4 points (class FourPointLoading), or a ramp like loading scenario (class RampLoading).
+Alternatively, the loading time function can be read from an external ascii or binary file (class ExternalFileLoading). Stress loading functions can also be defined in the calling python script and directly passed to the seismicity model classes (example not yet provided).</p>
+<p>Additional to simulations of the new TDSR model, the toolbox can compare results with earthquake rates calculated from other seismicity models, using the same loading functions and parameter settings as TDSR. All models are defined as classes and can be loaded from tdsr (e.g. TDSR1 for the TDSR model, provided by tdsr.tdsr.TDSR1). Other classes included so far are rate and state seismicity models (RSD, RSD1) and linear Coulomb failure models (CFM, Traditional).</p>
+<p>An elementary plotting class is supported, which is imported from tdsr.plotting. However, the examples provided in the toolbox use their own plotting solutions.</p>
+<p>Default settings of input parameter can be defined in config.toml. Default values can be overwritten when calling the seismicity model classes or  loading scenarios (see examples).</p>
+<p>The examples collected in the subdirectory ‘’examples’’ reproduce figures published in Dahm and Hainzl (2022). All theory of the TDSR model and the examples are described in  Dahm and Hainzl (2022). The software toolbox in python is published together with the JGR paper under Dahm et al. (2022) (doi link to be added).
+The TDSR  github project here, however, is intended as an open source project that may change and improve over the years. Please send us your suggestions or addings and contribute to the git project if interested.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.CFM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">CFM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.CFM" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class Coulomb Failure Model (CFM ) is ismilar to Traditional but coded different.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.LCM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">LCM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.LCM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class of the Linear Coulomb Failure Model (LCM) used as base for calculating time dependent seismicity with class TDSR. Note that TDSR is outdated and was replaced by TDSR1.
+For simulations with the linear Coulomb Failure model use classes “CFM” or “Traditional”.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.RSD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">RSD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.RSD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rate and State Model a la Dietrich (RSrate_Dietrich) class documentation.
+RSrate_Dietrich estimates the time dependent seimicity response for a given stress loading scenario.
+Theory is described in Dietrich (1994), JGR.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.RSD1">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">RSD1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.RSD1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seismicity response of RS for a continuous stress evolution S(t) for times t
+according to Heimisson &amp; Segall, JGR 2018, Eq.(20) &amp; Eq.(29) &amp; Eq.(34)</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.RSM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">RSM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.RSM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rate and State Model (RCM) class documentation.
+RSM estimates the time dependent seimicity response for a given stress loading scenario.
+Theory is described in Dietrich (1994), JGR.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.TDSR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">TDSR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.TDSR" title="Permalink to this definition">¶</a></dt>
+<dd><p>TDSR class realisation builts on LCM and is depreciated. Use TDSR1 instead.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.TDSR1">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">TDSR1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.TDSR1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class TDSR1 simulates the time dependent stress rate seismicity model TDSR.
+Key parameters are chi0 (susceptibility to trigger earthquakes after unit step increase),
+t0 (mean time to failure for critically stressed sources),  and depthS (skin depth parameter in exponential trigger functions).
+Different source distributions can be considered, controlled by parameter iX0switch. If iX0switch==1 a uniform disribution
+of stress stages at seismic sources is assumed. If iX0switch==2 a Gaussian distribution of stress stages is assumed. The
+mean stress level of the Gaussian peak is defined by Zmean and the standard deviation by Zstd. If iX0switch==0 a steady state distribution of
+sources is assumed, using config.strend. All three cases of stress distributions can be modified by a shift of Sshadow  on the stress axis to simulate a subcritical stress state.
+If taxis_log==0 an equally space time sampling is assumed with interval deltat.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tdsr.tdsr.Traditional">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tdsr.tdsr.</span></span><span class="sig-name descname"><span class="pre">Traditional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Config</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tdsr.tdsr.Traditional" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear Coulomb Failure Model (LCM) realisation using a simple (traditional) approach.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">TDSR</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Usage</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#example">Example</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Variants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="loadings.html">Loadings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Usage</a><ul>
+      <li>Previous: <a href="configuration.html" title="previous chapter">Configuration</a></li>
+      <li>Next: <a href="loadings.html" title="next chapter">Loadings</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Torsten Dahm, Sebastian Hainzl.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/usage/variants.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
