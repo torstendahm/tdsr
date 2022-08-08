@@ -4,11 +4,12 @@ Welcome to tdsr's documentation!
 .. automodule:: tdsr.tdsr
    :members:
 
+.. automodule:: tdsr.loading
+   :members:
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
-
 
 Indices and tables
 ==================

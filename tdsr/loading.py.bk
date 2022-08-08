@@ -18,6 +18,9 @@ from tdsr.utils import DEBUG, Number, gridrange, gridrange_log
 
 
 class Loading(ABC):
+    """
+    This loading claass is not specified (not used)
+    """
     __name__: str = ""
 
     def __init__(self) -> None:
@@ -38,6 +41,9 @@ class Loading(ABC):
 
 
 class FourPointLoading(Loading):
+    """
+    Class FourPointLoading (short  name "4points") can define a Coulomb stress loading by 4 stress values at subsequent times. Equally-spaced stress function with a sampling interval of "deltat" is generated. The first Coulomb stress value (sc0) is assumed at time tstart. The last one (sc3) at time tend. The sample  times of the two stress values in between (sc1 and sc2) are defined by integer number of the sampling interval, n1 and n2, respectively.   
+    """
     __name__: str = "4points"
 
     def __init__(
@@ -74,6 +80,9 @@ class FourPointLoading(Loading):
 
 
 class StepLoading(Loading):
+    """
+    Class StepLoading (short  name "Step") can define a stress step over a linear trend of Coulomb stress loading. An equal distance sampling of the stress function with sampling interval of "deltat" is generated if t_axis_log != 1. Controlling parameter are the background stress trend (strend), the time when the stress step is applied (tstep), and the magnitude of the stress step (sstep). If taxis_log==1 a logarithic time sampling is considered. Then, the time of the step is set to t=tstart, and the  number of sampling points (ntlog) is specified instead of the sampling interval. 
+    """
     __name__: str = "Step"
 
     def __init__(
@@ -156,6 +165,9 @@ class StepLoading(Loading):
 
 
 class CyclicLoading(Loading):
+    """
+    Class CyclicLoading (short  name "Cycle") defines a sinusoidal stress loading function with period Tsin and amplitude ampsin. A linear trend is superposed (strend). An equal distance sampling of the stress function with sampling interval of "deltat" is generated.
+    """
     __name__: str = "Cycle"
 
     def __init__(
@@ -207,6 +219,9 @@ class CyclicLoading(Loading):
 
 
 class BackgroundLoading(Loading):
+    """
+    Class BackgroundLoading (short  name "Background") defines a constant stress rate with slope strend. If t_axis_log==1 a logarithmic time sampling is realised, where the number of samples is defined by ntlog. Otherwise, a constant sampling interval of deltat is defined. The loading time series is defined between times tstart and tend.
+    """
     __name__: str = "Background"
 
     def __init__(
@@ -272,6 +287,9 @@ class BackgroundLoading(Loading):
 
 
 class TrendchangeLoading(Loading):
+    """
+    Class TrendchangeLoading (short  name "Trendchange") defines a loading function where stress rate changes abruptly from strend to strend2 at time tstep. A constant sampling interval is defined by deltat between tstart and tend.
+    """
     __name__: str = "Trendchange"
 
     def __init__(
@@ -327,6 +345,9 @@ class TrendchangeLoading(Loading):
 
 
 class RampLoading(Loading):
+    """
+    Class RampLoading (short  name "Ramp") is used to realise a ramp loading of length nsample2 * deltat starting at time tstep, where deltat is the sampling interval
+    """
     __name__: str = "Ramp"
 
     def __init__(
@@ -407,6 +428,9 @@ class RampLoading(Loading):
 
 
 class ExternalFileLoading(Loading):
+    """
+    Class ExternalFileLoading (short  name "InFile") is used to read an arbitrary stress loading file from disk. Both ascii and binary files can be loaded if the formatting is correct. See examples for further explanations
+    """
     __name__: str = "InFile"
 
     def __init__(

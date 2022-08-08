@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "tdsr"
-copyright = "2021, Torsten Dahm"
-author = "Torsten Dahm"
+project = "TDSR"
+copyright = "2022, Torsten Dahm, Roman Dahm  and Sebastian Hainzl"
+author = "Torsten Dahm, Roman Dahm, Sebastian Hainzl"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.5"

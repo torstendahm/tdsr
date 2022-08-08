@@ -1,6 +1,6 @@
 ################################
 # Time Dependent Seismicity Model - Utility functions
-# T. Dahm, R. Dahm 26.12.2021
+# T. Dahm, R. Dahm, S. Hainzl  26.12.2021
 ################################
 
 import os
