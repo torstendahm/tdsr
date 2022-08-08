@@ -138,7 +138,7 @@ def pdf(x, loc=0.0, scale=1.0):
     if scale < 0.0:
         return np.nan
     y = (x - loc) / scale
-    pdf = np.exp(-(y**2) / 2.0) / np.sqrt(2 * np.pi)
+    pdf = np.exp(-(y ** 2) / 2.0) / np.sqrt(2 * np.pi)
     return pdf / scale
 
 
@@ -155,7 +155,8 @@ def X0gaussian(Z, Z0mean, Z0std, X0):
 
 def Eq5(t, Zmin, X0, t0, dsig, dotsigc):
     """
-    Constant stressing (with rate dotsigc) given an initially uniform stress distribution
+    Constant stressing (with rate dotsigc) given an initially
+    uniform stress distribution
     Eq.(5) in Dahm & Hainzl (2022)
     """
     ta = dsig / dotsigc
@@ -170,8 +171,9 @@ def Eq5(t, Zmin, X0, t0, dsig, dotsigc):
 
 def Eq7(t, dS, r0, dsig, dotsigc, dotsigca):
     """
-    Stress step dS at time t=0 given an initial steady state state related constant rate r0 for dotsigc
-    with constant stressing rate dotsigca for t>0
+    Stress step dS at time t=0 given an initial steady state state
+    related constant rate r0 for dotsigc with constant stressing rate
+    dotsigca for t>0
     Eq.(8) in Dahm & Hainzl (2022)
     """
     f = dotsigca / dotsigc
@@ -181,8 +183,8 @@ def Eq7(t, dS, r0, dsig, dotsigc, dotsigca):
 
 def Eq8(t, dS, r0, dsig, dotsigc):
     """
-    Stress step dS at time t=0 given an initial steady state state related constant rate r0 for dotsigc
-    without stress changes for t>0
+    Stress step dS at time t=0 given an initial steady state state
+    related constant rate r0 for dotsigc without stress changes for t>0
     Eq.(7) in Dahm & Hainzl (2022)
     """
     R = r0 / (np.exp(-dS / dsig) + (dotsigc / dsig) * t)

@@ -5,7 +5,7 @@
 __author__ = """torstendahm"""
 __email__ = "torsten.dahm@gfz-potsdam.de"
 
-from tdsr.version import version as __version__
+from tdsr.version import version as __version__  # noqa: F401
 from tdsr.config import Config
 from tdsr.tdsr import CFM, LCM, RSD, RSD1, RSM, TDSR, TDSR1, Result, Traditional
 from tdsr.utils import load, save

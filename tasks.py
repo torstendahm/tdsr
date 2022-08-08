@@ -5,6 +5,7 @@ Execute 'invoke --list' for guidance on using invoke
 """
 import shutil
 import pprint
+import itertools as it
 
 from invoke import task
 import webbrowser
@@ -23,15 +24,19 @@ TOX_DIR = REPO_ROOT / ".tox"
 COVERAGE_FILE = REPO_ROOT / ".coverage"
 COVERAGE_DIR = REPO_ROOT / "htmlcov"
 COVERAGE_REPORT = COVERAGE_DIR / "index.html"
-PYTHON_FILES = list(REPO_ROOT.glob("**/*.py"))
+PYTHON_FILES = list(
+    it.chain.from_iterable([d.glob("**/*.py") for d in [TEST_DIR, SOURCE_DIR]])
+) + [REPO_ROOT / "setup.py", REPO_ROOT / "utils.py", REPO_ROOT / "tasks.py"]
 
 
 @task(help={"check": "Checks if source is formatted without applying changes"})
 def format(c, check=False):
     """Format code"""
     python_files = " ".join([str(f) for f in PYTHON_FILES])
-    black_options = "--diff" if check else ""
-    c.run(f"pipenv run black {black_options} {python_files}")
+    black_options = []
+    if check:
+        black_options.append("--diff")
+    c.run(f"pipenv run black {python_files} {' '.join(black_options)}")
 
 
 @task
