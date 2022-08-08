@@ -1,19 +1,21 @@
 """
-tdsr (Time Dependent Seismicity Model)
+TDSR (Time Dependent Stress Response) seismicity models
 ====================================
-tdsr is python tool to simulate time dependent earthquake rates for different stress loading scenarios. 
-Earthquake rate is definded as number of events per time unit with magnitudes above a completeness magntiude. 
-Stress loading is understood as Coulomb stress as a function of time. The stress loading is assumed homogeneous within the rock volume for which the simulation is performed. The details of the tdsr model are given in the paper by Dahm (2022) submitted. 
+TDSR is a python tool to simulate time dependent earthquake rates for different stress loading scenarios. 
+Earthquake rate is definded as number of events per time unit with magnitudes above a completeness magnitude. 
+Stress loading is understood as Coulomb stress as a function of time. The stress loading is assumed homogeneous within the rock volume for which the simulation is performed. The details of the TDSR seismicity model and examles are described in Dahm and Hainzl (2022), JGR, in review.
 
-Additional  to the tdsr model simulations, the tdsr tool can simulate earthquakes rates for a rate and state seismicity model and a linear Coulomb failure model, which can be loaded from tdsr. Different loading scenarios are supported, including step in Coulomb stress, a constant background stress rate, a change in stres rate, a cyclic stress rate superposed to a constant background trend, a stress curve defined by 4 points, a ramp like loading scenario, or a loading tome function readed from an exernal file. The loading classes are imported from tdsr.loading.  
+Different loading scenarios are supported and defined by loading classes which are imported from tdsr.loading. Loading classes include step in Coulomb stress (class StepLoading), a constant background stress rate (class BackgroundLoading), a change in stress rate (class TrendchangeLoading), a cyclic stress rate superposed to a constant background trend (class CyclicLoading), a stress curve defined by 4 points (class FourPointLoading), or a ramp like loading scenario (class RampLoading). 
+Alternatively, the loading time function can be read from an external ascii or binary file (class ExternalFileLoading). Stress loading functions can also be defined in the calling python script and directly passed to the seismicity model classes (example not yet provided). 
 
-An elementary plotting class is supported, which is imported from tdsr.plotting.
+Additional to simulations of the new TDSR model, the toolbox can compare results with earthquake rates calculated from other seismicity models, using the same loading functions and parameter settings as TDSR. All models are defined as classes and can be loaded from tdsr (e.g. TDSR1 for the TDSR model, provided by tdsr.tdsr.TDSR1). Other classes included so far are rate and state seismicity models (RSD, RSD1) and linear Coulomb failure models (CFM, Traditional). 
 
-Input parameter can be defined in config.toml (default settings)  or when calling the seismicity models or loading scenarios. 
+An elementary plotting class is supported, which is imported from tdsr.plotting. However, the examples provided in the toolbox use their own plotting solutions. 
 
-Examples how to use the tdsr tools  are provided in python scripts in directory examples. Example scripts reproduce figures published in Dahm (2022) submitted.
+Default settings of input parameter can be defined in config.toml. Default values can be overwritten when calling the seismicity model classes or  loading scenarios (see examples). 
 
-Please cite Dahm (2022) and Dahm et al. (2022) when using the software. No warranty is given. 
+The examples collected in the subdirectory ''examples'' reproduce figures published in Dahm and Hainzl (2022). All theory of the TDSR model and the examples are described in  Dahm and Hainzl (2022). The software toolbox in python is published together with the JGR paper under Dahm et al. (2022) (doi link to be added). 
+The TDSR  githib project here, however, is intended as an open source project that may change and improve over the years. Please send us your suggestions or addings and contribute to the git project if interested. 
 """
 
 from copy import deepcopy
@@ -49,9 +51,9 @@ Result = Tuple[
 
 
 class LCM(object):
-    """Linear Coulomb Failure Model (LCM ) ,according to Dahm (2022), class documentation.
-    This LCM class  is used as base for calculating time dependent seismicity with class tdsr. For calculation of
-    responses with a linear Coulomb Failure model the class "Traditional" is recommended.
+    """
+    Class of the Linear Coulomb Failure Model (LCM) used as base for calculating time dependent seismicity with class TDSR. Note that TDSR is outdated and was replaced by TDSR1.
+    For simulations with the linear Coulomb Failure model use classes "CFM" or "Traditional".
     """
 
     def __init__(self, config: Optional[Config] = None) -> None:
@@ -188,9 +190,8 @@ class LCM(object):
 
 
 class TDSR(LCM):
-    """tdsr class documentation.
-    tdsr estimates the time dependent seimicity response for a given stress loading scenario.
-    Theory is described in Dahm (2022), submitted.
+    """
+    TDSR class realisation builts on LCM and is depreciated. Use TDSR1 instead. 
     """
 
     def _compute(self, config: Config) -> Result:
@@ -203,7 +204,16 @@ class TDSR(LCM):
 
 
 class TDSR1(object):
-    """Time dependent seismicity response ccording to Dahm and Hainzland Hainzl  (2022), class documentation."""
+    """
+    Class TDSR1 simulates the time dependent stress rate seismicity model TDSR.
+    Key parameters are chi0 (susceptibility to trigger earthquakes after unit step increase),
+    t0 (mean time to failure for critically stressed sources),  and depthS (skin depth parameter in exponential trigger functions).
+    Different source distributions can be considered, controlled by parameter iX0switch. If iX0switch==1 a uniform disribution 
+    of stress stages at seismic sources is assumed. If iX0switch==2 a Gaussian distribution of stress stages is assumed. The 
+    mean stress level of the Gaussian peak is defined by Zmean and the standard deviation by Zstd. If iX0switch==0 a steady state distribution of 
+    sources is assumed, using config.strend. All three cases of stress distributions can be modified by a shift of Sshadow  on the stress axis to simulate a subcritical stress state.
+    If taxis_log==0 an equally space time sampling is assumed with interval deltat. 
+    """
 
     def __init__(self, config: Optional[Config] = None) -> None:
         """
@@ -366,9 +376,7 @@ class TDSR1(object):
 
 
 class Traditional(LCM):
-    """Linear Coulomb Failure Model (LCM ) - traditional way of calculation, class documentation.
-    LCM estimtes the linear, instantaneous seimicity response for a given stress loading scenario.
-    Simulations with the LCM cannot account for delayed failure,.
+    """Linear Coulomb Failure Model (LCM) realisation using a simple (traditional) approach. 
     """
 
     def _compute(self, config: Config) -> Result:
@@ -391,9 +399,7 @@ class Traditional(LCM):
 
 
 class CFM(LCM):
-    """Linear Coulomb Failure Model (CFM ) - traditional way of calculation, class documentation.
-    DFM estimtes the linear, instantaneous seimicity response for a given stress loading scenario.
-    Simulations with the CFM cannot account for delayed failure,.
+    """The class Coulomb Failure Model (CFM ) is ismilar to Traditional but coded different.
     """
 
     def _compute(self, config: Config) -> Result:
