@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 from tdsr.utils import gridrange, DEBUG
 from tdsr.types import Number, PathLike
+from tdsr.exceptions import InvalidParameter, MissingParameter
 
 
 if TYPE_CHECKING:
@@ -45,7 +46,7 @@ class CustomLoading(Loading):
 
         if file is not None:
             if not Path(file).is_file():
-                raise ValueError("input file does not exist")
+                raise FileNotFoundError  # ("input file does not exist")
             with open(file, "rb") as f:
                 self.data = np.loadtxt(
                     f,
@@ -55,10 +56,10 @@ class CustomLoading(Loading):
                 )
         elif data is not None:
             if data.shape[1] != 2:
-                raise ValueError("data shape must be length x 2 (time, stress")
+                raise InvalidParameter("data shape must be length x 2 (time, stress")
             self.data = data
         else:
-            raise ValueError("custom loading missing file or data argument")
+            raise MissingParameter("custom loading missing file or data argument")
 
     @property
     def stress_rate(self) -> float:
@@ -68,11 +69,10 @@ class CustomLoading(Loading):
     def values(self, length: int) -> npt.NDArray[np.float64]:
 
         if self.taxis_log != 0:
-            print(
+            raise InvalidParameter(
                 "logarithmic time samples not possible when "
                 "reading in stress loading function. Set taxis_log = 0"
             )
-            exit()
 
         # scaled time
         t_obs = self.data[:, 0] * self.scal_t
@@ -84,7 +84,7 @@ class CustomLoading(Loading):
 
         if self.tstart > tmin_obs:
             print("tmin_obs=", tmin_obs, " tstart=", self.tstart)
-            raise ValueError(
+            raise InvalidParameter(
                 "tstart must be smaller than the begin time of series read in"
             )
         tmin, tmax, nt, t, dt = gridrange(self.tstart, self.tend, self.deltat)

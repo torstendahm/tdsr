@@ -5,6 +5,7 @@ import numpy as np
 import numpy.typing as npt
 from tdsr.types import Number
 from tdsr.utils import DEBUG
+from tdsr.exceptions import InvalidParameter
 
 
 if TYPE_CHECKING:
@@ -100,5 +101,5 @@ class StepLoading(Loading):
                 )
             )
         if not (n1 >= 0 and n1 + 1 <= nt):
-            raise ValueError("tstep must be greater than zero and smaller than tend")
+            raise InvalidParameter("tstep must be greater than zero and smaller than tend")
         return np.hstack([seg1, seg3])

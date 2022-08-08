@@ -26,6 +26,7 @@ import numpy.typing as npt
 
 from tdsr.config import Config
 from tdsr.loading import Loading
+from tdsr.exceptions import MissingParameter
 from tdsr.utils import (
     X0gaussian,
     X0steady,
@@ -144,7 +145,7 @@ class LCM(object):
 
         loading = config.loading
         if loading is None:
-            raise ValueError("missing loading function")
+            raise MissingParameter("missing loading function")
         self.cf = loading.values(length=self.nt)
 
     def _compute(self, config: Config) -> Result:
@@ -301,7 +302,7 @@ class TDSR1(object):
         # self.pz = np.heaviside(self.sigma, 1)
         loading = config.loading
         if loading is None:
-            raise ValueError("missing loading function")
+            raise MissingParameter("missing loading function")
         self.cf = loading.values(length=self.nt)
 
     def _compute(self, config: Config) -> Result:
