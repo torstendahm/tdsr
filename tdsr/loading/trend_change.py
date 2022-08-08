@@ -12,17 +12,21 @@ if TYPE_CHECKING:
 
 
 class TrendchangeLoading(Loading):
+    """
+    Class TrendchangeLoading (short  name "Trendchange") defines a loading function where stress rate changes abruptly from strend to strend2 at time tstep. A constant sampling interval is defined by deltat between tstart and tend.
+    """
+
     __name__: str = "Trendchange"
 
     def __init__(
         self,
-        _config: "Config",
         strend: Number = 7.0e-5,
         strend2: Number = 7.0e-4,
         tstep: Optional[Number] = None,
         tstart: Number = 0.0,
         tend: Number = 86400.0,
         deltat: Number = 720.0,
+        config: Optional["Config"] = None,
     ):
         self.config = _config
         self.strend = strend

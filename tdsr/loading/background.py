@@ -1,6 +1,6 @@
 from tdsr.loading.loading import Loading
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 import numpy as np
 import numpy.typing as npt
 from tdsr.types import Number
@@ -12,11 +12,14 @@ if TYPE_CHECKING:
 
 
 class BackgroundLoading(Loading):
+    """
+    Class BackgroundLoading (short  name "Background") defines a constant stress rate with slope strend. If t_axis_log==1 a logarithmic time sampling is realised, where the number of samples is defined by ntlog. Otherwise, a constant sampling interval of deltat is defined. The loading time series is defined between times tstart and tend.
+    """
+
     __name__: str = "Background"
 
     def __init__(
         self,
-        _config: "Config",
         strend: Number = 7.0e-5,
         tstart: Number = 0.0,
         tend: Number = 86400.0,
@@ -24,8 +27,9 @@ class BackgroundLoading(Loading):
         taxis_log: Number = 0,
         ntlog: Number = 1000,
         sstep: Number = 0.0,
+        config: Optional["Config"] = None,
     ):
-        self.config = _config
+        self.config = config
         self.strend = strend
         self.tstart = tstart
         self.tend = tend

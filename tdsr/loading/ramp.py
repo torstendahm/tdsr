@@ -12,28 +12,33 @@ if TYPE_CHECKING:
 
 
 class RampLoading(Loading):
+    """
+    Class RampLoading (short  name "Ramp") is used to realise a ramp loading of length nsample2 * deltat starting at time tstep, where deltat is the sampling interval
+    """
+
     __name__: str = "Ramp"
 
     def __init__(
         self,
-        _config: "Config",
         strend: Number = 7.0e-5,
         strend2: Number = 7.0e-4,
         strend3: Number = 7.0e-5,
         nsample2: Number = 20,
         tstep: Optional[Number] = None,
         tstart: Number = 0.0,
-        tend: Number = 86400.0,
+        # tend: Number = 86400.0,
+        tend: Optional[Number] = None,
         deltat: Number = 720.0,
+        config: Optional["Config"] = None,
     ):
-        self.config = _config
+        self.config = config
         self.strend = strend
         self.strend2 = strend2
         self.strend3 = strend3
         self.nsample2 = nsample2
-        self.tstep = tstep or self.config.tend / 2
+        self.tend = tend or self.config.tend
+        self.tstep = tstep or self.tend / 2
         self.tstart = tstart
-        self.tend = tend
         self.deltat = deltat
 
     @property

@@ -12,35 +12,45 @@ if TYPE_CHECKING:
 
 
 class StepLoading(Loading):
+    """
+    Class StepLoading (short  name "Step") can define a stress step over a linear trend of Coulomb stress loading. An equal distance sampling of the stress function with sampling interval of "deltat" is generated if t_axis_log != 1. Controlling parameter are the background stress trend (strend), the time when the stress step is applied (tstep), and the magnitude of the stress step (sstep). If taxis_log==1 a logarithic time sampling is considered. Then, the time of the step is set to t=tstart, and the  number of sampling points (ntlog) is specified instead of the sampling interval.
+    """
+
     __name__: str = "Step"
 
     def __init__(
         self,
-        _config: "Config",
         strend: Number = 7.0e-5,
         tstep: Optional[Number] = None,
         sstep: Number = 1.0,
         tstart: Number = 0.0,
-        tend: Number = 86400.0,
+        # tstep: Optional[Number] = None,
+        tend: Optional[Number] = None,
+        # tend: Number = 86400.0,
         taxis_log: Number = 0,
         ntlog: Number = 1000,
         deltat: Number = 720.0,
+        config: Optional["Config"] = None,
     ):
-        self.config = _config
+        self.config = config
         self.strend = strend
-        self.tstep = tstep or self.config.tend / 2
+        self.tend = tend or self.config.tend
+        # todo
+        assert self.tend is not None
+        self.tstep = tstep or self.tend / 2
         self.sstep = sstep
         self.tstart = tstart
-        self.tend = tend
         self.taxis_log = taxis_log
         self.ntlog = ntlog
         self.deltat = deltat
 
     @property
     def stress_rate(self) -> float:
+        """the loading stress rate"""
         return (self.sc1 - self.sc0) / (self.n1 * self.deltat)
 
     def values(self, length: int) -> npt.NDArray[np.float64]:
+        """the loading values"""
         if self.taxis_log == 1:
             print("taxis_log=1 (logarithmic scale), step is at tstep=0 and start>0")
             print(

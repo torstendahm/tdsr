@@ -15,7 +15,7 @@ An elementary plotting class is supported, which is imported from tdsr.plotting.
 Default settings of input parameter can be defined in config.toml. Default values can be overwritten when calling the seismicity model classes or  loading scenarios (see examples). 
 
 The examples collected in the subdirectory ''examples'' reproduce figures published in Dahm and Hainzl (2022). All theory of the TDSR model and the examples are described in  Dahm and Hainzl (2022). The software toolbox in python is published together with the JGR paper under Dahm et al. (2022) (doi link to be added). 
-The TDSR  githib project here, however, is intended as an open source project that may change and improve over the years. Please send us your suggestions or addings and contribute to the git project if interested. 
+The TDSR  github project here, however, is intended as an open source project that may change and improve over the years. Please send us your suggestions or addings and contribute to the git project if interested. 
 """
 
 from copy import deepcopy

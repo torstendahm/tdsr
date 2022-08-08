@@ -5,6 +5,10 @@ import numpy.typing as npt
 
 
 class Loading(ABC):
+    """
+    Loading abstract base class to be implemented by concrete
+    loadings.
+    """
     __name__: str = ""
 
     def __init__(self) -> None:

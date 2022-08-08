@@ -51,7 +51,7 @@ class Config(object):
         self.iX0switch = int(iX0switch)
         self.loading = loading
         if loading is None:
-            self.loading = StepLoading(_config=self)
+            self.loading = StepLoading(config=self)
 
     def merge(self, config: Dict[str, Any]) -> None:
         config = {k: v for k, v in config.items() if v is not None}
@@ -97,7 +97,7 @@ class Config(object):
             loading_typ = parsed_config["use_loading"]
             loading_params = parsed_config["loading"][loading_typ]
             loading_cls = LOADING[loading_typ]
-            config.loading = loading_cls(_config=config, **loading_params)
+            config.loading = loading_cls(config=config, **loading_params)
         except KeyError:
             # todo: warn about missing loading
             pass

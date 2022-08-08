@@ -47,7 +47,7 @@ class StaticFileHandler(http.server.BaseHTTPRequestHandler):
         self.base_dir = base_dir
         super().__init__(request, client_address, server)
 
-    def send_error(self, error: Exception):
+    def send_exception(self, error: Exception):
         if isinstance(error, FileNotFoundError):
             self.send_message(404, "not found")
         elif isinstance(error, PermissionError):
@@ -71,6 +71,11 @@ class StaticFileHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(data)
 
+    def do_POST(self):
+        # ignore
+        self.send_response(200)
+        self.end_headers()
+
     def do_GET(self):
         try:
             path = Path(self.path)
@@ -84,4 +89,4 @@ class StaticFileHandler(http.server.BaseHTTPRequestHandler):
             else:
                 self.send_file(path)
         except Exception as e:
-            self.send_error(e)
+            self.send_exception(e)

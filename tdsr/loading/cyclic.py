@@ -1,6 +1,6 @@
 from tdsr.loading.loading import Loading
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 import numpy as np
 import numpy.typing as npt
 from tdsr.types import Number
@@ -12,24 +12,30 @@ if TYPE_CHECKING:
 
 
 class CyclicLoading(Loading):
+    """
+    Class CyclicLoading (short  name "Cycle") defines a sinusoidal stress loading function with period Tsin and amplitude ampsin. A linear trend is superposed (strend). An equal distance sampling of the stress function with sampling interval of "deltat" is generated.
+    """
+
     __name__: str = "Cycle"
 
     def __init__(
         self,
-        _config: "Config",
         strend: Number = 7.0e-5,
         ampsin: Number = 0.2e0,
         Tsin: Number = 43200,
         tstart: Number = 0.0,
-        tend: Number = 86400.0,
+        # tend: Number = 86400.0,
+        tend: Optional[Number] = None,
         deltat: Number = 720.0,
+        config: Optional["Config"] = None,
     ):
-        self.config = _config
+        self.config = config
         self.strend = strend
         self.ampsin = ampsin
         self.Tsin = Tsin
         self.tstart = tstart
-        self.tend = tend
+        # todo
+        self.tend = tend or self.config.tend
         self.deltat = deltat
 
     @property
