@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .utils import dump_values, load_values, PLOT_DIR
-from tdsr import Config, RSD1, TDSR1
+from tdsr import RSD1, TDSR1
 from tdsr.loading import ExternalFileLoading
 
 
@@ -102,7 +102,7 @@ def test_read_loading():
         tend=tend,
         deltat=deltat,
     )
-    config, t, chiz, cf, r_tdsr, xn = tdsr(
+    t, chiz, cf, r_tdsr, xn = tdsr(
         loading=loading,
         chi0=chi0,
         t0=t0,
@@ -126,7 +126,7 @@ def test_read_loading():
         tend=tend,
         deltat=deltat,
     )
-    config, t, chiz, cf, r_rsd, xn = rsd1(
+    t, chiz, cf, r_rsd, xn = rsd1(
         loading=loading,
         chi0=chi0,
         depthS=depthS,

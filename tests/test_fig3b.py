@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .utils import dump_values, load_values, PLOT_DIR
-from tdsr import Config, TDSR1
+from tdsr import TDSR1
 from tdsr.loading import BackgroundLoading
 from tdsr.utils import Eq7
 
@@ -55,7 +55,7 @@ def test_fig3b() -> None:
     tdsr = TDSR1()
 
     # ----------------------------------------
-    print("define model parameter for plotting, if different from config file")
+    print("define model parameter for plotting")
     # ----------------------------------------
     hours = 1.0  # time unit
     depthS = (
@@ -70,7 +70,7 @@ def test_fig3b() -> None:
 
     tend = 100.0 * hours
 
-    taxis_log = 1  # linear time axis discretization = default in config.toml
+    taxis_log = 1  # linear time axis discretization
     ntlog = 10000
     tstartl = 1.0e-6 * hours
 
@@ -89,7 +89,6 @@ def test_fig3b() -> None:
 
     for k in range(ns):
         loading = BackgroundLoading(
-            # _config=tdsr.config,
             strend=strend,
             sstep=sstep[k],
             taxis_log=taxis_log,
@@ -97,7 +96,7 @@ def test_fig3b() -> None:
             tstart=tstartl,
             tend=tend,
         )
-        config, t, chiz, cf, r, xn = tdsr(
+        t, chiz, cf, r, xn = tdsr(
             loading=loading,
             chi0=chi0,
             t0=t0,

@@ -64,7 +64,7 @@ def test_fig3a():
     rsd = RSD1()
 
     # ----------------------------------------
-    print("define model parameter for plotting, if different from config file")
+    print("define model parameter for plotting")
     # ----------------------------------------
     hours = 1.0  # time unit
     # (=-dsig) skin depth in MPa (must be negativ, will be changed with next release)
@@ -82,7 +82,7 @@ def test_fig3a():
     deltat = 0.1 * hours  # obsolet if logarithmic time axis
     # =NT = len(t) - overwritten if logarithmic time axis
     nt = int(np.ceil((tend - tstart) / deltat))
-    taxis_log = 0  # linear time axis discretization = default in config.toml
+    taxis_log = 0  # linear time axis discretization
     ntlog = 1000
     tstartl = 1.0e-4 * hours
 
@@ -102,7 +102,6 @@ def test_fig3a():
 
     for k, Zmin in enumerate(Sshadow):
         loading = BackgroundLoading(
-            # _config=tdsr.config,
             strend=strend,
             taxis_log=taxis_log,
             ntlog=ntlog,
@@ -110,7 +109,7 @@ def test_fig3a():
             tstart=tstartl,
             tend=tend,
         )
-        config, t, chiz, cf, r, xn = tdsr(
+        t, chiz, cf, r, xn = tdsr(
             loading=loading,
             chi0=chi0,
             t0=t0,
@@ -128,7 +127,6 @@ def test_fig3a():
         r_tdsr[k, :] = r
 
         loading = BackgroundLoading(
-            # _config=cfm.config,
             strend=strend,
             taxis_log=taxis_log,
             ntlog=ntlog,
@@ -136,7 +134,7 @@ def test_fig3a():
             tstart=tstartl,
             tend=tend,
         )
-        config, t, chiz, cf, r, xn = cfm(
+        t, chiz, cf, r, xn = cfm(
             loading=loading,
             chi0=chi0,
             depthS=depthS,
@@ -151,7 +149,6 @@ def test_fig3a():
         r_cfm[k, :] = r
 
         loading = BackgroundLoading(
-            # _config=rsd.config,
             strend=strend,
             taxis_log=taxis_log,
             ntlog=ntlog,
@@ -159,7 +156,7 @@ def test_fig3a():
             tstart=tstartl,
             tend=tend,
         )
-        config, t, chiz, cf, r, xn = rsd(
+        t, chiz, cf, r, xn = rsd(
             loading=loading,
             chi0=chi0,
             depthS=depthS,

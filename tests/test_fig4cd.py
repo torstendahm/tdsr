@@ -66,7 +66,7 @@ def test_fig4cd():
     rsd = RSD()
 
     # ----------------------------------------
-    print("define model parameter for plotting, if different from config file")
+    print("define model parameter for plotting")
     # ----------------------------------------
     hours = 1.0  # time unit
     depthS = (
@@ -95,7 +95,6 @@ def test_fig4cd():
     # Calculate earthquake rates for cyclic loading
     # ----------------------------------------
     loading = CyclicLoading(
-        # _config=tdsr.config,
         strend=strend,
         ampsin=ampsin,
         Tsin=Tsin,
@@ -103,7 +102,7 @@ def test_fig4cd():
         tstart=tstart,
         tend=tend,
     )
-    config, t, chiz, cf, r, xn = tdsr(
+    t, chiz, cf, r, xn = tdsr(
         loading=loading,
         chi0=chi0,
         t0=t0,
@@ -120,7 +119,6 @@ def test_fig4cd():
     r_tdsr = r
 
     loading = CyclicLoading(
-        # _config=cfm.config,
         strend=strend,
         ampsin=ampsin,
         Tsin=Tsin,
@@ -128,14 +126,13 @@ def test_fig4cd():
         tstart=0,
         tend=tend,
     )
-    config, t, chiz, cf, r, xn = cfm(
+    t, chiz, cf, r, xn = cfm(
         loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
     )
     cf_shad = chiz[0:nt]
     r_cfm = r
 
     loading = CyclicLoading(
-        # _config=rsd.config,
         strend=strend,
         ampsin=ampsin,
         Tsin=Tsin,
@@ -143,7 +140,7 @@ def test_fig4cd():
         tstart=tstart,
         tend=tend,
     )
-    config, t, chiz, cf, r, xn = rsd(
+    t, chiz, cf, r, xn = rsd(
         loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
     )
     r_rsd = r

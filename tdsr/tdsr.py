@@ -42,7 +42,6 @@ from tdsr.utils import (
 
 
 Result = Tuple[
-    Config,
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
     npt.NDArray[np.float64],
@@ -186,12 +185,12 @@ class LCM(object):
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
             # neqz[i] = np.trapz(ratez[0 : i + 1] , self.t[0:i+1])  # 24 july 2022: beruecksichtigt, dass zeitreihe nicht gelichabstaendig sein kann
-        return config, self.t, self.chiz, self.cf, ratez, neqz
+        return self.t, self.chiz, self.cf, ratez, neqz
 
 
 class TDSR(LCM):
     """
-    TDSR class realisation builts on LCM and is depreciated. Use TDSR1 instead. 
+    TDSR class realisation builts on LCM and is depreciated. Use TDSR1 instead.
     """
 
     def _compute(self, config: Config) -> Result:
@@ -208,11 +207,11 @@ class TDSR1(object):
     Class TDSR1 simulates the time dependent stress rate seismicity model TDSR.
     Key parameters are chi0 (susceptibility to trigger earthquakes after unit step increase),
     t0 (mean time to failure for critically stressed sources),  and depthS (skin depth parameter in exponential trigger functions).
-    Different source distributions can be considered, controlled by parameter iX0switch. If iX0switch==1 a uniform disribution 
-    of stress stages at seismic sources is assumed. If iX0switch==2 a Gaussian distribution of stress stages is assumed. The 
-    mean stress level of the Gaussian peak is defined by Zmean and the standard deviation by Zstd. If iX0switch==0 a steady state distribution of 
+    Different source distributions can be considered, controlled by parameter iX0switch. If iX0switch==1 a uniform disribution
+    of stress stages at seismic sources is assumed. If iX0switch==2 a Gaussian distribution of stress stages is assumed. The
+    mean stress level of the Gaussian peak is defined by Zmean and the standard deviation by Zstd. If iX0switch==0 a steady state distribution of
     sources is assumed, using config.strend. All three cases of stress distributions can be modified by a shift of Sshadow  on the stress axis to simulate a subcritical stress state.
-    If taxis_log==0 an equally space time sampling is assumed with interval deltat. 
+    If taxis_log==0 an equally space time sampling is assumed with interval deltat.
     """
 
     def __init__(self, config: Optional[Config] = None) -> None:
@@ -372,12 +371,11 @@ class TDSR1(object):
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, self.chiz, self.cf, ratez, neqz
+        return self.t, self.chiz, self.cf, ratez, neqz
 
 
 class Traditional(LCM):
-    """Linear Coulomb Failure Model (LCM) realisation using a simple (traditional) approach. 
-    """
+    """Linear Coulomb Failure Model (LCM) realisation using a simple (traditional) approach."""
 
     def _compute(self, config: Config) -> Result:
         ratez = np.zeros(self.nt)
@@ -395,12 +393,11 @@ class Traditional(LCM):
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, cf_shad, self.cf, ratez, neqz
+        return self.t, cf_shad, self.cf, ratez, neqz
 
 
 class CFM(LCM):
-    """The class Coulomb Failure Model (CFM ) is ismilar to Traditional but coded different.
-    """
+    """The class Coulomb Failure Model (CFM ) is ismilar to Traditional but coded different."""
 
     def _compute(self, config: Config) -> Result:
         ratez = np.zeros(self.nt)
@@ -418,7 +415,7 @@ class CFM(LCM):
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, cf_shad, self.cf, ratez, neqz
+        return self.t, cf_shad, self.cf, ratez, neqz
 
 
 class RSM(LCM):
@@ -453,8 +450,7 @@ class RSM(LCM):
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        # return config, self.t, self.chiz, self.cf, ratez, neqz
-        return config, self.t, cf_shad, self.cf, ratez, neqz
+        return self.t, cf_shad, self.cf, ratez, neqz
 
 
 class RSD(LCM):
@@ -491,7 +487,7 @@ class RSD(LCM):
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, cf_shad, self.cf, ratez, neqz
+        return self.t, cf_shad, self.cf, ratez, neqz
 
 
 class RSD1(LCM):
@@ -524,4 +520,4 @@ class RSD1(LCM):
         neqz = np.zeros(self.nt - 1)
         for i in range(1, self.nt - 2):
             neqz[i] = np.trapz(ratez[0 : i + 1])  # type: ignore
-        return config, self.t, cf_shad, self.cf, ratez, neqz
+        return self.t, cf_shad, self.cf, ratez, neqz

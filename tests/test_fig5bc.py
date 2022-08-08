@@ -161,7 +161,7 @@ def test_fig5bc():
     )
 
     # CF model with critical initial stress state:
-    config, t, chiz, cf, R_CF, xn = cfm(
+    t, chiz, cf, R_CF, xn = cfm(
         loading=loading,
         chi0=1.0,
         Sshadow=0.0,
@@ -176,7 +176,7 @@ def test_fig5bc():
     R_CF *= fac
 
     # CF model with subcritical initial stress state:
-    config, t, chiz, cf, R_CFsub, xn = cfm(
+    t, chiz, cf, R_CFsub, xn = cfm(
         loading=loading,
         chi0=1.0,
         Sshadow=dS0,
@@ -189,7 +189,7 @@ def test_fig5bc():
     R_CFsub *= fac
 
     # RS model for critical initial stress state:
-    config, t, chiz, cf, R_RS, xn = rsd1(
+    t, chiz, cf, R_RS, xn = rsd1(
         loading=loading,
         chi0=1.0,
         Sshadow=0.0,
@@ -202,7 +202,7 @@ def test_fig5bc():
     R_RS *= fac
 
     # TDSR model for critical initial stress state:
-    config, t, chiz, cf, R_TDSR, xn = tdsr(
+    t, chiz, cf, R_TDSR, xn = tdsr(
         loading=loading,
         chi0=1.0,
         t0=t0,
@@ -233,7 +233,7 @@ def test_fig5bc():
     )
 
     # RS model for subcritical initial stress state:
-    config, t, chiz, cf, R_RSsub, xn = rsd1(
+    t, chiz, cf, R_RSsub, xn = rsd1(
         loading=loading,
         chi0=1.0,
         Sshadow=(dS0 + dotsigc_sub * (t00 - tgrid[0])),
@@ -246,7 +246,7 @@ def test_fig5bc():
     R_RSsub *= fac
 
     # TDSR model with uniform subcritical stress:
-    config, t, chiz, cf, R_TDSRsub_uniform, xn = tdsr(
+    t, chiz, cf, R_TDSRsub_uniform, xn = tdsr(
         loading=loading,
         chi0=1.0,
         t0=t0,
@@ -266,7 +266,7 @@ def test_fig5bc():
     R_TDSRsub_uniform *= fac
 
     # TDSR model with gaussian subcritical prestress:
-    config, t, chiz, cf, R_TDSRsub_gauss, xn = tdsr(
+    t, chiz, cf, R_TDSRsub_gauss, xn = tdsr(
         loading=loading,
         chi0=1.0,
         t0=t0,

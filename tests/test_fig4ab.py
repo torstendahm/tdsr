@@ -106,7 +106,7 @@ def test_fig4ab():
     rsd = RSD()
 
     # ----------------------------------------
-    print("define model parameter for plotting, if different from config file")
+    print("define model parameter for plotting")
     # ----------------------------------------
     hours = 1.0  # time unit
     depthS = (
@@ -143,15 +143,16 @@ def test_fig4ab():
     r_rsd = np.zeros((2, nt))
     R_TDSR_theory = np.zeros((2, nt))
 
-    # ---- calculate equilibrium distribution of tectonic loading, to be used later to avoid initial oscillations
-    # loading = BackgroundLoading(_config=tdsm.config, strend=strend)
-    # config, t, chiz_background, cf, r, xn = tdsm(loading=loading, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, deltat=deltat, tstart=0, tend=tend)
+    # calculate equilibrium distribution of tectonic loading,
+    # to be used later to avoid initial oscillations
+    # loading = BackgroundLoading(strend=strend)
+    # t, chiz_background, cf, r, xn = tdsm(loading=loading, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, deltat=deltat, tstart=0, tend=tend)
+
     for i, Sstep in enumerate(sstep):
 
         print("i=", i, " Sstep=", Sstep, " sstep[i]=", sstep[i], " tstep=", tstep)
         print("deltat=", deltat, " tstart=", tstart, " tend=", tend)
         loading = StepLoading(
-            # _config=tdsr.config,
             strend=strend,
             sstep=Sstep,
             tstep=tstep,
@@ -160,7 +161,7 @@ def test_fig4ab():
             tstart=tstart,
             tend=tend,
         )
-        config, t, chiz, cf, r, xn = tdsr(
+        t, chiz, cf, r, xn = tdsr(
             loading=loading,
             chi0=chi0,
             t0=t0,
@@ -177,7 +178,6 @@ def test_fig4ab():
         r_tdsr[i, :] = r[:]
 
         loading = StepLoading(
-            # _config=rsd.config,
             strend=strend,
             sstep=Sstep,
             tstep=tstep,
@@ -186,7 +186,7 @@ def test_fig4ab():
             tend=tend,
         )
         # BUG: cf_shadow is written here, but cf_shad is plotted (zeros only)!
-        config, t, cf_shadow, cf, r, xn = rsd(
+        t, cf_shadow, cf, r, xn = rsd(
             loading=loading,
             chi0=chi0,
             depthS=depthS,
@@ -197,7 +197,6 @@ def test_fig4ab():
         r_rsd[i, :] = r
 
         loading = StepLoading(
-            # _config=cfm.config,
             strend=strend,
             sstep=Sstep,
             tstep=tstep,
@@ -205,7 +204,7 @@ def test_fig4ab():
             tstart=tstart,
             tend=tend,
         )
-        config, t, chiz, cf, r, xn = cfm(
+        t, chiz, cf, r, xn = cfm(
             loading=loading, chi0=chi0, deltat=deltat, tstart=tstart, tend=tend
         )
         r_lcm[i, :] = r

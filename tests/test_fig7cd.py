@@ -159,7 +159,7 @@ def test_fig7cd():
             tend=tend,
             deltat=deltat,
         )
-        config, t, chiz, cfs, r, xn = tdsr(
+        t, chiz, cfs, r, xn = tdsr(
             loading=loading,
             chi0=chi0,
             t0=t0,
@@ -178,7 +178,7 @@ def test_fig7cd():
         r_tdsr[i, :] = r[:]
 
     # calculate stress shadow ad hoc  by using the linear coulomb failure class
-    config, t, cf_shad, cf, r, xn = trad(
+    t, cf_shad, cf, r, xn = trad(
         loading=loading, chi0=chi0, deltat=deltat, tstart=tstart, tend=tend
     )
 
