@@ -76,7 +76,8 @@ def test_read_loading():
     deltaS = -depthS / 500.0  # increment do discretize Coulomb stress axis
     sigma_max = 10000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
 
-    iX0switch = 0  # steady state distribution
+    # steady state distribution
+    iX0 = "equilibrium"
 
     scal_cf = 1.0  # data provided in Pa, to be scaled to  MPa
     scal_t = 1.0  # time provilded in units of days, to be scaled to seconds
@@ -109,7 +110,7 @@ def test_read_loading():
         depthS=depthS,
         deltaS=deltaS,
         sigma_max=sigma_max,
-        iX0switch=iX0switch,
+        iX0=iX0,
         deltat=deltat,
         taxis_log=0,
         tstart=tstart,

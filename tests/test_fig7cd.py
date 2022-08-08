@@ -23,11 +23,6 @@ def plot_fig7cd(out, t, tstart, tend, teq, cfs, cf_shad, Req, r_tdsr):
     fig, ax = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1, 1]}, figsize=(7, 8))
     plt.subplots_adjust(hspace=0, wspace=0.2)
 
-    # this fails
-    # t is 10000, cfs is 44003
-    print(t.shape)
-    print(cfs.shape)
-    print(cfs.shape)
     ax[0].plot(t, cfs - cfs[0], c="k", ls="solid", lw=1, alpha=0.9)
     ax[0].plot(t, cf_shad, c="k", ls="dotted", lw=1, alpha=0.3)
     ax[0].set_xlim(tstart, tend)
@@ -85,38 +80,41 @@ def plot_fig7cd(out, t, tstart, tend, teq, cfs, cf_shad, Req, r_tdsr):
 
 
 def test_fig7cd():
-    fn_obsrate = DATA_DIR / "morsleben_EQ.dat"
-
-    print("set-up the tdsm, lcm and rsm class environments")
     tdsr = TDSR1()
     trad = Traditional()
 
-    print("define model parameter for plotting, if different from config file")
     days = 1.0
 
     tstart = 0.0 * days
     tend = 100.0 * days
     deltat = 0.01 * days
+
     nt = np.floor((tend - tstart) / deltat).astype(int)
     tgrid = np.linspace(tstart, tend, nt)
     dt = np.ediff1d(tgrid, to_end=tgrid[-1] - tgrid[-2])
 
     t0 = 0.01
-    strend = 0.0  # no tectonic loading
-    chi0 = 1.0  # susceptibility to trigger earthquakes by unit stress increase
+    # no tectonic loading
+    strend = 0.0
+    # susceptibility to trigger earthquakes by unit stress increase
+    chi0 = 1.0
 
-    deltaS = 0.3 / 500.0  # increment do discretize Coulomb stress axis
-    sigma_max = 10000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+    # increment do discretize Coulomb stress axis
+    deltaS = 0.3 / 500.0
+    # maximum depth on Coulomb axis (limit of integral)
+    sigma_max = 10000.0 * deltaS
 
-    iX0switch = 1  # uniform distribution (and strend=0)
+    # uniform distribution (and strend=0)
+    iX0 = "uniform"
 
-    scal_cf = 1.0e-6  # data provided in Pa, to be scaled to  MPa
-    scal_t = 1.0  # time provilded in units of days, to be scaled to days
+    # data provided in Pa, to be scaled to MPa
+    scal_cf = 1.0e-6
+    # time provilded in units of days, to be scaled to days
+    scal_t = 1.0
     c_tstart = 0.0
 
-    # ------------------------------------
-    # read observed data again to get some paramter for plotting and scaling
-    # ------------------------------------
+    # read observed data to get some paramter for plotting and scaling
+    fn_obsrate = DATA_DIR / "morsleben_EQ.dat"
     data = np.loadtxt(fn_obsrate)
     data = data[((data[:, 1] >= tstart) & (data[:, 1] <= tend))]
     teq = data[:, 1]
@@ -125,9 +123,7 @@ def test_fig7cd():
     dteq = np.ediff1d(teq, to_end=teq[-1] - teq[-2])
     Req = Neq / dteq
 
-    # -----------------------------------------------------
-    print("Calculate earthquake rates with tdsm, lcm and rsm")
-    # -----------------------------------------------------
+    # calculate earthquake rates with tdsm, lcm and rsm
     ns = 3
     cfs = np.zeros(nt)
     r_tdsr = np.zeros((ns, nt))
@@ -149,15 +145,18 @@ def test_fig7cd():
             usecols=(1, 0),
             unpack=False,
         )
+        common = dict(
+            tstart=tstart,
+            tend=tend,
+            deltat=deltat,
+        )
         loading = CustomLoading(
             data=morsleben_data_cfs,
             scal_t=scal_t,
             scal_cf=scal_cf,
             strend=strend,
             c_tstart=c_tstart,
-            tstart=tstart,
-            tend=tend,
-            deltat=deltat,
+            **common,
         )
         t, chiz, cfs, r, xn = tdsr(
             loading=loading,
@@ -167,11 +166,9 @@ def test_fig7cd():
             Sshadow=Sshadow,
             deltaS=deltaS,
             sigma_max=sigma_max,
-            iX0switch=iX0switch,
-            deltat=deltat,
-            taxis_log=0,
-            tstart=tstart,
-            tend=tend,
+            iX0=iX0,
+            taxis_log=False,
+            **common,
         )
         X0 = NEQ / np.sum(r * dt)
         r *= X0  # X0 set to match the observed number

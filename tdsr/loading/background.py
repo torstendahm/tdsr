@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class BackgroundLoading(Loading):
     """
-    Class BackgroundLoading (short  name "Background") defines a constant stress rate with slope strend. If t_axis_log==1 a logarithmic time sampling is realised, where the number of samples is defined by ntlog. Otherwise, a constant sampling interval of deltat is defined. The loading time series is defined between times tstart and tend.
+    Class BackgroundLoading (short  name "Background") defines a constant stress rate with slope strend. If ``taxis_log==True`` a logarithmic time sampling is realised, where the number of samples is defined by ntlog. Otherwise, a constant sampling interval of deltat is defined. The loading time series is defined between times tstart and tend.
     """
 
     __name__: str = "Background"
@@ -24,7 +24,7 @@ class BackgroundLoading(Loading):
         tstart: Number = 0.0,
         tend: Number = 86400.0,
         deltat: Number = 720.0,
-        taxis_log: Number = 0,
+        taxis_log: bool = False,
         ntlog: Number = 1000,
         sstep: Number = 0.0,
         config: Optional["Config"] = None,
@@ -48,7 +48,7 @@ class BackgroundLoading(Loading):
         # spaeter evtl wieder auskommentieren:
         # so ist es gleich wie TDSR  fuer step
         sc0 = 0.0
-        if self.taxis_log == 1:
+        if self.taxis_log:
             nt = self.ntlog
             tvalues = np.logspace(np.log10(self.tstart), np.log10(self.tend), nt)
             cf = sc0 + tvalues * self.strend

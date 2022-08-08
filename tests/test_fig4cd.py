@@ -60,23 +60,26 @@ def plot_fig4cd(out, t, Tmax, cf, cf_shad, r_tdsr, r_rsd, r_cfm):
 
 
 def test_fig4cd():
-    print("set-up the tdsr, linear Coulomb failure and Rate and State models")
     tdsr = TDSR1()
     cfm = CFM()
     rsd = RSD()
 
-    # ----------------------------------------
-    print("define model parameter for plotting")
-    # ----------------------------------------
-    hours = 1.0  # time unit
-    depthS = (
-        -1.0
-    )  # (=-dsig) skin depth in MPa (must be negativ, will be changed with next release)
-    t0 = 1.0  # mean failure time in sec for critically stressed source
-    strend = 1.0  # (=dotsigc) in MPa/timeunit: tectonic stressing rate before loading
-    chi0 = 1.0  # susceptibility to trigger critically stressed sources if a unit step increas is applied (r0 = chi0*strend)
+    # time unit
+    hours = 1.0
+    # (=-dsig) skin depth in MPa
+    # must be negative, will be changed with next release
+    depthS = -1.0
+    # mean failure time in sec for critically stressed source
+    t0 = 1.0
+    # (=dotsigc) in MPa/timeunit:
+    # tectonic stressing rate before loading
+    strend = 1.0
+    # susceptibility to trigger critically stressed sources
+    # if a unit step increas is applied (r0 = chi0*strend)
+    chi0 = 1.0
 
-    ampsin = 5.0e0  # Amplitude of sinusoidal loading
+    # amplitude of sinusoidal loading
+    ampsin = 5.0e0
     Tsin = ampsin / strend
     Tmax = 3.0 * Tsin
 
@@ -85,15 +88,16 @@ def test_fig4cd():
 
     deltat = 0.02 * hours
     t0 = deltat
-    nt = int(np.ceil((tend - tstart) / deltat))  # =NT = len(t)
+    # =NT = len(t)
+    nt = int(np.ceil((tend - tstart) / deltat))
 
-    # ---- discretizing stress axis for integration with
-    deltaS = -depthS / 60.0  # increment do discretize Coulomb stress axis
-    sigma_max = 3000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+    # discretizing stress axis for integration
+    # increment do discretize Coulomb stress axis
+    deltaS = -depthS / 60.0
+    # maximum depth on Coulomb axis (limit of integral)
+    sigma_max = 3000.0 * deltaS
 
-    # ----------------------------------------
-    # Calculate earthquake rates for cyclic loading
-    # ----------------------------------------
+    # calculate earthquake rates for cyclic loading
     loading = CyclicLoading(
         strend=strend,
         ampsin=ampsin,
@@ -102,52 +106,34 @@ def test_fig4cd():
         tstart=tstart,
         tend=tend,
     )
-    t, chiz, cf, r, xn = tdsr(
+
+    common = dict(
         loading=loading,
         chi0=chi0,
-        t0=t0,
         depthS=depthS,
+        deltat=deltat,
+        tstart=tstart,
+        tend=tend,
+        taxis_log=False,
         deltaS=deltaS,
         sigma_max=sigma_max,
-        iX0switch=0,
-        deltat=deltat,
-        taxis_log=0,
-        tstart=0,
-        tend=tend,
+        t0=t0,
+        iX0="equilibrium",
     )
+
+    t, chiz, cf, r, xn = tdsr(**common)
     cfs = cf
     r_tdsr = r
 
-    loading = CyclicLoading(
-        strend=strend,
-        ampsin=ampsin,
-        Tsin=Tsin,
-        deltat=deltat,
-        tstart=0,
-        tend=tend,
-    )
-    t, chiz, cf, r, xn = cfm(
-        loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
-    )
+    t, chiz, cf, r, xn = cfm(**common)
     cf_shad = chiz[0:nt]
     r_cfm = r
 
-    loading = CyclicLoading(
-        strend=strend,
-        ampsin=ampsin,
-        Tsin=Tsin,
-        deltat=deltat,
-        tstart=tstart,
-        tend=tend,
-    )
-    t, chiz, cf, r, xn = rsd(
-        loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
-    )
+    t, chiz, cf, r, xn = rsd(**common)
     r_rsd = r
 
-    test_name = inspect.currentframe().f_code.co_name
-
     # plot values
+    test_name = inspect.currentframe().f_code.co_name
     plot_fig4cd(
         out=PLOT_DIR / test_name,
         t=t,

@@ -57,39 +57,42 @@ def plot_fig3c(out, t, sstep, strend, r_tdsr, chi0, depthS, Z0mean, Z0std):
 
 
 def test_fig3c():
-    print("set-up the tdsr, linear Coulomb failure and Rate and State models")
     tdsr = TDSR1()
 
-    # ----------------------------------------
-    print("define model parameter for plotting")
-    # ----------------------------------------
-    hours = 1.0  # time unit
-    depthS = (
-        -1.0
-    )  # (=-dsig) skin depth in MPa (must be negativ, will be changed with next release)
-    t0 = 1.0  # mean failure time in sec for critically stressed source
-    strend = 1.0  # (=dotsigc) in MPa/timeunit: tectonic stressing rate before loading
-    chi0 = 1.0  # susceptibility to trigger critically stressed sources if a unit step increas is applied (r0 = chi0*strend)
+    # time unit
+    hours = 1.0
+    # (=-dsig) skin depth in MPa
+    # must be negative, will be changed with next release
+    depthS = -1.0
+    # mean failure time in sec for critically stressed source
+    t0 = 1.0
+    # (=dotsigc) in MPa/timeunit: tectonic stressing rate before loading
+    strend = 1.0
+    # susceptibility to trigger critically stressed sources
+    # if a unit step increas is applied (r0 = chi0*strend)
+    chi0 = 1.0
 
-    # ---- define stress steps --------
-    sstep = np.asarray([2.0, 4.0, 6.0, 8.0, 10.0])  # stress steps in e.g. MPa
+    # stress steps in e.g. MPa
+    sstep = np.asarray([2.0, 4.0, 6.0, 8.0, 10.0])
 
     tend = 100.0 * hours
-    taxis_log = 1  # linear time axis discretization
+    # logarithmic time axis discretization
+    taxis_log = True
     ntlog = 10000
     tstartl = 1.0e-6 * hours
 
-    # ---- discretizing stress axis for integration with
-    deltaS = -depthS / 60.0  # increment do discretize Coulomb stress axis
-    sigma_max = 3000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+    # discretizing stress axis for integration
+    # increment do discretize Coulomb stress axis
+    deltaS = -depthS / 60.0
+    # maximum depth on Coulomb axis (limit of integral)
+    sigma_max = 3000.0 * deltaS
 
-    iX0switch = 2  # Gaussin distribution
+    # Gaussin distribution
+    iX0 = "gaussian"
     Z0mean = 1.0
     Z0std = 0.2
 
-    # ----------------------------------------
-    # Calculate earthquake rates for cyclic loading
-    # ----------------------------------------
+    # calculate earthquake rates for cyclic loading
     ns = len(sstep)
     r_tdsr = np.zeros((ns, ntlog))
 
@@ -109,7 +112,7 @@ def test_fig3c():
             depthS=depthS,
             deltaS=deltaS,
             sigma_max=sigma_max,
-            iX0switch=iX0switch,
+            iX0=iX0,
             Zmean=Z0mean,
             Zstd=Z0std,
             Sshadow=sstep[k],

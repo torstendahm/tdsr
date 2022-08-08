@@ -58,43 +58,48 @@ def plot_fig3a(out, t, t0, Sshadow, strend, r_tdsr, r_cfm, r_rsd, chi0, depthS):
 
 
 def test_fig3a():
-    print("set-up the tdsr, linear Coulomb failure and Rate and State models")
     tdsr = TDSR1()
     cfm = CFM()
     rsd = RSD1()
 
-    # ----------------------------------------
-    print("define model parameter for plotting")
-    # ----------------------------------------
-    hours = 1.0  # time unit
-    # (=-dsig) skin depth in MPa (must be negativ, will be changed with next release)
+    # time unit
+    hours = 1.0
+    # (=-dsig) skin depth in MPa
+    # must be negative, will be changed with next release
     depthS = -5.0
-    t0 = 1.0  # mean failure time in sec for critically stressed source
-    strend = 1.0  # (=dotsigc) in MPa/timeunit: tectonic stressing rate before loading
-    chi0 = 1.0  # susceptibility to trigger critically stressed sources if a unit step increas is applied (r0 = chi0*strend)
+    # mean failure time in sec for critically stressed source
+    t0 = 1.0
+    # (=dotsigc) in MPa/timeunit: tectonic stressing rate before loading
+    strend = 1.0
+    # susceptibility to trigger critically stressed sources
+    # if a unit step increas is applied (r0 = chi0*strend)
+    chi0 = 1.0
 
-    # ---- define Sshadow (Zmin) --------
+    # define Sshadow (Zmin)
     Sshadow = [0.0, 30.0, 60.0]
 
     tstart = 1.0e-4 * hours
     tend = 100.0 * hours
 
-    deltat = 0.1 * hours  # obsolet if logarithmic time axis
+    # obsolete if logarithmic time axis
+    deltat = 0.1 * hours
     # =NT = len(t) - overwritten if logarithmic time axis
     nt = int(np.ceil((tend - tstart) / deltat))
-    taxis_log = 0  # linear time axis discretization
+    # linear time axis discretization
+    taxis_log = False
     ntlog = 1000
     tstartl = 1.0e-4 * hours
 
-    # ---- discretizing stress axis for integration with
-    deltaS = -depthS / 60.0  # increment do discretize Coulomb stress axis
-    sigma_max = 3000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+    # discretizing stress axis for integration
+    # increment do discretize Coulomb stress axis
+    deltaS = -depthS / 60.0
+    # maximum depth on Coulomb axis (limit of integral)
+    sigma_max = 3000.0 * deltaS
 
-    iX0switch = 1  # uniform distribution
+    # uniform distribution
+    iX0 = "uniform"
 
-    # ----------------------------------------
-    # Calculate earthquake rates for cyclic loading
-    # ----------------------------------------
+    # calculate earthquake rates for cyclic loading
     ns = len(Sshadow)
     r_tdsr = np.zeros((ns, nt))
     r_cfm = np.zeros((ns, nt))
@@ -109,65 +114,30 @@ def test_fig3a():
             tstart=tstartl,
             tend=tend,
         )
-        t, chiz, cf, r, xn = tdsr(
+
+        common = dict(
             loading=loading,
             chi0=chi0,
-            t0=t0,
             depthS=depthS,
             deltaS=deltaS,
-            sigma_max=sigma_max,
-            iX0switch=iX0switch,
             Sshadow=Sshadow[k],
             taxis_log=taxis_log,
             ntlog=ntlog,
             deltat=deltat,
             tstart=tstartl,
             tend=tend,
+            t0=t0,
+            sigma_max=sigma_max,
+            iX0=iX0,
         )
+
+        t, chiz, cf, r, xn = tdsr(**common)
         r_tdsr[k, :] = r
 
-        loading = BackgroundLoading(
-            strend=strend,
-            taxis_log=taxis_log,
-            ntlog=ntlog,
-            deltat=deltat,
-            tstart=tstartl,
-            tend=tend,
-        )
-        t, chiz, cf, r, xn = cfm(
-            loading=loading,
-            chi0=chi0,
-            depthS=depthS,
-            deltaS=deltaS,
-            Sshadow=Sshadow[k],
-            taxis_log=taxis_log,
-            ntlog=ntlog,
-            deltat=deltat,
-            tstart=tstartl,
-            tend=tend,
-        )
+        t, chiz, cf, r, xn = cfm(**common)
         r_cfm[k, :] = r
 
-        loading = BackgroundLoading(
-            strend=strend,
-            taxis_log=taxis_log,
-            ntlog=ntlog,
-            deltat=deltat,
-            tstart=tstartl,
-            tend=tend,
-        )
-        t, chiz, cf, r, xn = rsd(
-            loading=loading,
-            chi0=chi0,
-            depthS=depthS,
-            deltaS=deltaS,
-            Sshadow=Sshadow[k],
-            taxis_log=taxis_log,
-            ntlog=ntlog,
-            deltat=deltat,
-            tstart=tstartl,
-            tend=tend,
-        )
+        t, chiz, cf, r, xn = rsd(**common)
         r_rsd[k, :] = r
 
     # plot values

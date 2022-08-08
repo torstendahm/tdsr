@@ -20,7 +20,7 @@ def plot(
 
     plt.plot(t, cf)
     plt.xlabel("$t$")
-    plt.ylabel("$\sigma_c$")
+    plt.ylabel("$\\sigma_c$")
     plt.show()
     plt.close()
 

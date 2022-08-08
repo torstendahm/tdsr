@@ -13,15 +13,15 @@ from tdsr.loading import CustomLoading
 
 
 def compute_groningen_stress_loading(tstart, tend):
-    # Earthquake data
+    # earthquake data
     data = np.loadtxt(DATA_DIR / "groningenEQ.dat")
     teq = data[:, 0]
-    # Pressure data
+    # pressure data
     data = np.loadtxt(DATA_DIR / "groningenP.dat")
     tgrid = data[:, 0]
     p = data[:, 1]
 
-    # Coulomb stress function
+    # coulomb stress function
     S = -p
     dS = np.ediff1d(S, to_begin=0.0)
     S = np.cumsum(dS)
@@ -101,22 +101,25 @@ def plot_fig5bc(
 
 
 def test_fig5bc():
-    print("set-up the tdsr, linear Coulomb failure and Rate and State models")
     tdsr = TDSR1()
     cfm = CFM()
     rsd1 = RSD1()
 
-    # ----------------------------------------
-    print("define model parameter for plotting, if different from config file")
-    # ----------------------------------------
-    dsig = 1.0  # Asig = dsig in the RS model
+    # Asig = dsig in the RS model
+    dsig = 1.0
     depthS = -dsig
-    dS0 = 8.5  # [MPa] gap for CF and RS_subcrit
-    dS0_TDSR = 22.0  # [MPa] gap for TDSR with uniform subcritical stress state
-    dS0mean = 24.5  # [MPa] mean stress for TDSR with gaussian subcritical stress state
-    dS0std = 1.0  # [MPa] standard deviation " " "
-    ta = 3e5  # [years] relaxation time ta=dsig/dotsigc
-    taRSsub = 60.0  # [years] relaxation time in the subcritical RS model
+    # [MPa] gap for CF and RS_subcrit
+    dS0 = 8.5
+    # [MPa] gap for TDSR with uniform subcritical stress state
+    dS0_TDSR = 22.0
+    # [MPa] mean stress for TDSR with gaussian subcritical stress state
+    dS0mean = 24.5
+    # [MPa] standard deviation " " "
+    dS0std = 1.0
+    # [years] relaxation time ta=dsig/dotsigc
+    ta = 3e5
+    # [years] relaxation time in the subcritical RS model
+    taRSsub = 60.0
     dotsigc = dsig / ta
     dotsigc_sub = dsig / taRSsub
 
@@ -124,9 +127,11 @@ def test_fig5bc():
     # in the TDRS model
     t0 = 1e-4
 
-    # ---- discretizing stress axis for integration with
-    deltaS = -depthS / 60.0  # increment do discretize Coulomb stress axis
-    sigma_max = 3000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+    # discretizing stress axis for integration
+    # increment do discretize Coulomb stress axis
+    deltaS = -depthS / 60.0
+    # maximum depth on Coulomb axis (limit of integral)
+    sigma_max = 3000.0 * deltaS
 
     tstart = 1960  # start time for model simulation
     tend = 2022.0  # end time for model simulation
@@ -149,41 +154,44 @@ def test_fig5bc():
     )
 
     # loading assuming that faults under critical stress exists
-    loading = CustomLoading(
+    common_loading = dict(
         data=data,
         scal_t=1.0,
         scal_cf=1.0,
-        strend=dotsigc,
         c_tstart=tstart,
         tstart=tstart,
         tend=tend,
         deltat=dt,
     )
+    loading = CustomLoading(strend=dotsigc, **common_loading)
 
-    # CF model with critical initial stress state:
-    t, chiz, cf, R_CF, xn = cfm(
-        loading=loading,
+    common = dict(
         chi0=1.0,
-        Sshadow=0.0,
+        t0=t0,
         depthS=depthS,
         deltat=dt,
         tstart=tstart,
         tend=tend,
+        taxis_log=False,
+        deltaS=deltaS,
+        sigma_max=sigma_max,
     )
-    fac = NEQ / np.sum(
-        R_CF[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt
-    )  # renormalize to observed EQ-number within [T1, T2]:
+
+    # CF model with critical initial stress state:
+    t, chiz, cf, R_CF, xn = cfm(
+        loading=loading,
+        Sshadow=0.0,
+        **common,
+    )
+    # renormalize to observed EQ-number within [T1, T2]:
+    fac = NEQ / np.sum(R_CF[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
     R_CF *= fac
 
     # CF model with subcritical initial stress state:
     t, chiz, cf, R_CFsub, xn = cfm(
         loading=loading,
-        chi0=1.0,
         Sshadow=dS0,
-        depthS=depthS,
-        deltat=dt,
-        tstart=tstart,
-        tend=tend,
+        **common,
     )
     fac = NEQ / np.sum(R_CFsub[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
     R_CFsub *= fac
@@ -191,12 +199,8 @@ def test_fig5bc():
     # RS model for critical initial stress state:
     t, chiz, cf, R_RS, xn = rsd1(
         loading=loading,
-        chi0=1.0,
         Sshadow=0.0,
-        depthS=depthS,
-        deltat=dt,
-        tstart=tstart,
-        tend=tend,
+        **common,
     )
     fac = NEQ / np.sum(R_RS[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
     R_RS *= fac
@@ -204,61 +208,31 @@ def test_fig5bc():
     # TDSR model for critical initial stress state:
     t, chiz, cf, R_TDSR, xn = tdsr(
         loading=loading,
-        chi0=1.0,
-        t0=t0,
-        depthS=depthS,
         Sshadow=0.0,
-        deltaS=deltaS,
-        sigma_max=sigma_max,
-        iX0switch=0,
-        deltat=dt,
-        taxis_log=0,
-        tstart=tstart,
-        tend=tend,
+        **common,
     )
     fac = NEQ / np.sum(R_TDSR[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
     R_TDSR *= fac
 
     # assuming that no faults exists under critical stress
     # (needed for TDSR and RS)
-    loading = CustomLoading(
-        data=data,
-        scal_t=1.0,
-        scal_cf=1.0,
-        strend=dotsigc_sub,
-        c_tstart=tstart,
-        tstart=tstart,
-        tend=tend,
-        deltat=dt,
-    )
+    sub_loading = CustomLoading(strend=dotsigc_sub, **common_loading)
 
     # RS model for subcritical initial stress state:
     t, chiz, cf, R_RSsub, xn = rsd1(
-        loading=loading,
-        chi0=1.0,
+        loading=sub_loading,
         Sshadow=(dS0 + dotsigc_sub * (t00 - tgrid[0])),
-        depthS=depthS,
-        deltat=dt,
-        tstart=tstart,
-        tend=tend,
+        **common,
     )
     fac = NEQ / np.sum(R_RSsub[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
     R_RSsub *= fac
 
     # TDSR model with uniform subcritical stress:
     t, chiz, cf, R_TDSRsub_uniform, xn = tdsr(
-        loading=loading,
-        chi0=1.0,
-        t0=t0,
-        depthS=depthS,
+        loading=sub_loading,
         Sshadow=dS0_TDSR,
-        deltaS=deltaS,
-        sigma_max=sigma_max,
-        iX0switch=1,
-        deltat=dt,
-        taxis_log=0,
-        tstart=tstart,
-        tend=tend,
+        iX0="uniform",
+        **common,
     )
     fac = NEQ / np.sum(
         R_TDSRsub_uniform[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt
@@ -267,20 +241,12 @@ def test_fig5bc():
 
     # TDSR model with gaussian subcritical prestress:
     t, chiz, cf, R_TDSRsub_gauss, xn = tdsr(
-        loading=loading,
-        chi0=1.0,
-        t0=t0,
-        depthS=depthS,
+        loading=sub_loading,
         Sshadow=0.0,
-        deltaS=deltaS,
-        sigma_max=sigma_max,
-        iX0switch=2,
+        iX0="gaussian",
         Zmean=dS0mean,
         Zstd=dS0std,
-        deltat=dt,
-        taxis_log=0,
-        tstart=tstart,
-        tend=tend,
+        **common,
     )
     fac = NEQ / np.sum(
         R_TDSRsub_gauss[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt

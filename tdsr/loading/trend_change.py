@@ -67,5 +67,7 @@ class TrendchangeLoading(Loading):
                 )
             )
         if not (n1 >= 0 and n1 + 1 <= nt):
-            raise InvalidParameter("tstep must be greater than zero and smaller than tend")
+            raise InvalidParameter(
+                "tstep must be greater than zero and smaller than tend"
+            )
         return np.hstack([seg1, seg2])

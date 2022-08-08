@@ -22,10 +22,10 @@ class Config(object):
         deltat: Number = 0.2 * HOURS,
         tstart: Number = 0 * HOURS,
         tend: Number = 30 * HOURS,
-        taxis_log: int = 0,
+        taxis_log: bool = False,
         ntlog: int = 1000,
         deltaS: Number = 0.0125,
-        iX0switch: int = 0,
+        iX0: str = "equilibrium",
         Zmean: float = 0.0,
         Zstd: float = 1.0,
         equilibrium: bool = False,
@@ -43,12 +43,12 @@ class Config(object):
         self.deltat = float(deltat)
         self.tstart = float(tstart)
         self.tend = float(tend)
-        self.taxis_log = int(taxis_log)
+        self.taxis_log = bool(taxis_log)
         self.ntlog = int(ntlog)
         self.deltaS = float(deltaS)
         self.sigma_max = float(sigma_max)
         self.precision = int(precision)
-        self.iX0switch = int(iX0switch)
+        self.iX0 = str(iX0)
         self.loading = loading
         if loading is None:
             self.loading = StepLoading(config=self)
@@ -79,8 +79,8 @@ class Config(object):
             self.deltaS = config["deltaS"]
         if "sigma_max" in config:
             self.sigma_max = config["sigma_max"]
-        if "iX0switch" in config:
-            self.iX0switch = config["iX0switch"]
+        if "iX0" in config:
+            self.iX0 = config["iX0"]
         if "Zmean" in config:
             self.Zmean = config["Zmean"]
         if "Zstd" in config:

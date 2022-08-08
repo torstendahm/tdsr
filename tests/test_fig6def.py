@@ -212,7 +212,8 @@ def skip_fig6def():
     sigma_max = 10000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
     # precision = 18
 
-    iX0switch = 1  # uniform distribution (and strend=0)
+    # uniform distribution (and strend=0)
+    iX0 = "uniform"
 
     D = 0.033  # [m^2/s]
     Mcut = -2.3

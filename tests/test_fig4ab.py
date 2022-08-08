@@ -100,42 +100,51 @@ def plot_fig4ab(
 
 
 def test_fig4ab():
-    print("set-up the tdsr, linear Coulomb failure and Rate and State models")
     tdsr = TDSR1()
     cfm = CFM()
     rsd = RSD()
 
-    # ----------------------------------------
-    print("define model parameter for plotting")
-    # ----------------------------------------
-    hours = 1.0  # time unit
-    depthS = (
-        -1.0
-    )  # (=-dsig) skin depth in MPa (must be negativ, will be changed with next release)
-    t0 = 1.0  # mean failure time in sec for critically stressed source
-    strend = 1.0  # (=dotsigc) in MPa/timeunit: tectonic stressing rate before loading
-    chi0 = 1.0  # susceptibility to trigger critically stressed sources if a unit step increas is applied (r0 = chi0*strend)
+    # time unit
+    hours = 1.0
+    # (=-dsig) skin depth in MPa
+    # must be negative, will be changed with next release
+    depthS = -1.0
+    # mean failure time in sec for critically stressed source t0 = 1.0
+    # (=dotsigc) in MPa/timeunit: tectonic stressing rate before loading
+    strend = 1.0
+    # susceptibility to trigger critically stressed sources
+    # if a unit step increas is applied (r0 = chi0*strend)
+    chi0 = 1.0
+
+    # stress steps applied at time tstep, in MPa
+    # formerly Sstepvalues = (-2.0, -4.0)
     sstep = [
         -2.0,
         -4.0,
-    ]  # stress steps applied at time tstep, in MPa ( formerly Sstepvalues = (-2.0, -4.0) )
+    ]
     tstep = 0.0 * hours
     tstep = 0.01 * hours
 
-    tstart = -1.0 * hours  # T0 = -1.0     # simulation start
-    tend = 10.0 * hours  # T1 = 10.0     # simulation end
+    # simulation start
+    tstart = -1.0 * hours
+    # simulation end
+    tend = 10.0 * hours
 
     deltat = 0.02 * hours
     t0 = deltat
-    nt = int(np.ceil((tend - tstart) / deltat))  # =NT = len(t)
+    # =NT = len(t)
+    nt = int(np.ceil((tend - tstart) / deltat))
 
-    # ---- discretizing stress axis for integration with
-    deltaS = -depthS / 60.0  # increment do discretize Coulomb stress axis
-    sigma_max = 3000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+    # linear time axis
+    taxis_log = False
 
-    # ----------------------------------------
-    # Calculare earthquake rates
-    # ----------------------------------------
+    # discretizing stress axis for integration
+    # increment do discretize Coulomb stress axis
+    deltaS = -depthS / 60.0
+    # maximum depth on Coulomb axis (limit of integral)
+    sigma_max = 3000.0 * deltaS
+
+    # calculare earthquake rates
     cfs = np.zeros((2, nt))
     cf_shad = np.zeros((2, nt))
     r_tdsr = np.zeros((2, nt))
@@ -146,67 +155,43 @@ def test_fig4ab():
     # calculate equilibrium distribution of tectonic loading,
     # to be used later to avoid initial oscillations
     # loading = BackgroundLoading(strend=strend)
-    # t, chiz_background, cf, r, xn = tdsm(loading=loading, chi0=chi0, depthS=depthS, deltaS=deltaS, sigma_max=sigma_max, deltat=deltat, tstart=0, tend=tend)
+    # t, chiz_background, cf, r, xn = tdsm(
+    #   loading=loading, chi0=chi0, depthS=depthS, deltaS=deltaS,
+    #   sigma_max=sigma_max, deltat=deltat, tstart=0, tend=tend)
 
     for i, Sstep in enumerate(sstep):
-
-        print("i=", i, " Sstep=", Sstep, " sstep[i]=", sstep[i], " tstep=", tstep)
-        print("deltat=", deltat, " tstart=", tstart, " tend=", tend)
         loading = StepLoading(
             strend=strend,
             sstep=Sstep,
             tstep=tstep,
-            taxis_log=0,
+            taxis_log=taxis_log,
             deltat=deltat,
             tstart=tstart,
             tend=tend,
         )
-        t, chiz, cf, r, xn = tdsr(
+        common = dict(
             loading=loading,
             chi0=chi0,
             t0=t0,
             depthS=depthS,
             deltaS=deltaS,
             sigma_max=sigma_max,
-            iX0switch=0,
+            iX0="equilibrium",
             deltat=deltat,
-            taxis_log=0,
+            taxis_log=taxis_log,
             tstart=tstart,
             tend=tend,
         )
+
+        t, chiz, cf, r, xn = tdsr(**common)
         cfs[i, :] = cf[:]
         r_tdsr[i, :] = r[:]
 
-        loading = StepLoading(
-            strend=strend,
-            sstep=Sstep,
-            tstep=tstep,
-            deltat=deltat,
-            tstart=tstart,
-            tend=tend,
-        )
         # BUG: cf_shadow is written here, but cf_shad is plotted (zeros only)!
-        t, cf_shadow, cf, r, xn = rsd(
-            loading=loading,
-            chi0=chi0,
-            depthS=depthS,
-            deltat=deltat,
-            tstart=tstart,
-            tend=tend,
-        )
+        t, cf_shadow, cf, r, xn = rsd(**common)
         r_rsd[i, :] = r
 
-        loading = StepLoading(
-            strend=strend,
-            sstep=Sstep,
-            tstep=tstep,
-            deltat=deltat,
-            tstart=tstart,
-            tend=tend,
-        )
-        t, chiz, cf, r, xn = cfm(
-            loading=loading, chi0=chi0, deltat=deltat, tstart=tstart, tend=tend
-        )
+        t, chiz, cf, r, xn = cfm(**common)
         r_lcm[i, :] = r
 
         R_TDSR_theory[i, :] = Eq7(t, sstep[i], chi0 * strend, -depthS, strend, strend)

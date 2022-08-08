@@ -27,7 +27,7 @@ class CustomLoading(Loading):
         strend: Number = 7.0e-5,
         tstart: Number = 0.0,
         tend: Number = 86400.0,
-        taxis_log: int = 0,
+        taxis_log: bool = False,
         deltat: Number = 720.0,
         scal_t: Number = 3600 * 24,
         scal_cf: Number = 1.0e-6,
@@ -68,10 +68,10 @@ class CustomLoading(Loading):
 
     def values(self, length: int) -> npt.NDArray[np.float64]:
 
-        if self.taxis_log != 0:
+        if self.taxis_log:
             raise InvalidParameter(
                 "logarithmic time samples not possible when "
-                "reading in stress loading function. Set taxis_log = 0"
+                "reading in stress loading function. Set taxis_log=False."
             )
 
         # scaled time

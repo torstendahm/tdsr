@@ -58,7 +58,8 @@ def skip_ramp_loading() -> None:
     sigma_max = 10000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
     precision = 18
 
-    iX0switch = 0  # steady state distribution
+    # steady state distribution
+    iX0 = "equilibrium"
 
     # print('deltat=',deltat,' sec = ',deltat/hours,' hours, from 0 to ',tend/hours,' hours, samples =',nt)
     # print('Ta1  =',-depthS/strend1,' sec = ',-depthS/(strend1*hours),' hours')
@@ -184,7 +185,7 @@ def skip_ramp_loading() -> None:
         deltaS=deltaS,
         sigma_max=sigma_max,
         precision=precision,
-        iX0switch=iX0switch,
+        iX0=iX0,
         deltat=deltat,
         tstart=tstart,
         tend=tend,
@@ -271,7 +272,7 @@ def skip_ramp_loading() -> None:
         deltaS=deltaS,
         sigma_max=sigma_max,
         precision=precision,
-        iX0switch=iX0switch,
+        iX0=iX0,
         deltat=deltat,
         tstart=tstart,
         tend=tend,
@@ -394,7 +395,7 @@ def skip_ramp_loading() -> None:
         deltaS=deltaS,
         sigma_max=sigma_max,
         precision=precision,
-        iX0switch=iX0switch,
+        iX0=iX0,
         deltat=deltat,
         tstart=tstart,
         tend=tend,

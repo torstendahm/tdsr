@@ -1,21 +1,60 @@
 """
 TDSR (Time Dependent Stress Response) seismicity models
 ====================================
-TDSR is a python tool to simulate time dependent earthquake rates for different stress loading scenarios. 
-Earthquake rate is definded as number of events per time unit with magnitudes above a completeness magnitude. 
-Stress loading is understood as Coulomb stress as a function of time. The stress loading is assumed homogeneous within the rock volume for which the simulation is performed. The details of the TDSR seismicity model and examles are described in Dahm and Hainzl (2022), JGR, in review.
+TDSR is a python tool to simulate time dependent earthquake rates for
+different stress loading scenarios.
+Earthquake rate is definded as number of events per time unit with
+magnitudes above a completeness magnitude.
+Stress loading is understood as Coulomb stress as a function of time.
+The stress loading is assumed homogeneous within the rock volume for which
+the simulation is performed. The details of the TDSR seismicity model
+and examles are described in Dahm and Hainzl (2022), JGR, in review
 
-Different loading scenarios are supported and defined by loading classes which are imported from tdsr.loading. Loading classes include step in Coulomb stress (class StepLoading), a constant background stress rate (class BackgroundLoading), a change in stress rate (class TrendchangeLoading), a cyclic stress rate superposed to a constant background trend (class CyclicLoading), a stress curve defined by 4 points (class FourPointLoading), or a ramp like loading scenario (class RampLoading). 
-Alternatively, the loading time function can be read from an external ascii or binary file (class ExternalFileLoading). Stress loading functions can also be defined in the calling python script and directly passed to the seismicity model classes (example not yet provided). 
+Different loading scenarios are supported and defined by loading
+classes which are imported from tdsr.loading.
+Loading classes include
 
-Additional to simulations of the new TDSR model, the toolbox can compare results with earthquake rates calculated from other seismicity models, using the same loading functions and parameter settings as TDSR. All models are defined as classes and can be loaded from tdsr (e.g. TDSR1 for the TDSR model, provided by tdsr.tdsr.TDSR1). Other classes included so far are rate and state seismicity models (RSD, RSD1) and linear Coulomb failure models (CFM, Traditional). 
+    * step in Coulomb stress :class:`tdsr.loading.StepLoading`
+    * a constant background stress rate :class:`tdsr.loading.BackgroundLoading`
+    * a change in stress rate :class:`tdsr.loading.TrendchangeLoading`
+    * a cyclic stress rate superposed to a constant background trend
+      :class:`tdsr.loading.CyclicLoading`
+    * a stress curve defined by 4 points :class:`tdsr.loading.FourPointLoading`
+    * or a ramp like loading scenario :class:`tdsr.loading.RampLoading`
 
-An elementary plotting class is supported, which is imported from tdsr.plotting. However, the examples provided in the toolbox use their own plotting solutions. 
+Alternatively, the loading time function can be read from an
+external file with :class:`tdsr.loading.CustomLoading`.
+Stress loading functions can also be defined in the calling python
+script and directly passed to the seismicity model classes
+(example not yet provided).
 
-Default settings of input parameter can be defined in config.toml. Default values can be overwritten when calling the seismicity model classes or  loading scenarios (see examples). 
+Additional to simulations of the new TDSR model, the toolbox can
+compare results with earthquake rates calculated from other seismicity
+models, using the same loading functions and parameter settings as TDSR.
+All models are defined as classes and can be loaded from tdsr
+(e.g. TDSR1 for the TDSR model, provided by tdsr.tdsr.TDSR1).
+Other classes included so far are rate and state
+seismicity models (RSD, RSD1) and linear Coulomb failure
+models (CFM, Traditional).
 
-The examples collected in the subdirectory ''examples'' reproduce figures published in Dahm and Hainzl (2022). All theory of the TDSR model and the examples are described in  Dahm and Hainzl (2022). The software toolbox in python is published together with the JGR paper under Dahm et al. (2022) (doi link to be added). 
-The TDSR  github project here, however, is intended as an open source project that may change and improve over the years. Please send us your suggestions or addings and contribute to the git project if interested. 
+An elementary plotting class is supported, which is imported from
+tdsr.plotting. However, the examples provided in the toolbox use
+their own plotting solutions.
+
+Default settings of input parameter can be defined in config.toml.
+Default values can be overwritten when calling the seismicity model
+classes or  loading scenarios (see examples).
+
+The examples collected in the subdirectory ''examples'' reproduce figures
+published in Dahm and Hainzl (2022).
+All theory of the TDSR model and the examples are described in
+Dahm and Hainzl (2022).
+The software toolbox in python is published together with the JGR paper
+under Dahm et al. (2022) (doi link to be added).
+The TDSR  github project here, however, is intended as an open source
+project that may change and improve over the years.
+Please send us your suggestions or addings and contribute to the
+git project if interested.
 """
 
 from copy import deepcopy
@@ -28,6 +67,7 @@ from tdsr.config import Config
 from tdsr.loading import Loading
 from tdsr.exceptions import MissingParameter
 from tdsr.utils import (
+    DEBUG,
     X0gaussian,
     X0steady,
     X0uniform,
@@ -36,11 +76,7 @@ from tdsr.utils import (
     gridrange_log,
     pf,
     shifted,
-    tf,
 )
-
-# import nptyping as npt
-
 
 Result = Tuple[
     npt.NDArray[np.float64],
@@ -52,8 +88,11 @@ Result = Tuple[
 
 class LCM(object):
     """
-    Class of the Linear Coulomb Failure Model (LCM) used as base for calculating time dependent seismicity with class TDSR. Note that TDSR is outdated and was replaced by TDSR1.
-    For simulations with the linear Coulomb Failure model use classes "CFM" or "Traditional".
+    Class of the Linear Coulomb Failure Model (LCM) used as base
+    for calculating time dependent seismicity with class TDSR.
+    Note that TDSR is outdated and was replaced by TDSR1.
+    For simulations with the linear Coulomb Failure model use
+    classes "CFM" or "Traditional".
     """
 
     def __init__(self, config: Optional[Config] = None) -> None:
@@ -74,14 +113,14 @@ class LCM(object):
         chiz: Optional[float] = None,
         depthS: Optional[float] = None,
         Sshadow: Optional[float] = None,
-        iX0switch: Optional[int] = None,
+        iX0: Optional[str] = None,
         Zmean: Optional[float] = None,
         Zstd: Optional[float] = None,
         equilibrium: Optional[bool] = None,
         deltat: Optional[float] = None,
         tstart: Optional[float] = None,
         tend: Optional[float] = None,
-        taxis_log: Optional[int] = None,
+        taxis_log: Optional[bool] = None,
         ntlog: Optional[int] = None,
         deltaS: Optional[float] = None,
         sigma_max: Optional[int] = None,
@@ -95,7 +134,7 @@ class LCM(object):
                 t0=t0,
                 depthS=depthS,
                 Sshadow=Sshadow,
-                iX0switch=iX0switch,
+                iX0=iX0,
                 Zmean=Zmean,
                 Zstd=Zstd,
                 equilibrium=equilibrium,
@@ -126,11 +165,7 @@ class LCM(object):
         (self.smin, self.smax, self.nsigma, self.sigma, self.dZ) = gridrange(
             -config.sigma_max, +config.sigma_max, config.deltaS
         )
-        if config.taxis_log == 1:
-            # self.t = np.logspace(config.tstart, config.tend, config.ntlog)
-            # self.tmin = config.tstart
-            # self.tmax = config.tend
-            # self.nt   = config.ntlog
+        if config.taxis_log:
             (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange_log(
                 config.tstart, config.tend, config.ntlog
             )
@@ -140,7 +175,7 @@ class LCM(object):
             )
 
         self.chiz = np.zeros(self.nsigma)
-        #  self.pz wird ueberschrieben, wenn tdsr benutzt wird
+        #  self.pz will be overridden by TDSR subclass
         self.pz = np.heaviside(self.sigma, 1)
 
         loading = config.loading
@@ -191,7 +226,8 @@ class LCM(object):
 
 class TDSR(LCM):
     """
-    TDSR class realisation builts on LCM and is depreciated. Use TDSR1 instead.
+    TDSR class realisation builts on LCM and is deprecated.
+    Use TDSR1 instead.
     """
 
     def _compute(self, config: Config) -> Result:
@@ -205,14 +241,28 @@ class TDSR(LCM):
 
 class TDSR1(object):
     """
-    Class TDSR1 simulates the time dependent stress rate seismicity model TDSR.
-    Key parameters are chi0 (susceptibility to trigger earthquakes after unit step increase),
-    t0 (mean time to failure for critically stressed sources),  and depthS (skin depth parameter in exponential trigger functions).
-    Different source distributions can be considered, controlled by parameter iX0switch. If iX0switch==1 a uniform disribution
-    of stress stages at seismic sources is assumed. If iX0switch==2 a Gaussian distribution of stress stages is assumed. The
-    mean stress level of the Gaussian peak is defined by Zmean and the standard deviation by Zstd. If iX0switch==0 a steady state distribution of
-    sources is assumed, using config.strend. All three cases of stress distributions can be modified by a shift of Sshadow  on the stress axis to simulate a subcritical stress state.
-    If taxis_log==0 an equally space time sampling is assumed with interval deltat.
+    TDSR1 simulates the time dependent stress rate seismicity model TDSR.
+    Key parameters are
+
+        * ``chi0``: susceptibility to trigger earthquakes after unit
+          step increase
+        * ``t0``: mean time to failure for critically stressed sources
+        * ``depthS``: skin depth parameter in exponential trigger functions
+
+    Different source distributions ``iX0`` can be considered:
+
+        * If ``iX0=="uniform"``,  a uniform disribution of stress stages
+          at seismic sources is assumed.
+        * If ``iX0=="gaussian"`` a gaussian distribution of stress stages
+          is assumed. The mean stress level of the Gaussian peak is defined
+          by ``Zmean`` and the standard deviation by ``Zstd``.
+        * If ``iX0switch=="equilibrium"`` a steady state distribution
+          of sources is assumed, using ``config.strend``.
+
+    All three cases of stress distributions can be modified by a shift of
+    ``Sshadow`` on the stress axis to simulate a subcritical stress state.
+    If ``taxis_log==False`` an equally space time sampling is assumed
+    with interval ``deltat``.
     """
 
     def __init__(self, config: Optional[Config] = None) -> None:
@@ -233,14 +283,14 @@ class TDSR1(object):
         chiz: Optional[float] = None,
         depthS: Optional[float] = None,
         Sshadow: Optional[float] = None,
-        iX0switch: Optional[int] = None,
+        iX0: Optional[str] = None,
         Zmean: Optional[float] = None,
         Zstd: Optional[float] = None,
         equilibrium: Optional[bool] = None,
         deltat: Optional[float] = None,
         tstart: Optional[float] = None,
         tend: Optional[float] = None,
-        taxis_log: Optional[int] = None,
+        taxis_log: Optional[bool] = None,
         ntlog: Optional[int] = None,
         deltaS: Optional[float] = None,
         sigma_max: Optional[int] = None,
@@ -254,7 +304,7 @@ class TDSR1(object):
                 t0=t0,
                 depthS=depthS,
                 Sshadow=Sshadow,
-                iX0switch=iX0switch,
+                iX0=iX0,
                 Zmean=Zmean,
                 Zstd=Zstd,
                 equilibrium=equilibrium,
@@ -286,11 +336,7 @@ class TDSR1(object):
             -config.sigma_max, +config.sigma_max, config.deltaS
         )
         print("taxis_log=", config.taxis_log, " ntlog=", config.ntlog)
-        if config.taxis_log == 1:
-            # self.t = np.logspace(config.tstart, config.tend, config.ntlog)
-            # self.tmin = config.tstart
-            # self.tmax = config.tend
-            # self.nt   = config.ntlog
+        if config.taxis_log:
             (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange_log(
                 config.tstart, config.tend, config.ntlog
             )
@@ -311,10 +357,12 @@ class TDSR1(object):
         dsig = -config.depthS
         t0 = config.t0
         X0 = config.chi0
-        if (
-            config.taxis_log == 1
-        ):  # nicht gut geloest, macht nur Sinn wenn Background mit step verwendet wird (tstep=0)
-            # Zmin = config.Sshadow  # nicht gut geloest, sstep bei tstep=0 sollte mit sstep definiert werden - noch zu aendern
+        # nicht gut geloest, macht nur Sinn wenn Background
+        # mit step verwendet wird (tstep=0)
+        if config.taxis_log:
+            # Zmin = config.Sshadow
+            # nicht gut geloest, sstep bei tstep=0 sollte mit sstep
+            # definiert werden - noch zu aendern
             Zmin = config.loading.sstep
         else:
             Zmin = 0.0
@@ -330,21 +378,32 @@ class TDSR1(object):
         # print('zvalues ',Z)
         dS = np.ediff1d(self.cf, to_end=self.cf[-1] - self.cf[-2])
 
-        print("iX0switch=", config.iX0switch)
-        if config.iX0switch == 1:
-            # -----  uniform Distribution of stress states (e.g. Fig. 3a)
-            X = X0uniform(Z, config.Sshadow, config.chi0)
-        elif config.iX0switch == 2:
-            # ----- Gaussian  distribution before loading starts
-            print(
-                "Gaussian distribution with Zmean=", config.Zmean, " Zstd=", config.Zstd
-            )
-            X = X0gaussian(Z + Zmin, config.Zmean, config.Zstd, config.chi0)
-        else:
-            # ----- default is steady state distribution before loading starts
+        if config.iX0.lower() == "equilibrium":
+            # steady state equilibrium before loading starts
             r0 = config.chi0 * config.loading.strend
-            # X = X0steady(Z+Zmin, r0, config.t0, -config.depthS, config.loading.strend)
             X = X0steady(Z + Zmin, r0, config.t0, -config.depthS, config.loading.strend)
+
+        elif config.iX0.lower() == "uniform":
+            # uniform Distribution of stress states (e.g. Fig. 3a)
+            X = X0uniform(Z, config.Sshadow, config.chi0)
+
+        elif config.iX0.lower() == "gaussian":
+            # gaussian distribution before loading starts
+            if DEBUG:
+                print(
+                    "Gaussian distribution with " "Zmean=",
+                    config.Zmean,
+                    " Zstd=",
+                    config.Zstd,
+                )
+            X = X0gaussian(Z + Zmin, config.Zmean, config.Zstd, config.chi0)
+
+        else:
+            raise InvalidParameter(
+                'iX0 must be of of "equilibrium", "uniform", "gaussian", ',
+                "but got ",
+                config.iX0.lower(),
+            )
 
         self.chiz = X
         # print('xmin=',np.amin(X),' xmax=',np.amax(X),' nx=',len(X))

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class StepLoading(Loading):
     """
-    Class StepLoading (short  name "Step") can define a stress step over a linear trend of Coulomb stress loading. An equal distance sampling of the stress function with sampling interval of "deltat" is generated if t_axis_log != 1. Controlling parameter are the background stress trend (strend), the time when the stress step is applied (tstep), and the magnitude of the stress step (sstep). If taxis_log==1 a logarithic time sampling is considered. Then, the time of the step is set to t=tstart, and the  number of sampling points (ntlog) is specified instead of the sampling interval.
+    Class StepLoading (short name "Step") can define a stress step over a linear trend of Coulomb stress loading. An equal distance sampling of the stress function with sampling interval of ``deltat`` is generated if ``taxis_log==False``. Controlling parameter are the background stress trend (``strend``), the time when the stress step is applied (``tstep``), and the magnitude of the stress step (``sstep``). If ``taxis_log==True`` a logarithic time sampling is considered. Then, the time of the step is set to ``t=tstart``, and the  number of sampling points (``ntlog``) is specified instead of the sampling interval.
     """
 
     __name__: str = "Step"
@@ -28,7 +28,7 @@ class StepLoading(Loading):
         # tstep: Optional[Number] = None,
         tend: Optional[Number] = None,
         # tend: Number = 86400.0,
-        taxis_log: Number = 0,
+        taxis_log: bool = False,
         ntlog: Number = 1000,
         deltat: Number = 720.0,
         config: Optional["Config"] = None,
@@ -52,17 +52,17 @@ class StepLoading(Loading):
 
     def values(self, length: int) -> npt.NDArray[np.float64]:
         """the loading values"""
-        if self.taxis_log == 1:
-            print("taxis_log=1 (logarithmic scale), step is at tstep=0 and start>0")
-            print(
+        if self.taxis_log:
+            print("logarithmic scale used, step is at tstep=0 and start>0")
+            raise InvalidParameter(
                 "Steploading not configured for logarithmic t-axis. "
                 "Use BackgroundLoading with sstep=sstep and tdsr() with "
                 "Sshadow=sstep"
             )
-            exit()
-            nt = self.ntlog
-            tvalues = np.logspace(np.log10(self.tstart), np.log10(self.tend), nt)
-            seg2 = sc0 + tvalues * self.strend
+            # exit()
+            # nt = self.ntlog
+            # tvalues = np.logspace(np.log10(self.tstart), np.log10(self.tend), nt)
+            # seg2 = sc0 + tvalues * self.strend
         else:
             n1 = np.floor((self.tstep - self.tstart) / self.deltat).astype(int) + 1
             nt = length
@@ -101,5 +101,7 @@ class StepLoading(Loading):
                 )
             )
         if not (n1 >= 0 and n1 + 1 <= nt):
-            raise InvalidParameter("tstep must be greater than zero and smaller than tend")
+            raise InvalidParameter(
+                "tstep must be greater than zero and smaller than tend"
+            )
         return np.hstack([seg1, seg3])

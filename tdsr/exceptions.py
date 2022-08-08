@@ -7,9 +7,11 @@
 class TDSRException(Exception):
     pass
 
+
 class InvalidParameter(TDSRException):
     def __init__(self, message: str) -> None:
         super().__init__(message)
+
 
 class MissingParameter(TDSRException):
     def __init__(self, message: str) -> None:
