@@ -29,7 +29,7 @@ class TrendchangeLoading(Loading):
         deltat: Number = 720.0,
         config: Optional["Config"] = None,
     ):
-        self.config = _config
+        self.config = config
         self.strend = strend
         self.strend2 = strend2
         self.tstep = tstep or self.config.tend / 2

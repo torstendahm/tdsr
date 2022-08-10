@@ -1,38 +1,30 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # --------------------------
 # Example Fig 7cd in Dahm and Hainzl - Morsleben induced seismicity case
 # --------------------------
+
 import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
-import matplotlib.ticker
-import math
 import numpy as np
 
 EXAMPLE_DIR = Path(__file__).parent
 REPO_ROOT = EXAMPLE_DIR.parent.absolute()
 sys.path.insert(0, str(REPO_ROOT))
 
-from tdsr import Config, TDSR, TDSR1, LCM, Traditional, CFM, RSM, RSD, RSD1
-from tdsr.plotting import plot
-from tdsr.loading import ExternalFileLoading, BackgroundLoading
+from tdsr import TDSR1, Traditional  # noqa: E402
+from tdsr.loading import CustomLoading  # noqa: E402
 
-config_file = EXAMPLE_DIR / "config.toml"
 data_cfs = REPO_ROOT / "data/stresschange_morsleben.dat"
 fn_obsrate = REPO_ROOT / "data/morsleben_EQ.dat"
-# fn_obsrate = current_dir / '../data/observed_rate_southregion.txt'
 figname = REPO_ROOT / "plots/fig7cd"
 
-print("set-up the tdsm, lcm and rsm class environments")
-# tdsm = TDSM(config=Config.open(config_file))
-tdsr = TDSR1(config=Config.open(config_file))
-# rsd1  = RSD1(config=Config.open(config_file))
-trad = Traditional(config=Config.open(config_file))
+tdsr = TDSR1()
+trad = Traditional()
 
-
-print("define model parameter for plotting, if different from config file")
 km = 1000.0
-# hours = 3600.
-# days = hours * 24.
 days = 1.0
 
 tstart = 0.0 * days
@@ -43,41 +35,44 @@ tgrid = np.linspace(tstart, tend, nt)
 dt = np.ediff1d(tgrid, to_end=tgrid[-1] - tgrid[-2])
 
 t0 = 0.01
-strend = 0.0  # no tectonic loading
-chi0 = 1.0  # susceptibility to trigger earthquakes by unit stress increase
+# no tectonic loading
+strend = 0.0
+# susceptibility to trigger earthquakes by unit stress increase
+chi0 = 1.0
 
-deltaS = 0.3 / 500.0  # increment do discretize Coulomb stress axis
-sigma_max = 10000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
-# precision = 18
+# increment do discretize Coulomb stress axis
+deltaS = 0.3 / 500.0
+# maximum depth on Coulomb axis (limit of integral)
+sigma_max = 10000.0 * deltaS
 
-iX0switch = 1  # uniform distribution (and strend=0)
+# uniform distribution (and strend=0)
+iX0 = "uniform"
 
-iascii = True
-scal_cf = 1.0e-6  # data provided in Pa, to be scaled to  MPa
-scal_t = 1.0  # time provilded in units of days, to be scaled to days
+# data provided in Pa, to be scaled to  MPa
+scal_cf = 1.0e-6
+# time provilded in units of days, to be scaled to days
+scal_t = 1.0
 c_tstart = 0.0
 
-# ------------------------------------
 # read observed data again to get some paramter for plotting and scaling
-# ------------------------------------
-# data = np.loadtxt(fn_obsrate, skiprows=2)
 data = np.loadtxt(fn_obsrate)
 data = data[((data[:, 1] >= tstart) & (data[:, 1] <= tend))]
 teq = data[:, 1]
 Neq = data[:, 0]
 NEQ = np.sum(Neq)
-# NEQ = 70446.   # Sebastion used the full EQ catalog, i constrained in my input only to the Southern region
+# Sebastion used the full EQ catalog
+# I constrained in my input only to the Southern region
+# NEQ = 70446.
 dteq = np.ediff1d(teq, to_end=teq[-1] - teq[-2])
 Req = Neq / dteq
 
-# -----------------------------------------------------
-print("Calculate earthquake rates with tdsm, lcm and rsm")
-# -----------------------------------------------------
+# read morsleben data
+morsleben_data = np.loadtxt(data_cfs)
+
+# calculate earthquake rates with tdsm, lcm and rsm
 ns = 3
 cfs = np.zeros(nt)
 r_tdsr = np.zeros((ns, nt))
-# r_tdsm = np.zeros((ns,nti))
-# r_rsd  = np.zeros((ns,nt))
 
 for i in range(3):
     if i == 0:
@@ -90,10 +85,8 @@ for i in range(3):
         depthS = -0.5
         Sshadow = 4.5
 
-    loading = ExternalFileLoading(
-        _config=tdsr.config,
-        iascii=True,
-        infile=data_cfs,
+    loading = CustomLoading(
+        data=morsleben_data[:, [1, 0]],
         scal_t=scal_t,
         scal_cf=scal_cf,
         strend=strend,
@@ -102,7 +95,7 @@ for i in range(3):
         tend=tend,
         deltat=deltat,
     )
-    config, t, chiz, cfs, r, xn = tdsr(
+    t, chiz, cfs, r, xn = tdsr(
         loading=loading,
         chi0=chi0,
         t0=t0,
@@ -110,7 +103,7 @@ for i in range(3):
         Sshadow=Sshadow,
         deltaS=deltaS,
         sigma_max=sigma_max,
-        iX0switch=iX0switch,
+        iX0=iX0,
         deltat=deltat,
         taxis_log=0,
         tstart=tstart,
@@ -120,26 +113,18 @@ for i in range(3):
     r *= X0  # X0 set to match the observed number
     r_tdsr[i, :] = r[:]
 
-    # loading = ExternalFileLoading(_config=rsd1.config, iascii=True, infile=data_cfs, scal_t=scal_t, scal_cf=scal_cf, strend=strend, c_tstart=c_tstart, tstart=tstart, tend=tend, deltat=deltat)
-    # config, t, chiz, cf, r, xn = rsd1(loading=loading, chi0=chi0, depthS=depthS, Sshadow=Sshadow, deltat=deltat, tstart=tstart, tend=tend)
-    # r_rsd[i,:] = r[:]
-
 # calculate stress shadow ad hoc  by using the linear coulomb failure class
-config, t, cf_shad, cf, r, xn = trad(
+t, cf_shad, cf, r, xn = trad(
     loading=loading, chi0=chi0, deltat=deltat, tstart=tstart, tend=tend
 )
 
-# -------------------------------------------------
-# Plot results
-# -------------------------------------------------
-# General Plot Properties
-# make a bigger global font size and sans-serif style
+# plot results
+
 cb = ["r", "b", "m", "r", "b", "m", "r", "b", "m"]
 fac = 1.0 / 24.0  # scaling rate from days to hours
 plt.rc("font", family="sans-serif")
 plt.rc("font", size=12)
 plt.rc("legend", fontsize=8)
-
 
 fig, ax = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1, 1]}, figsize=(7, 8))
 plt.subplots_adjust(hspace=0, wspace=0.2)
@@ -203,4 +188,4 @@ ax[1].text(
 plt.show()
 fig.savefig(str(figname) + ".pdf", dpi=300, format="pdf", bbox_inches="tight")
 fig.savefig(str(figname) + ".png", dpi=300, format="png", bbox_inches="tight")
-print("\n\t OUTPUT: %s\n" % (figname))
+print(f"\n\t OUTPUT: {str(figname) + '.pdf'}\n")

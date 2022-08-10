@@ -1,35 +1,39 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # --------------------------
 # Example for ramp loading
 # --------------------------
+
 import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
-import matplotlib.ticker
-import math
 import numpy as np
 
 EXAMPLE_DIR = Path(__file__).parent
 REPO_ROOT = EXAMPLE_DIR.parent.absolute()
 sys.path.insert(0, str(REPO_ROOT))
 
-from tdsr import Config, TDSR, TDSR1, LCM, Traditional, CFM, RSM, RSD
-from tdsr.plotting import plot
-from tdsr.loading import StepLoading, BackgroundLoading, TrendchangeLoading, RampLoading
+from tdsr import TDSR, TDSR1, LCM, Traditional, CFM, RSM, RSD  # noqa: E402
+from tdsr.loading import (  # noqa: E402
+    BackgroundLoading,
+    TrendchangeLoading,
+    RampLoading,
+)
+
 
 config_file = EXAMPLE_DIR / "config.toml"
-pdf_file1 = REPO_ROOT / "plots/fig_ramploading"
+figname = REPO_ROOT / "plots/fig_ramploading"
 
-print("set-up the tdsm, lcm and rsm class environments")
-tdsm = TDSR(config=Config.open(config_file))
-tdsr = TDSR1(config=Config.open(config_file))
-lcm = LCM(config=Config.open(config_file))
-trad = Traditional(config=Config.open(config_file))
-cfm = CFM(config=Config.open(config_file))
-rsm = RSM(config=Config.open(config_file))
-rsd = RSD(config=Config.open(config_file))
+tdsm = TDSR()
+tdsr = TDSR1()
+lcm = LCM()
+trad = Traditional()
+cfm = CFM()
+rsm = RSM()
+rsd = RSD()
 
 
-print("define model parameter for plotting, if different from config file")
 hours = 3600.0
 tstart = 0 * hours
 tend = 200 * hours
@@ -43,33 +47,54 @@ strend3 = strend1
 nsample2 = 100
 
 sstep = 0.0
-tstep = 80.0 * hours  # time when stress step is acting
+# time when stress step is acting
+tstep = 80.0 * hours
 nsample1 = np.floor((tstep - tstart) / deltat).astype(int) + 1
 
 tstep3 = tstep + nsample2 * deltat
 nstep = np.floor((tstep - tstart) / deltat).astype(int) + 1
 
-chi0 = 1.0e4  # susceptibility to trigger earthquakes by unit stress increase
-depthS = -0.3  # skin depth in MPa (must be defined negativ)
+# susceptibility to trigger earthquakes by unit stress increase
+chi0 = 1.0e4
+# skin depth in MPa (must be negative)
+depthS = -0.3
 
-deltaS = -depthS / 500.0  # increment do discretize Coulomb stress axis
-sigma_max = 10000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+# increment do discretize Coulomb stress axis
+deltaS = -depthS / 500.0
+# maximum depth on Coulomb axis (limit of integral)
+sigma_max = 10000.0 * deltaS
 precision = 18
 
-iX0switch = 0  # steady state distribution
+# steady state distribution
+iX0 = "equilibrium"
 
-# print('deltat=',deltat,' sec = ',deltat/hours,' hours, from 0 to ',tend/hours,' hours, samples =',nt)
-# print('Ta1  =',-depthS/strend1,' sec = ',-depthS/(strend1*hours),' hours')
-# print('Ta2  =',-depthS/strend2,' sec = ',-depthS/(strend2*hours),' hours')
-# print('suscept. chi0=',chi0,' #/MPa')
-# print('skin depth =',-depthS,' MPa')
-# print('tectonic trend1 =',strend1*24.*hours,' MPa/days,  dot(sigma)*deltat/deltaS=',-strend1*deltat/depthS)
-# print('tectonic trend2 =',strend2*24.*hours,' MPa/days,  dot(sigma)*deltat/deltaS=',-strend2*deltat/depthS)
-# print('deltaS=',deltaS,' MPa, from 0 to ',sigma_max,' MPa')
+print(
+    dict(
+        deltat=deltat,
+        sec=deltat / hours,
+        hours=hours,
+        end=tend / hours,
+        samples=nt,
+    )
+)
 
-# -----------------------------------------------------
-print("Calculate earthquake rates with tdsm, lcm and rsm")
-# -----------------------------------------------------
+print(
+    dict(
+        Ta1=-depthS / strend1,
+        Ta2=-depthS / strend2,
+        sec=-depthS / (strend1 * hours),
+        chi0=chi0,
+        skinDepth=-depthS,
+        deltaS=-deltaS,
+        tectonic_trend1=strend1 * 24.0 * hours,
+        tectonic_trend2=strend2 * 24.0 * hours,
+        sigma_max=-sigma_max,
+        dot_sigma1=-strend1 * deltat / depthS,
+        dot_sigma2=-strend2 * deltat / depthS,
+    )
+)
+
+# calculate earthquake rates with tdsm, lcm and rsm
 cfs1 = np.zeros(nt)
 cfs1_ramp = np.zeros(nt)
 cfs2 = np.zeros(nt)
@@ -77,15 +102,11 @@ cfs2 = np.zeros(nt)
 r_tdsm = np.zeros(nt)
 r_tdsr = np.zeros(nt)
 r_lcm = np.zeros(nt)
-# r_cfm  = np.zeros(nt)
 r_rsm = np.zeros(nt)
-# r_rsd  = np.zeros(nt)
 n_tdsm = np.zeros(nt - 1)
 n_tdsd = np.zeros(nt - 1)
 n_lcm = np.zeros(nt - 1)
-# n_cfm  = np.zeros(nt-1)
 n_rsm = np.zeros(nt - 1)
-# n_rsd  = np.zeros(nt-1)
 
 r_theo1 = np.zeros(nt)
 r_theo2 = np.zeros(nt)
@@ -118,11 +139,10 @@ n_rsm2 = np.zeros(nt - 1)
 r_theo12 = np.zeros(nt)
 r_theo22 = np.zeros(nt)
 
-# ---- calculate equilibrium distribution of tectonic loading, to be used later to avoid initial oscillations
-loading = BackgroundLoading(
-    _config=tdsm.config, strend=strend1, deltat=deltat, tstart=tstart, tend=tend
-)
-config, t, chiz_background, cf, r, xn = tdsm(
+# calculate equilibrium distribution of tectonic loading,
+# to be used later to avoid initial oscillations
+loading = BackgroundLoading(strend=strend1, deltat=deltat, tstart=tstart, tend=tend)
+t, chiz_background, cf, r, xn = tdsm(
     loading=loading,
     chi0=chi0,
     depthS=depthS,
@@ -141,7 +161,6 @@ good3 = t >= (tstep3 - tstart)
 
 # --- simulation of trend change  at time tstep
 loading = TrendchangeLoading(
-    _config=tdsm.config,
     strend=strend1,
     strend2=strend2,
     tstep=tstep,
@@ -149,7 +168,7 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = tdsm(
+t, chiz, cf, r, xn = tdsm(
     loading=loading,
     equilibrium=True,
     chiz=chiz_background,
@@ -167,7 +186,6 @@ r_tdsm = r
 n_tdsm = xn
 
 loading = TrendchangeLoading(
-    _config=tdsr.config,
     strend=strend1,
     strend2=strend2,
     tstep=tstep,
@@ -175,14 +193,14 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = tdsr(
+t, chiz, cf, r, xn = tdsr(
     loading=loading,
     chi0=chi0,
     depthS=depthS,
     deltaS=deltaS,
     sigma_max=sigma_max,
     precision=precision,
-    iX0switch=iX0switch,
+    iX0=iX0,
     deltat=deltat,
     tstart=tstart,
     tend=tend,
@@ -191,7 +209,6 @@ r_tdsr = r
 n_tdsr = xn
 
 loading = TrendchangeLoading(
-    _config=trad.config,
     strend=strend1,
     strend2=strend2,
     tstep=tstep,
@@ -199,14 +216,13 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = trad(
+t, chiz, cf, r, xn = trad(
     loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend
 )
 r_lcm = r
 n_lcm = xn
 
 loading = TrendchangeLoading(
-    _config=rsm.config,
     strend=strend1,
     strend2=strend2,
     tstep=tstep,
@@ -214,7 +230,7 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = rsm(
+t, chiz, cf, r, xn = rsm(
     loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
 )
 r_rsm = r
@@ -224,7 +240,6 @@ n_rsm = xn
 # Figure c, extensionm to three slopes to represent ramp function
 # -------------------------------------------------
 loading = RampLoading(
-    _config=tdsm.config,
     strend=strend1,
     strend2=strend2,
     strend3=strend3,
@@ -234,7 +249,7 @@ loading = RampLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = tdsm(
+t, chiz, cf, r, xn = tdsm(
     loading=loading,
     equilibrium=True,
     chiz=chiz_background,
@@ -252,7 +267,6 @@ r_tdsm_ramp = r
 n_tdsm_ramp = xn
 
 loading = RampLoading(
-    _config=tdsr.config,
     strend=strend1,
     strend2=strend2,
     strend3=strend3,
@@ -262,14 +276,14 @@ loading = RampLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = tdsr(
+t, chiz, cf, r, xn = tdsr(
     loading=loading,
     chi0=chi0,
     depthS=depthS,
     deltaS=deltaS,
     sigma_max=sigma_max,
     precision=precision,
-    iX0switch=iX0switch,
+    iX0=iX0,
     deltat=deltat,
     tstart=tstart,
     tend=tend,
@@ -278,7 +292,6 @@ r_tdsr_ramp = r
 n_tdsr_ramp = xn
 
 loading = RampLoading(
-    _config=trad.config,
     strend=strend1,
     strend2=strend2,
     strend3=strend3,
@@ -288,14 +301,13 @@ loading = RampLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = trad(
+t, chiz, cf, r, xn = trad(
     loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend
 )
 r_lcm_ramp = r
 n_lcm_ramp = xn
 
 loading = RampLoading(
-    _config=rsm.config,
     strend=strend1,
     strend2=strend2,
     strend3=strend3,
@@ -305,14 +317,13 @@ loading = RampLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = rsm(
+t, chiz, cf, r, xn = rsm(
     loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
 )
 r_rsm_ramp = r
 n_rsm_ramp = xn
 
 loading = RampLoading(
-    _config=rsd.config,
     strend=strend1,
     strend2=strend2,
     strend3=strend3,
@@ -322,7 +333,7 @@ loading = RampLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = rsd(
+t, chiz, cf, r, xn = rsd(
     loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
 )
 r_rsd_ramp = r
@@ -331,10 +342,8 @@ n_rsd_ramp = xn
 # -----------------------------------------------------
 print("second case (figure b) , two slopes, large trend before small trend")
 # -----------------------------------------------------
-loading = BackgroundLoading(
-    _config=tdsm.config, strend=strend2, deltat=deltat, tstart=tstart, tend=tend
-)
-config, t, chiz_background, cf, r, xn = tdsm(
+loading = BackgroundLoading(strend=strend2, deltat=deltat, tstart=tstart, tend=tend)
+t, chiz_background, cf, r, xn = tdsm(
     loading=loading,
     chi0=chi0,
     depthS=depthS,
@@ -351,7 +360,6 @@ Ta12 = -depthS / strend2
 
 # --- simulation of trend change  at time tstep
 loading = TrendchangeLoading(
-    _config=tdsm.config,
     strend=strend2,
     strend2=strend1,
     tstep=tstep,
@@ -359,7 +367,7 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = tdsm(
+t, chiz, cf, r, xn = tdsm(
     loading=loading,
     equilibrium=True,
     chiz=chiz_background,
@@ -377,7 +385,6 @@ r_tdsm2 = r
 n_tdsm2 = xn
 
 loading = TrendchangeLoading(
-    _config=tdsr.config,
     strend=strend2,
     strend2=strend1,
     tstep=tstep,
@@ -385,14 +392,14 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = tdsr(
+t, chiz, cf, r, xn = tdsr(
     loading=loading,
     chi0=chi0,
     depthS=depthS,
     deltaS=deltaS,
     sigma_max=sigma_max,
     precision=precision,
-    iX0switch=iX0switch,
+    iX0=iX0,
     deltat=deltat,
     tstart=tstart,
     tend=tend,
@@ -401,7 +408,6 @@ r_tdsr2 = r
 n_tdsr2 = xn
 
 loading = TrendchangeLoading(
-    _config=trad.config,
     strend=strend2,
     strend2=strend1,
     tstep=tstep,
@@ -409,14 +415,13 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = trad(
+t, chiz, cf, r, xn = trad(
     loading=loading, chi0=chi0, deltat=deltat, tstart=0, tend=tend
 )
 r_lcm2 = r
 n_lcm2 = xn
 
 loading = TrendchangeLoading(
-    _config=rsm.config,
     strend=strend2,
     strend2=strend1,
     tstep=tstep,
@@ -424,7 +429,7 @@ loading = TrendchangeLoading(
     tstart=tstart,
     tend=tend,
 )
-config, t, chiz, cf, r, xn = rsm(
+t, chiz, cf, r, xn = rsm(
     loading=loading, chi0=chi0, depthS=depthS, deltat=deltat, tstart=0, tend=tend
 )
 r_rsm2 = r
@@ -489,7 +494,10 @@ r_theo1_ramp2 = rinfty1 + chi0 * dS * (
 tstep2b = tstep
 t0 = deltat / 10.0
 t1 = deltat
-Ta2b = Ta2  # Ta aendern bringt nicht viel, da fuer kleine lag times offensichtlich wenig Einfluss - wird ebenso durch t0 bestimmt
+# Ta aendern bringt nicht viel
+# da fuer kleine lag times offensichtlich wenig Einfluss
+# - wird ebenso durch t0 bestimmt
+Ta2b = Ta2
 r_theo2_ramp2[good] = (
     chi0
     * dS
@@ -559,7 +567,7 @@ else:
 # ---- Coulomb stress loading (input and interpolated input)
 fig = plt.figure(1, figsize=(12, 6))
 ax1a = fig.add_subplot(131)
-ax1a.set_ylabel("$\sigma_c/\dot{\sigma}_{c0} T_{0}$", fontsize=20)
+ax1a.set_ylabel("$\\sigma_c/\\dot{\\sigma}_{c0} T_{0}$", fontsize=20)
 ax1a.set_xlabel(r"$(t-t_1)/T_{0}$", fontsize=20)
 plt.figtext(0.09, 0.87, "a)", fontsize=20)
 ax1a.tick_params(axis="both", which="major", labelsize=20)
@@ -577,8 +585,6 @@ ax1a.plot(
 
 plt.legend(loc="upper left", fontsize=20)
 if xrange_set:
-    # plt.ylim([1.5, ymaxs])
-    # plt.xlim([tmin, tmax])
     plt.xlim([-2, 5])
     plt.ylim([0, 15])
 
@@ -601,8 +607,6 @@ ax12a.plot(
 
 plt.legend(loc="lower right", fontsize=20)
 if xrange_set:
-    # plt.xlim([tmin, tmax])
-    # plt.ylim([1.5, ymaxs])
     plt.xlim([-2, 5])
     plt.ylim([0, 15])
 
@@ -622,8 +626,6 @@ ax13a.plot(
 )
 
 if xrange_set:
-    # plt.ylim([1.5, ymaxs])
-    # plt.xlim([tmin, tmax])
     plt.xlim([-2, 5])
     plt.ylim([0, 15])
 
@@ -662,7 +664,6 @@ ax1b.plot(
     color="gray",
     label=r"LCM",
 )
-# ax1b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm[nstart:]/rinfty1, linewidth=3.5, ls='-.', color='black', label=r'TDSM')
 ax1b.plot(
     (t[nstart:] - t[nstep]) / Ta1,
     r_tdsr[nstart:] / rinfty1,
@@ -723,7 +724,6 @@ ax12b.plot(
     color="gray",
     label=r"LCM",
 )
-# ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm2[nstart:]/rinfty1, linewidth=3.5, ls='-.', color='black', label=r'TDSM')
 ax12b.plot(
     (t[nstart:] - t[nstep]) / Ta1,
     r_tdsr2[nstart:] / rinfty1,
@@ -759,8 +759,6 @@ if xrange_set:
     plt.ylim([ymin, ymax])
 else:
     print("nothing defined")
-    # ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo12[nstart:]/rinfty1, linewidth=1.5, ls='--', color='orange')
-    # ax12b.plot((t[nstart:]-t[nstep])/Ta1 , r_theo22[nstart:]/rinfty1, linewidth=1.5, ls='--', color='green')
 
 # ---- third case, ramp function  ------------------------------------
 ax13b = fig.add_subplot(133)
@@ -784,7 +782,6 @@ ax13b.plot(
     color="gray",
     label=r"LCM",
 )
-# ax13b.plot((t[nstart:]-t[nstep])/Ta1 , r_tdsm_ramp[nstart:]/rinfty1, linewidth=3.5, ls='-.', color='black', label=r'TDSM')
 ax13b.plot(
     (t[nstart:] - t[nstep]) / Ta1,
     r_tdsr_ramp[nstart:] / rinfty1,
@@ -801,10 +798,6 @@ ax13b.plot(
     color="blue",
     label=r"RSM",
 )
-
-# -------------- constructing ramp response from two stress rate change solutions ---
-# ax13b.plot((t[nstart:nstart+nsample1+nsample2]-t[nstep])/Ta1 , r_tdsm[nstart:nstart+nsample1+nsample2]/rinfty1, linewidth=3.0, ls='dotted', color='black')
-# ax13b.plot((t[nstart+nsample1+n2nd:]-t[nstep-nsample2+n2nd])/Ta1 , r_tdsm2[nstart+nsample1+n2nd:]/rinfty1, linewidth=3.0, ls='dotted', color='black')
 
 yval = r_theo1[nstart + nsample2]
 if strend1 <= strend2:
@@ -850,5 +843,6 @@ else:
     print("nothing defined")
 
 plt.show()
-fig.savefig(str(pdf_file1) + ".pdf", format="pdf", bbox_inches="tight")
-fig.savefig(str(pdf_file1) + ".png", format="png", bbox_inches="tight")
+fig.savefig(str(figname) + ".pdf", format="pdf", bbox_inches="tight")
+fig.savefig(str(figname) + ".png", format="png", bbox_inches="tight")
+print(f"\n\t OUTPUT: {str(figname) + '.pdf'}\n")

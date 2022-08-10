@@ -1,10 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # --------------------------
 # Example Fig 6def in Dahm and Hainzl (2022): KTB injection induced seismicity
 # --------------------------
+
 import sys
 import matplotlib.pyplot as plt
-import matplotlib.ticker
-import math
 from scipy import special
 import numpy as np
 from pathlib import Path
@@ -13,22 +15,14 @@ EXAMPLE_DIR = Path(__file__).parent
 REPO_ROOT = EXAMPLE_DIR.parent.absolute()
 sys.path.insert(0, str(REPO_ROOT))
 
-from tdsr import Config, TDSR, TDSR1, LCM, Traditional, CFM, RSM, RSD, RSD1
-from tdsr.plotting import plot
-from tdsr.loading import ExternalFileLoading, BackgroundLoading
+from tdsr import TDSR1  # noqa: E402
+from tdsr.loading import CustomLoading  # noqa: E402, F401
 
-config_file = EXAMPLE_DIR / "config.toml"
 data_file = REPO_ROOT / "data/CFSloading_KTB.dat"
-figname = REPO_ROOT / "plots/fig6def.png"
+figname = REPO_ROOT / "plots/fig6def"
 
-print("set-up the tdsm, lcm and rsm class environments")
-# tdsm = TDSM(config=Config.open(config_file))
-tdsr = TDSR1(config=Config.open(config_file))
-# rsd1  = RSD1(config=Config.open(config_file))
-# trad = Traditional(config=Config.open(config_file))
+tdsr = TDSR1()
 
-
-print("define model parameter for plotting, if different from config file")
 day2sec = 24 * 60 * 60.0
 km = 1000.0
 hours = 3600.0
@@ -44,22 +38,28 @@ dt = np.ediff1d(tgrid, to_end=tgrid[-1] - tgrid[-2])
 t0 = 0.01  # [days]
 dottauPayr = 30.0
 strend = 1e-6 * dottauPayr / 365.25  # [MPa/day]
-chi0 = 1.0  # susceptibility to trigger earthquakes by unit stress increase
+# susceptibility to trigger earthquakes by unit stress increase
+chi0 = 1.0
 
-dsigvalues = (0.9, 1.0, 1.1)  # values for -depthS
+# values for -depthS
+dsigvalues = (0.9, 1.0, 1.1)
 
-deltaS = 0.3 / 500.0  # increment do discretize Coulomb stress axis
-sigma_max = 10000.0 * deltaS  # maximum depth on Coulomb axis (limit of integral)
+# increment do discretize Coulomb stress axis
+deltaS = 0.3 / 500.0
+# maximum depth on Coulomb axis (limit of integral)
+sigma_max = 10000.0 * deltaS
 # precision = 18
 
-iX0switch = 1  # uniform distribution (and strend=0)
+# uniform distribution (and strend=0)
+iX0switch = "uniform"
 
 D = 0.033  # [m^2/s]
 Mcut = -2.3
 
-iascii = True
-scal_cf = 1.0e-6  # data provided in Pa, to be scaled to  MPa
-scal_t = 1.0  # time provilded in units of days, to be scaled to days
+# data provided in Pa, to be scaled to  MPa
+scal_cf = 1.0e-6
+# time provilded in units of days, to be scaled to days
+scal_t = 1.0
 c_tstart = 0.0
 
 
@@ -106,11 +106,13 @@ def calculateP(Dm2s, tgrid, rdist, tq, dq):
     vu = 0.30  # undrained Poisson's ratio
     mu = 1e9  # [Pa] shear modulus
     alpha = 0.1  # Biot coefficient
-    lambda_d = 2.0 * mu * vd / (1.0 - 2.0 * vd)  # Segall & Lu 2015, below Eq.(2)
+
+    # Segall & Lu 2015, below Eq.(2)
+    lambda_d = 2.0 * mu * vd / (1.0 - 2.0 * vd)
     lambda_u = 2.0 * mu * vu / (1.0 - 2.0 * vu)
-    ketafac = np.square(alpha) * (
-        lambda_u + 2.0 * mu
-    )  # Segall & Lu 2015, Eq.(4): k/eta = D * ketafac
+
+    # Segall & Lu 2015, Eq.(4): k/eta = D * ketafac
+    ketafac = np.square(alpha) * (lambda_u + 2.0 * mu)
     ketafac /= (lambda_u - lambda_d) * (lambda_d + 2.0 * mu)
     kappa = D * ketafac
     fac = 1.0 / (4 * np.pi * kappa)
@@ -124,9 +126,7 @@ def calculateP(Dm2s, tgrid, rdist, tq, dq):
     return P / 1e6
 
 
-# ------------------------------------
 # read observed data again to get some paramter for plotting and scaling
-# ------------------------------------
 # Graessle et al 2006: Distance between open hole section of PH and MH:
 # open sections: depth: MH: 5.2-5.6 km  PH: 3.85-4.0 and horizontally: 0.2 km
 r_calibration = np.sqrt(np.square(200.0) + np.square(5400 - 3925.0))
@@ -164,9 +164,7 @@ for i, R in enumerate(Ri):
     P = calculateP(D, tgrid, R, tq, dq)
     dSr[i, :] = np.ediff1d(P, to_begin=0.0)
 
-# -----------------------------------------------------
-print("Calculate earthquake rates with tdsm, lcm and rsm")
-# -----------------------------------------------------
+# calculate earthquake rates with tdsm, lcm and rsm
 ns = 3
 cfs = np.zeros(nt)
 r_tdsr = np.zeros((ns, nt))
@@ -182,17 +180,19 @@ for i in range(3):
         depthS = -0.5
         Sshadow = 4.5
 
-    # loading = ExternalFileLoading(_config=tdsr.config, iascii=True, infile=data_cfs, scal_t=scal_t, scal_cf=scal_cf, strend=strend, c_tstart=c_tstart, tstart=tstart, tend=tend, deltat=deltat)
-    # config, t, chiz, cfs, r, xn = tdsr(loading=loading, chi0=chi0, t0=t0, depthS=depthS, Sshadow=Sshadow, deltaS=deltaS, sigma_max=sigma_max, iX0switch=iX0switch, deltat=deltat, taxis_log=0, tstart=tstart, tend=tend)
+    # loading = CustomLoading(
+    #   file=data_cfs, scal_t=scal_t, scal_cf=scal_cf, strend=strend,
+    #   c_tstart=c_tstart, tstart=tstart, tend=tend, deltat=deltat)
+    # t, chiz, cfs, r, xn = tdsr(
+    #   loading=loading, chi0=chi0, t0=t0, depthS=depthS, Sshadow=Sshadow,
+    #   deltaS=deltaS, sigma_max=sigma_max, iX0=iX0, deltat=deltat,
+    #   taxis_log=0, tstart=tstart, tend=tend)
     # X0 = NEQ / np.sum(r * dt)
-    # r *= X0                   # X0 set to match the observed number
+    # X0 set to match the observed number
+    # r *= X0
     # r_tdsr[i,:] = r[:]
 
-# -------------------------------------------------
-# Plot results
-# -------------------------------------------------
-# General Plot Properties
-# make a bigger global font size and sans-serif style
+# plot results
 cb = ["b", "r", "g"]
 plt.rc("font", family="sans-serif")
 plt.rc("font", size=12)
@@ -215,7 +215,6 @@ a.axhline(0, c="k", ls="dotted", lw=1)
 y2 = 100
 a.set_ylim(-y2, f * y2)
 a.set_ylabel("Flow rate [l/min]")
-# a.set_ylim(0, 6.5)
 
 ax[1].scatter(teqall, meqall, c="k", s=5, alpha=0.2)
 ax[1].axhline(Mcut, c="k", ls="dotted", lw=1)
@@ -234,12 +233,6 @@ for i, dsig in enumerate(dsigvalues):
     for k in range(len(Ri)):
         dS = dSr[k, :] + strend * dt
         S = np.cumsum(dS)
-        # Z = functions.Zvalues(S, 0, t0, dsig)
-        # Xs = functions.X0steady(Z, 1.0, t0, dsig, strend)
-        # RR = functions.TDSR(tgrid, S, Z, Xs, t0, dsig)
-        # RR /= np.sum(RR*dt)
-        # R += RR * len(teq)/len(Ri)
-    # ax[2].plot(tgrid, R*DT, c=cb[i], lw=2, zorder=10, label=r'$\delta\sigma/\mu=%.1f$ MPa' % (dsig))
 ax[2].set_xlim(T1, T2)
 ax[2].set_ylim(
     0,
@@ -278,4 +271,4 @@ ax[2].text(
 plt.show()
 fig.savefig(str(figname) + ".pdf", dpi=300, format="pdf", bbox_inches="tight")
 fig.savefig(str(figname) + ".png", dpi=300, format="png", bbox_inches="tight")
-print("\n\t OUTPUT: %s\n" % (figname))
+print(f"\n\t OUTPUT: {str(figname) + '.pdf'}\n")
