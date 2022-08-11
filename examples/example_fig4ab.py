@@ -15,7 +15,7 @@ EXAMPLE_DIR = Path(__file__).parent
 REPO_ROOT = EXAMPLE_DIR.parent.absolute()
 sys.path.insert(0, str(REPO_ROOT))
 
-from tdsr import TDSR1, CFM, RSD  # noqa: E402
+from tdsr import TDSR1, CFM, RSD1  # noqa: E402
 from tdsr.loading import StepLoading  # noqa: E402
 from tdsr.utils import Eq7  # noqa: E402
 
@@ -23,7 +23,7 @@ figname = REPO_ROOT / "plots/fig4ab"
 
 tdsr = TDSR1()
 cfm = CFM()
-rsd = RSD()
+rsd = RSD1()
 
 # time unit
 hours = 1.0
@@ -102,11 +102,11 @@ for i, Sstep in enumerate(sstep):
     cfs[i, :] = cf[:]
     r_tdsr[i, :] = r[:]
 
-    # BUG: cf_shadow is written here, but cf_shad is plotted (zeros only)!
     t, cf_shadow, cf, r, xn = rsd(**common)
     r_rsd[i, :] = r
 
-    t, chiz, cf, r, xn = cfm(**common)
+    t, cf_shadow, cf, r, xn = cfm(**common)
+    cf_shad[i, :] = cf_shadow[:]
     r_lcm[i, :] = r
 
     R_TDSR_theory[i, :] = Eq7(t, sstep[i], chi0 * strend, -depthS, strend, strend)
@@ -124,7 +124,7 @@ plt.subplots_adjust(hspace=0.0)
 al = (0.8, 0.2)
 good = t > 0.0
 for i, Sstep in enumerate(sstep):
-    ax[0].plot(t, cf_shad[i, :], c="k", ls="solid", lw=1.5, alpha=al[i])
+    ax[0].plot(t, cf_shad[i, :], c="k", ls="dotted", lw=1, alpha=al[i])
     ax[0].plot(
         t,
         cfs[i, :],
