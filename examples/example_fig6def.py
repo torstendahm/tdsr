@@ -28,20 +28,13 @@ km = 1000.0
 hours = 3600.0
 days = hours * 24.0
 
-tstart = 0.0 * days
-tend = 100.0 * days
-deltat = 0.01 * days
-nt = np.floor((tend - tstart) / deltat).astype(int)
-tgrid = np.linspace(tstart, tend, nt)
-dt = np.ediff1d(tgrid, to_end=tgrid[-1] - tgrid[-2])
-
 t0 = 0.01  # [days]
 dottauPayr = 30.0
 strend = 1e-6 * dottauPayr / 365.25  # [MPa/day]
-# susceptibility to trigger earthquakes by unit stress increase
-chi0 = 1.0
+# susceptibility to trigger earthquakes by unit stress increase (backgrond rate set to r0=1)
+chi0 = 1.0/strend
 
-# values for -depthS
+# values for -depthS (here interpreted as normalised by friction coefficient)
 dsigvalues = (0.9, 1.0, 1.1)
 
 # increment do discretize Coulomb stress axis
@@ -50,18 +43,8 @@ deltaS = 0.3 / 500.0
 sigma_max = 10000.0 * deltaS
 # precision = 18
 
-# uniform distribution (and strend=0)
-iX0switch = "uniform"
-
 D = 0.033  # [m^2/s]
 Mcut = -2.3
-
-# data provided in Pa, to be scaled to  MPa
-scal_cf = 1.0e-6
-# time provilded in units of days, to be scaled to days
-scal_t = 1.0
-c_tstart = 0.0
-
 
 def read_flowdata():
     data = np.loadtxt(REPO_ROOT / "data/ktb_flowrates.dat", skiprows=1, usecols=(0, 1))
@@ -118,9 +101,9 @@ def calculateP(Dm2s, tgrid, rdist, tq, dq):
     fac = 1.0 / (4 * np.pi * kappa)
     P = np.zeros(len(tgrid))
     for i in range(len(tgrid)):
-        t0 = tgrid[i]
-        dqi = dq[(tq < t0)]
-        dti = (t0 - tq[(tq < t0)]) * day2sec
+        tzero = tgrid[i]
+        dqi = dq[(tq < tzero)]
+        dti = (tzero - tq[(tq < tzero)]) * day2sec
         psi = rdist / np.sqrt(D * dti)
         P[i] = (fac / (D * rdist)) * np.sum(dqi * special.erfc(0.5 * psi))  # [Pa]
     return P / 1e6
@@ -152,47 +135,64 @@ meq = meqall[ind]
 
 T1 = np.minimum(np.min(tflow), np.min(teq))
 T2 = np.max(teqall)
-tgrid = np.linspace(T1, T2, 10000)
+tstart = T1    # in days
+c_tstart = T1
+tend = T2      # in days
+deltat = 0.1   # in days
+nt = np.floor((tend - tstart) / deltat).astype(int)
+nt=nt+1
+tgrid = np.linspace(tstart, tend, nt)
 dt = np.ediff1d(tgrid, to_end=tgrid[-1] - tgrid[-2])
 
-Pcalibration = calculateP(D, tgrid, r_calibration, tq, dq)
+Pcalibration = calculateP(D, tgrid, r_calibration, tq, dq)  # for plotting pressure model
 
 Ri = np.linspace(r10, r90, 10)
 print("\t P calculation in distance range: [%.0f - %.0f]m" % (Ri[0], Ri[-1]))
 dSr = np.zeros((len(Ri), len(tgrid)))
 for i, R in enumerate(Ri):
     P = calculateP(D, tgrid, R, tq, dq)
-    dSr[i, :] = np.ediff1d(P, to_begin=0.0)
+    dSr[i, :] = np.ediff1d(P, to_begin=0.0)   # pressure change, as later a tectonic loading is added
 
-# calculate earthquake rates with tdsm, lcm and rsm
-ns = 3
+common_loading = dict(
+    scal_t=1.0,
+    scal_cf=1.0,
+    c_tstart=c_tstart,
+    tstart=tstart,
+    tend=tend,
+    deltat=deltat,
+    strend = strend,
+)
+
+common = dict(
+    chi0=chi0,
+    Sshadow=0.0,
+    t0=t0,
+    iX0='equilibrium',
+    deltat=deltat,
+    tstart=tstart,
+    tend=tend,
+    taxis_log=False,
+    deltaS=deltaS,
+    sigma_max=sigma_max,
+)
+
+# ----- calculate earthquake rates with tdsm, lcm and rsm
+ns = len(dsigvalues)
 cfs = np.zeros(nt)
 r_tdsr = np.zeros((ns, nt))
 
-for i in range(3):
-    if i == 0:
-        depthS = -0.3
-        Sshadow = 3.0
-    if i == 1:
-        depthS = -0.4
-        Sshadow = 3.5
-    if i == 2:
-        depthS = -0.5
-        Sshadow = 4.5
+for i, dsig in enumerate(dsigvalues):
+    depthS = -dsig
+    R = np.zeros(len(tgrid))
+    for k in range(len(Ri)):   # calculate mean rate over different distances to injection point
+        dS = dSr[k,:] + strend * dt  
+        S = np.cumsum(dS)  # stress model (normalized by friction) is sum of pore pressure and tectonic loading 
+        loading = CustomLoading(data=np.transpose([tgrid, S]), **common_loading)
+        t, chiz, cf, r, xn = tdsr(loading=loading, depthS=depthS, **common)
+        r /= np.sum(r*dt)
+        r_tdsr[i,:] += r * len(teq)/len(Ri)
 
-    # loading = CustomLoading(
-    #   file=data_cfs, scal_t=scal_t, scal_cf=scal_cf, strend=strend,
-    #   c_tstart=c_tstart, tstart=tstart, tend=tend, deltat=deltat)
-    # t, chiz, cfs, r, xn = tdsr(
-    #   loading=loading, chi0=chi0, t0=t0, depthS=depthS, Sshadow=Sshadow,
-    #   deltaS=deltaS, sigma_max=sigma_max, iX0=iX0, deltat=deltat,
-    #   taxis_log=0, tstart=tstart, tend=tend)
-    # X0 = NEQ / np.sum(r * dt)
-    # X0 set to match the observed number
-    # r *= X0
-    # r_tdsr[i,:] = r[:]
-
-# plot results
+# -------- plot results
 cb = ["b", "r", "g"]
 plt.rc("font", family="sans-serif")
 plt.rc("font", size=12)
@@ -229,14 +229,10 @@ DT = 5.0
 tbins = np.arange(0, T2 + 1, DT)
 ax[2].hist(teq, bins=tbins, color="k", alpha=0.3, label="observed")
 for i, dsig in enumerate(dsigvalues):
-    R = np.zeros(len(tgrid))
-    for k in range(len(Ri)):
-        dS = dSr[k, :] + strend * dt
-        S = np.cumsum(dS)
+    ax[2].plot(tgrid, r_tdsr[i,:]*DT, c=cb[i], lw=2, zorder=10, label=r'$\delta\sigma/\mu=%.1f$ MPa' % (dsig))
 ax[2].set_xlim(T1, T2)
-ax[2].set_ylim(
-    0,
-)
+ax[2].set_ylim( 0,)
+#ax[2].set_ylim( 0, 100)
 ax[2].set_xlabel("Days from 1/1/2002")
 ax[2].set_ylabel("Rate   [# / %.0f days]" % (DT))
 ax[2].legend()
