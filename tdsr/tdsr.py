@@ -335,7 +335,7 @@ class TDSR1(object):
         (self.smin, self.smax, self.nsigma, self.sigma, self.dZ) = gridrange(
             -config.sigma_max, +config.sigma_max, config.deltaS
         )
-        print("taxis_log=", config.taxis_log, " ntlog=", config.ntlog)
+        #print("taxis_log=", config.taxis_log, " ntlog=", config.ntlog)
         if config.taxis_log:
             (self.tmin, self.tmax, self.nt, self.t, self.dt) = gridrange_log(
                 config.tstart, config.tend, config.ntlog
@@ -493,7 +493,7 @@ class RSM(LCM):
         dS = np.ediff1d(self.cf, to_end=config.loading.strend)
         rinfty = config.chi0 * config.loading.strend
         Asig = -config.depthS
-        print("Asig", Asig)
+        #print("Asig", Asig)
         gamma = 1.0
         ratez[0] = 1.0
         for i in range(1, self.nt):
@@ -532,7 +532,7 @@ class RSD(LCM):
 
         rinfty = config.chi0 * config.loading.strend
         Asig = -config.depthS
-        print("Asig", Asig)
+        #print("Asig", Asig)
         gamma = 1.0
         ratez[0] = 1.0
         for i in range(1, self.nt):

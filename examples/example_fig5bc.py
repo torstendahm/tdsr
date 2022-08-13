@@ -17,6 +17,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from tdsr import TDSR1, CFM, RSD, RSD1  # noqa: E402
 from tdsr.loading import CustomLoading  # noqa: E402
+from tdsr.utils import Zvalues, X0uniform, X0steady, X0gaussian
 
 figname = REPO_ROOT / "plots/fig5bc"
 
@@ -119,8 +120,8 @@ t, chiz, cf, R_CF, xn = cfm(
     **common,
 )
 # renormalize to observed EQ-number within [T1, T2]:
-fac = NEQ / np.sum(R_CF[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
-R_CF *= fac
+facCFc = NEQ / np.sum(R_CF[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
+R_CF *= facCFc
 
 # CF model with subcritical initial stress state:
 t, chiz, cf, R_CFsub, xn = cfm(
@@ -128,8 +129,8 @@ t, chiz, cf, R_CFsub, xn = cfm(
     Sshadow=dS0,
     **common,
 )
-fac = NEQ / np.sum(R_CFsub[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
-R_CFsub *= fac
+facCFsub = NEQ / np.sum(R_CFsub[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
+R_CFsub *= facCFsub
 
 # RS model for critical initial stress state:
 t, chiz, cf, R_RS, xn = rsd1(
@@ -146,8 +147,8 @@ t, chiz, cf, R_TDSR, xn = tdsr(
     Sshadow=0.0,
     **common,
 )
-fac = NEQ / np.sum(R_TDSR[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
-R_TDSR *= fac
+facS = NEQ / np.sum(R_TDSR[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
+R_TDSR *= facS
 
 # assuming that no faults exists under critical stress
 # (needed for TDSR and RS)
@@ -169,8 +170,8 @@ t, chiz, cf, R_TDSRsub_uniform, xn = tdsr(
     iX0="uniform",
     **common,
 )
-fac = NEQ / np.sum(R_TDSRsub_uniform[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
-R_TDSRsub_uniform *= fac
+facSsub_uniform = NEQ / np.sum(R_TDSRsub_uniform[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
+R_TDSRsub_uniform *= facSsub_uniform
 
 # TDSR model with gaussian subcritical prestress:
 t, chiz, cf, R_TDSRsub_gauss, xn = tdsr(
@@ -189,7 +190,12 @@ plt.rc("font", family="sans-serif")
 plt.rc("font", size=12)
 plt.rc("legend", fontsize=8)
 fig, ax = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1, 2]}, figsize=(7, 6.5))
-
+Z = Zvalues(S, 0.0, 0.0, dsig)
+ax[0].plot(Z, facCFc*X0uniform(Z, 0.0, 1.0), c='k', ls='dashed', alpha=0.3, label=r'CF')
+ax[0].plot(Z, facCFsub*X0uniform(Z, dS0, 1.0), c='k', alpha=0.3, label=r'CF$_\mathrm{subcrit}$')
+ax[0].plot(Z, facS*X0steady(Z,1.0*dotsigc,t0,dsig,dotsigc), c='b', lw=3, alpha=0.3, label=r'TDRS$_\mathrm{crit}$')
+ax[0].plot(Z, facSsub_uniform*X0uniform(Z, dS0_TDSR, 1.0), 'r--', label=r'TDSR$_\mathrm{uniform}$')
+ax[0].plot(Z, fac*X0gaussian(Z, dS0mean, dS0std, 1.0), 'r-', label=r'TDSR$_\mathrm{gauss}$')
 ax[0].set_xlim(-2, 30)
 ax[0].set_ylim(0, 180)
 ax[0].set_xlabel(r"$\zeta$    [MPa]", labelpad=1)
