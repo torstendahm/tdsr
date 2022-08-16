@@ -1,9 +1,9 @@
 Loadings
 --------
 
-TODO: explain loadings here
+.. image:: loading_overview.png
+   :width: 600
 
-TODO: maybe add an image
 
 .. autoclass:: tdsr.loading.StepLoading
 
