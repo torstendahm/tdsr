@@ -1,9 +1,8 @@
 Variants
 --------
 
-TODO: explain variants here
-
-TODO: maybe add an image
+.. image:: tdsr_overview.png
+  :width: 600
 
 
 .. automodule:: tdsr.tdsr
