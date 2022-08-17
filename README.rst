@@ -20,7 +20,9 @@ tdsr
 
 """"""""
 
-Your short description here. 
+Time dependent stress response seismicity model.
+
+A modified effective Coulomb failure model, that calculates earthquake rate as a function of stress loading and model parameter
 
 .. code-block:: console
 
