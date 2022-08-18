@@ -24,7 +24,7 @@ author = "Torsten Dahm, Roman Dahm, Sebastian Hainzl"
 
 # The full version, including alpha/beta/rc tags
 # never edit this manually!
-release = "0.0.5"
+release = "0.0.6"
 
 
 # -- General configuration ---------------------------------------------------
