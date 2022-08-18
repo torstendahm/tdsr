@@ -1,5 +1,5 @@
 ===============================
-citations
+Citations
 ===============================
 Dahm, Torsten; Hainzl, Sebastian; Dahm, Roman Albert (2022): Time-dependent stress response seismicity models (TDSR). GFZ Data Services. https://doi.org/10.5880/GFZ.2.1.2022.002
 Dahm, Torsten and hainzl, Sebastian (2022): A Coulomb Stress response model for time-dependent earthquake forecasts. Journal of Geophysical Research, Solid Earth,  http://doi.org/10.1029/2022JB024443

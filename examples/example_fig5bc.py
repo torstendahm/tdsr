@@ -157,7 +157,7 @@ sub_loading = CustomLoading(strend=dotsigc_sub, **common_loading)
 # RS model for subcritical initial stress state:
 t, chiz, cf, R_RSsub, xn = rsd1(
     loading=sub_loading,
-    Sshadow=(dS0 + dotsigc_sub * (t00 - tgrid[0])),
+    Sshadow=dS0,
     **common,
 )
 fac = NEQ / np.sum(R_RSsub[((tgrid[0:nt] >= T1) & (tgrid[0:nt] <= T2))] * dt)
