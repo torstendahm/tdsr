@@ -8,7 +8,7 @@ magnitudes above a completeness magnitude.
 Stress loading is understood as Coulomb stress as a function of time.
 The stress loading is assumed homogeneous within the rock volume for which
 the simulation is performed. The details of the TDSR seismicity model
-and examles are described in Dahm and Hainzl (2022), JGR, in review
+and examles are described in Dahm and Hainzl (2022), JGR, http://doi.org/10.1029/2022JB024443  . 
 
 Different loading scenarios are supported and defined by loading
 classes which are imported from tdsr.loading.
@@ -49,8 +49,8 @@ The examples collected in the subdirectory ''examples'' reproduce figures
 published in Dahm and Hainzl (2022).
 All theory of the TDSR model and the examples are described in
 Dahm and Hainzl (2022).
-The software toolbox in python is published together with the JGR paper
-under Dahm et al. (2022) (doi link to be added).
+The software toolbox in python can be cited as
+Dahm, T.; Hainzl, S.; Dahm, R.A. (2022): Time-dependent stress response seismicity models (TDSR). GFZ Data Services. https://doi.org/10.5880/GFZ.2.1.2022.002 .
 The TDSR  github project here, however, is intended as an open source
 project that may change and improve over the years.
 Please send us your suggestions or addings and contribute to the
