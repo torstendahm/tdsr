@@ -95,3 +95,27 @@ To build and preview the documentation locally, you can use
 
 This will start a local webserver and open the documentation in the browser for you.
 If this is not needed, use the ``--no-serve`` flag.
+
+++++++++++
+Releases
+++++++++++
+
+**Note:** This is only relevant for maintainers.
+
+Given a clean working tree on the master branch, a release of a new version of ``tdsr`` to `pypi <https://pypi.org/>`_
+can be triggered by creating and pushing a new git tag.
+
+The github action CICD pipeline will test, package, and publish the new version automatically.
+Before attempting a new release, please make sure all code checks pass.
+
+We use semantic version strings of the form ``{major}.{minor}.{patch}``.
+Depending on the type of release, choose the part of the version to be incremented in the command below.
+..
+  If you are ready, create a tagged release following the steps below.
+
+.. code-block:: bash
+
+    $ bump2version patch
+    $ git push --follow-tags
+
+Remember to activate the virtual environment as previously outlined if ``bump2version`` is not found.
