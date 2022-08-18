@@ -110,8 +110,6 @@ Before attempting a new release, please make sure all code checks pass.
 
 We use semantic version strings of the form ``{major}.{minor}.{patch}``.
 Depending on the type of release, choose the part of the version to be incremented in the command below.
-..
-  If you are ready, create a tagged release following the steps below.
 
 .. code-block:: bash
 
