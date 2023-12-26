@@ -24,7 +24,7 @@ try:
 except (ImportError, AssertionError):
     long_description = short_description
 
-requirements = ["click"]
+requirements = ["click", "numpy", "toml"]
 test_requirements = [
     "tox",
     "pytest",
