@@ -18,6 +18,7 @@ mypy = "*"
 # Tools
 pre-commit = "*"
 twine = "*"
+build = "*"
 invoke = "*"
 bump2version = "*"
 types-setuptools = "*"
