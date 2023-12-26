@@ -44,11 +44,7 @@ tool_requirements = [
     "bump2version",
 ]
 dev_requirements = (
-    requirements
-    + test_requirements
-    + coverage_requirements
-    + formatting_requirements
-    + tool_requirements
+    requirements + test_requirements + coverage_requirements + formatting_requirements + tool_requirements
 )
 
 setup(
