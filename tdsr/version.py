@@ -2,4 +2,4 @@
 
 """Tdsr version (this string is search and replaced by bump2version)"""
 
-version = "0.0.6"
+version = "0.0.7"
