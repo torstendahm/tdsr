@@ -1,19 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Usage &#8212; TDSR 0.0.6 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script src="../_static/documentation_options.js?v=1fd71caa"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Configuration" href="configuration.html" />
@@ -35,9 +32,9 @@
           <div class="body" role="main">
             
   <section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h1>
 <section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tdsr</span>
 </pre></div>
 </div>
@@ -50,9 +47,26 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="variants.html">Variants</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr-time-dependent-stress-response-seismicity-models">TDSR (Time Dependent Stress Response) seismicity models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.CFM"><code class="docutils literal notranslate"><span class="pre">CFM</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.LCM"><code class="docutils literal notranslate"><span class="pre">LCM</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.RSD"><code class="docutils literal notranslate"><span class="pre">RSD</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.RSD1"><code class="docutils literal notranslate"><span class="pre">RSD1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.RSM"><code class="docutils literal notranslate"><span class="pre">RSM</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.TDSR"><code class="docutils literal notranslate"><span class="pre">TDSR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.TDSR1"><code class="docutils literal notranslate"><span class="pre">TDSR1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="variants.html#tdsr.tdsr.Traditional"><code class="docutils literal notranslate"><span class="pre">Traditional</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="loadings.html">Loadings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loadings.html">Loadings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="loadings.html#tdsr.loading.StepLoading"><code class="docutils literal notranslate"><span class="pre">StepLoading</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="loadings.html#tdsr.loading.FourPointLoading"><code class="docutils literal notranslate"><span class="pre">FourPointLoading</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="loadings.html#tdsr.loading.CyclicLoading"><code class="docutils literal notranslate"><span class="pre">CyclicLoading</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="loadings.html#tdsr.loading.BackgroundLoading"><code class="docutils literal notranslate"><span class="pre">BackgroundLoading</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="loadings.html#tdsr.loading.TrendchangeLoading"><code class="docutils literal notranslate"><span class="pre">TrendchangeLoading</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="loadings.html#tdsr.loading.RampLoading"><code class="docutils literal notranslate"><span class="pre">RampLoading</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="loadings.html#tdsr.loading.CustomLoading"><code class="docutils literal notranslate"><span class="pre">CustomLoading</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -123,8 +137,8 @@
       &copy;2022, Torsten Dahm, Roman Dahm, Sebastian Hainzl.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
       <a href="../_sources/usage/index.rst.txt"
